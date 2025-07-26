@@ -1,0 +1,243 @@
+\documentclass[a4paper,12pt, openany]{book}  % Book class for thesis 
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{left=2cm, right=2cm, top=2cm, bottom=2cm} 
+\usepackage{setspace}
+\setstretch{1}
+\raggedbottom
+\usepackage{titlesec}
+\usepackage[toc,page]{appendix}
+\titleformat{\subsection}[hang]{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{\baselineskip}{0.5\baselineskip}
+\usepackage[bottom]{footmisc}
+\usepackage{ragged2e}
+\usepackage{lmodern}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{xcolor}
+\usepackage[
+    colorlinks=true,        % disables boxes around links
+    urlcolor=teal,          % URL link color
+    linkcolor=black,        % color of internal links (e.g., TOC)
+    citecolor=blue
+]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{array}
+\usepackage[nottoc]{tocbibind}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage[T1]{fontenc}
+\usepackage{soul}  
+\usepackage[font=bf,labelfont=bf,justification=raggedright,singlelinecheck=false]{caption}
+%\captionsetup{font={bf,small}}
+\captionsetup{font={bf,small}, labelfont=bf, justification=raggedright, singlelinecheck=false}
+\usepackage{chngcntr}
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+
+\usepackage{multirow, tabularx, xurl}
+
+\usepackage[authordate,backend=biber,natbib]{biblatex-chicago}
+\ExecuteBibliographyOptions{maxcitenames=2, mincitenames=1}
+\DeclareDelimFormat{nameyeardelim}{\addcomma\space}
+\addbibresource{references.bib}
+\AtEveryCitekey{%
+  \ifciteseen
+    {}
+    {\color{blue}}%
+}
+\DeclareCiteCommand{\citep}
+  {\begingroup(}  % Start a group, manually insert black opening parenthesis
+  {\color{blue}\usebibmacro{citeindex}%
+   \usebibmacro{cite}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}\endgroup)}  % Close blue group, then black parenthesis
+
+% Page numbering setup (BOTTOM CENTER)
+\pagestyle{fancy}
+\fancyhf{} % Clear all headers and footers
+\renewcommand{\headrulewidth}{0pt} % Remove header line
+\fancyfoot[C]{\thepage} % Center page number in footer
+
+% Apply same style to chapter start pages
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyfoot[C]{\thepage}
+}
+
+% Chapter formatting
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+
+% Customize Table of Contents
+\setlength{\cftbeforetoctitleskip}{-1em} % Reduce space before title
+\setlength{\cftaftertoctitleskip}{1.5em} % Space after title
+\setlength{\cftbeforetoctitleskip}{50pt} % Space above TOC title (same as chapters)
+\renewcommand{\cftchappagefont}{\normalfont} % Page numbers normal
+\renewcommand{\cftchapdotsep}{\cftdotsep} % Add dot leaders
+\setlength{\cftbeforesecskip}{0.5ex} % Reduce space between sections
+% Add List of Figures/Tables to TOC
+\renewcommand{\listfigurename}{List of Figures}
+\renewcommand{\listtablename}{List of Tables}
+
+\usepackage{pdfcomment}
+\begin{document}
+
+% Frontispiece
+\begin{titlepage}
+    \centering
+    \includegraphics[width=0.2\textwidth]{images/unibo-logo.pdf}
+    
+    \vspace*{1cm}
+    \Large
+    \textbf{ALMA MATER STUDIORUM \\ 
+    UNIVERSITÀ DI BOLOGNA}
+    
+    
+    \vspace{1.5cm}
+    
+    \normalsize
+    \textsc{Department of Classical Philology and Italian Studies} \\
+    \vspace{0.5cm}
+    \textsc{Second Cycle Degree in} \\
+    \vspace{0.2cm}
+    \textsc{\textbf{Digital Humanities and Digital Knowledge}}
+    
+    \vspace{1.6cm}
+    
+    \begin{spacing}{1}
+    \LARGE
+    \textbf{From Documents to Dialogue:\\Design, Implementation and Evaluation of a Question-Answering System for Geoportale Nazionale Archeologia}
+    \end{spacing}
+    
+    \vspace{1.2cm}
+    \normalsize
+    Dissertation in\\
+    \textbf{Machine Learning for the Arts and Humanities}
+    
+    \vspace{1cm}
+    
+    \begin{tabbing}
+    \textbf{Supervisor} \hspace{10cm} \= \textbf{Defended by} \\
+    Prof. Giovanni Colavizza \> Lucrezia Pograri \\
+    \\
+    \textbf{Co-Supervisors}\\
+    Prof. Paolo Bonora \\
+    Mario Caruso and Simone Persiani, BUP Solutions
+    \end{tabbing}
+    
+    \vfill
+    \rule{\linewidth}{0.4pt}
+    \vspace{0.2cm}
+    
+    \textbf{Graduation Session II} \\
+    \textbf{Academic Year 2024/2025}
+    
+\end{titlepage}
+\newpage
+\thispagestyle{empty}  % Force blank page to have no header/footer
+\mbox{}                % Prevent "empty page" warning
+\setcounter{figure}{0}
+
+%\pagestyle{empty}
+% Front Matter (Roman page numbering)
+\frontmatter
+\pagestyle{fancy}
+\tableofcontents
+
+% Abstract
+\input{chapters/abstract}
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+
+\newpage
+\thispagestyle{empty} 
+\mbox{}                
+\setcounter{figure}{0}
+
+% Main Content (Arabic page numbering)
+\mainmatter
+\pagestyle{fancy}
+\renewcommand{\figureautorefname}{Fig.}
+\renewcommand{\tableautorefname}{Tab.}
+\renewcommand{\chapterautorefname}{Chap.}
+\renewcommand{\sectionautorefname}{§}
+\makeatletter
+\renewcommand{\thefootnote}{\textsuperscript{\arabic{footnote}}}
+\renewcommand\@makefntext[1]{%
+  \noindent
+  \parindent=0pt
+  \leftskip=0pt
+  \hb@xt@1.8em{\hss\@thefnmark}#1%
+}
+\makeatother
+\input{chapters/introduction}
+\input{chapters/QAS}
+\input{chapters/SOTA}
+\input{chapters/casestudy}
+\input{chapters/methodology}
+\input{chapters/results}
+\input{chapters/discussion}
+\input{chapters/conclusion}
+
+\clearpage
+% Appendices
+\begin{appendices}
+    \chapter{Implementation details}
+    \label{appendix:A}
+
+In this study, all the experiments have been performed on a system with an Intel Core i7-1185G7 CPU at 3.00 GHz, 16 GB of RAM, and integrated Intel Iris Xe Graphics with 128 MB of VRAM. Additionally, the following software packages have been used to implement the proposed approach: PyTorch, NumPy, Pandas, Matplotlib, SpaCy, HuggingFace...
+
+    \chapter{Abbreviations}
+    \label{appendix:B}
+    \autoref{tab:abbreviations} describes the abbreviations and acronyms used throughout the chapters.
+
+\begin{table}[H]
+\begin{flushright}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Abbreviation} & \textbf{Explanation} \\ 
+\midrule
+AI & artificial intelligence\\
+QA & question-answering\\
+QAS & question-answering system\\
+RAG & retrieval-augmented generation\\
+LLM & large language model\\
+IR & information retrieval\\
+
+AL        & active learning \\[0.2em]
+ALBERT    & a lite bert \\[0.2em]
+BERT      & bidirectional encoder representations from transformers \\[0.2em]
+BiDAF     & bi-directional attention flow \\[0.2em]
+CE        & cross-entropy \\[0.2em]
+CNN       & convolutional neural network \\[0.2em]
+\bottomrule
+\end{tabular}
+\caption{Abbreviations and explanations}
+\label{tab:abbreviations}
+\end{flushright}
+\end{table}
+
+\end{appendices}
+
+
+\chapter*{Acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
+
+% Back Matter
+\backmatter
+\pagestyle{fancy}
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\nocite{noauthor_was_nodate}
+\printbibliography
+
+\end{document}

@@ -1,0 +1,108 @@
+\chapter{Overview of Question-Answering Discipline}
+\label{chap:QAS}
+\sloppy
+\begin{spacing}{1.5}
+
+This chapter introduces the foundations of question answering (QA) as both a Computer Science discipline and an applied technology. Before the emergence of large language models (LLMs), Transformers, and modern generative AI, question-answering systems (QAS) progressed through distinct paradigms: from symbolic and rule-based architectures to traditional information retrieval (IR) models and early neural networks approaches \citep{jurafsky_chapter_2024, antoniou_survey_2022}. Early systems depended on domain-specific models, manual knowledge bases, keyword retrieval, or engineered features. In recent years, pre-Transformer language models such as BERT and GPT-2/3 have answered questions by extracting or generating responses from static training data alone \citep{caballero_brief_2021}. While efficient and easy to deploy, these models exhibit factual inaccuracies, shallow contextual understanding, and limited adaptability to new or evolving information \citep{alanazi_question_2021}. They also frequently hallucinate or generate outdated responses, constrained by their static training corpora. The evolution of QAS approaches is summarized in \autoref{tab:qa_evolution}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\bfseries}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Models} & \textbf{QA Approach} & \textbf{Examples / Results}\\
+\midrule
+Symbolic / Rule-based (1960s–1980s) & Rule-based, domain-specific, handcrafted knowledge base & BASEBALL, LUNAR, SHRDLU \\
+Early IR Approaches (1990s–mid-2010s) & Keyword retrieval, TF-IDF, BM25, open-domain ranking & TREC QA \\
+Statistical / Seq2Seq (2000s–2018) & N-gram, embeddings, RNN/LSTM, statistical IR & Early neural QA, Reading comprehension in 2010s \\
+Transformer-based & Pre-training, fine-tuning, self-attention & BERT (93\% F1 on SQuAD), XLNet \\
+Generative LLMs and agents & Prompting, retrieval-augmented generation, agentic reasoning & GPT-3, RAG pipelines \\
+\bottomrule
+\end{tabularx}
+\caption{Evolution of QA systems.}
+\label{tab:qa_evolution}
+\end{table}
+
+\section{Pre-Transformer Era: Symbolic and Statistical Systems}
+
+Early domain-specific QA systems include:
+\begin{itemize}
+    \item \textbf{BASEBALL} (1960s): Hand-coded rules and database logic for Major League Baseball questions.
+    \item \textbf{LUNAR} (1971): Pattern matching and restricted knowledge base for geological questions about Moon rocks.
+    \item \textbf{SHRDLU} (late 1960s): Symbolic reasoning for a blocks-world robot in a toy domain.
+    \item \textbf{Unix Consultant (UC)} and \textbf{LILOG} (1980s): Domain-specific QA via linguistic rules and expert knowledge.
+\end{itemize}
+\citep{jurafsky_chapter_2024, antoniou_survey_2022}
+
+\subsection{Rule-Based and Symbolic Systems (1960s–1980s)}
+Early systems operated in restricted domains with manually created knowledge bases. These systems matched questions to predefined templates, enabling precise but brittle QA. Expert systems encoded inference rules and logical representations but could not scale or handle ambiguity outside narrow domains \citep{noauthor_question_2025,jurafsky_chapter_2024}.
+
+\subsection{Traditional Information Retrieval Approaches (1990s–mid-2010s)}
+As unstructured web data grew, QA moved toward ranking text passages with IR techniques like TF-IDF and BM25. Open-domain QA systems—such as those in TREC QA—returned ranked sentences or extracted answer spans. While scalable, these systems lacked deep language understanding and often missed nuanced answers not matching query terms \citep{antoniou_survey_2022, caballero_brief_2021}.
+
+\subsection{Statistical Models and Feature Engineering (2000s–2018)}
+N-gram models and statistical IR approaches enabled corpus-based reasoning. Word embeddings (Word2Vec, GloVe) and RNN/LSTM architectures advanced reading comprehension and retrieval QA \citep{jurafsky_chapter_2024}. IBM's Watson DeepQA \citep{noauthor_ibm_2025} integrated hundreds of NLP, IR, and ranking components to win Jeopardy!, but remained non-generative.  Semantic QA systems \citep{franco_ontology-based_2020} mapped questions to queries (SPARQL) over knowledge bases such as Freebase and DBpedia. Feature engineering (e.g., with CRFs, SVMs) improved answer extraction, while hybrid QA systems combined IR with knowledge-base querying, balancing coverage and precision \citep{antoniou_survey_2022}.
+
+\subsection{Early Neural and Generative Models (Late 2010s)}
+Word embeddings and RNNs improved modeling of semantic similarity between questions and answers, though context windows remained limited. Early generative QA models—using encoder-decoder architectures—struggled with factual consistency and often copied input text \citep{caballero_brief_2021}.
+
+\section{Limitations of Earlier Question-Answering Methods}
+
+Earlier QA methods had several critical limitations:
+\begin{itemize}
+    \item \textbf{Domain restriction:} Symbolic and rule-based systems scaled poorly beyond narrow domains.
+    \item \textbf{Brittleness:} Template matching caused failures on paraphrased or unanticipated queries.
+    \item \textbf{Limited understanding:} IR and statistical systems lacked semantic and contextual reasoning.
+    \item \textbf{Shallow answers:} Most models returned extracted snippets, not synthesized or novel responses.
+    \item \textbf{Manual effort:} Rule creation, feature engineering, and parser design required substantial labor.
+    \item \textbf{Incomplete coverage:} IR and KB approaches often missed answers due to phrasing mismatches.
+    \item \textbf{Limited context:} Pre-neural and early neural models handled only short contexts and simple reasoning.
+    \item \textbf{Data dependence:} Performance was sensitive to training data and engineered features.
+\end{itemize}
+\citep{farea_understanding_2025, alanazi_question_2021, alqifari_question_2019, diefenbach_core_2018, hirschman_natural_2001}
+
+These factors rendered pre-generative QA systems inflexible, brittle, and unable to provide context-rich, creative answers.
+
+\section{Transformer Models and Pre-Generative AI Advances}
+The introduction of the Transformer architecture (\textit{Attention Is All You Need}) replaced recurrence with self-attention, enabling parallel processing of sequences and laying the groundwork for all modern neural QA systems \citep{vaswani_attention_2017}.
+
+\begin{itemize}
+    \item \textbf{BERT} (2018): Bidirectional encoder pre-trained with masked language modeling; achieved 93.2\% F1 on SQuAD v1.1, outperforming prior models \citep{devlin_bert_2019}.
+    \item \textbf{XLNet} (2019): Permutation-based Transformer with state-of-the-art performance on QA benchmarks \parencite{yang_xlnet_2020}.
+    \item \textbf{BioBERT}: Domain-adapted for biomedical QA, achieved leading results on BioASQ \citep{yoon_pre-trained_2019}.
+    \item \textbf{Dynamic Coattention Networks (DCN)}: Attention mechanisms that fuse question and context, boosting accuracy via iterative decoding \citep{xiong_dynamic_2018}.
+\end{itemize}
+Surveys highlight the shift to extractive and generative QA pipelines—chunking, embedding, retrieval, answer generation—and increased interest in conversational and multi-turn QA \citep{yue_survey_2025, antoniou_survey_2022}.
+
+\section{Generative LLMs, RAG and Agents}
+
+Retrieval-augmented generation (RAG) QA systems combine a retriever that searches dynamic, external knowledge bases with a generator that synthesizes grounded responses. This hybrid model enhances factual reliability, contextual depth, and adaptability compared to static, traditional QA systems \citep{yue_survey_2025,lewis_retrieval-augmented_2020}. Generative models in RAG leverage real-time retrieval, reducing hallucination and keeping answers current. RAG-based systems scale with evolving knowledge without full retraining. However, they introduce higher computational costs, greater latency, and added system complexity due to the need for retrieval infrastructure.
+
+\paragraph{Conclusion}
+
+uauuu
+
+\autoref{tab:qa-comparison} summarizes functional differences between traditional and RAG-based QA systems.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Feature} & \textbf{Traditional QAS} & \textbf{RAG QAS} \\
+& \textit{(e.g., BERT, GPT-2/3)} & \textit{(Retriever + Generator)} \\
+\midrule
+Knowledge source & Fixed (training data) & Dynamic (external docs/databases) \\
+Answer type & Extracted or generated & Retrieved + generated (synthesized) \\
+Factual accuracy & Limited (can hallucinate or be outdated) & High (grounded in retrieved, up-to-date information) \\
+Contextual depth & Limited & Comprehensive, nuanced \\
+Scalability & Moderate & High (can update external data sources) \\
+Computational cost & Lower & Higher (due to retrieval/generation) \\
+Latency & Lower (faster for simple queries) & Higher (retrieval step adds time) \\
+Complexity of setup & Simpler & More complex to maintain \\
+Adaptability & Less adaptable to new domains & Highly adaptable via updated document index \\
+\bottomrule
+\end{tabularx}
+\caption{Comparison of traditional vs. RAG question-answering systems.\\ \footnotesize{Adapted from \url{https://www.geeksforgeeks.org/nlp/rag-vs-traditional-qa/}.}}
+\label{tab:qa-comparison}
+\end{table}
+
+\end{spacing}
