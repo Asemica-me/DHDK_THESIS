@@ -47,12 +47,19 @@
     {}
     {\color{blue}}%
 }
+\renewbibmacro*{doi+eprint+url}{
+  \printfield{doi}
+}
 \DeclareCiteCommand{\citep}
   {\begingroup(}  % Start a group, manually insert black opening parenthesis
   {\color{blue}\usebibmacro{citeindex}%
    \usebibmacro{cite}}
   {\multicitedelim}
   {\usebibmacro{postnote}\endgroup)}  % Close blue group, then black parenthesis
+\DeclareFieldFormat{doi}{%
+  DOI: \ifhyperref
+    {\href{https://doi.org/#1}{#1}}
+    {#1}}
 
 % Page numbering setup (BOTTOM CENTER)
 \pagestyle{fancy}
@@ -70,7 +77,7 @@
 % Chapter formatting
 \titleformat{\chapter}[display]
   {\normalfont\huge\bfseries}
-  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge} 
 
 
 % Customize Table of Contents
@@ -205,19 +212,23 @@ In this study, all the experiments have been performed on a system with an Intel
 \toprule
 \textbf{Abbreviation} & \textbf{Explanation} \\ 
 \midrule
-AI & artificial intelligence\\
-QA & question-answering\\
-QAS & question-answering system\\
-RAG & retrieval-augmented generation\\
-LLM & large language model\\
-IR & information retrieval\\
-
-AL        & active learning \\[0.2em]
-ALBERT    & a lite bert \\[0.2em]
-BERT      & bidirectional encoder representations from transformers \\[0.2em]
-BiDAF     & bi-directional attention flow \\[0.2em]
-CE        & cross-entropy \\[0.2em]
-CNN       & convolutional neural network \\[0.2em]
+AI & artificial intelligence\\[0.2em]
+DH & digital humanities\\[0.2em]
+QA & question-answering\\[0.2em]
+QAS & question-answering system\\[0.2em]
+RAG & retrieval-augmented generation\\[0.2em]
+LLM & large language model\\[0.2em]
+IR & information retrieval\\[0.2em]
+KB & knowledge base\\[0.2em]
+NLP & natural language processing\\[0.2em]
+ML & machine learning\\[0.2em]
+TF-IDF & term frequency-inverse document frequency\\[0.2em]
+BM25 & best match 25\\[0.2em]
+TREC & Text REtrieval Conference\\[0.2em]
+RNN & recurrent neural network\\[0.2em]
+LSTM & long short-term memory\\[0.2em]
+CRF & conditional random field\\[0.2em]
+SVM & support vector machine\\[0.2em]
 \bottomrule
 \end{tabular}
 \caption{Abbreviations and explanations}
