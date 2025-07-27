@@ -201,40 +201,57 @@
 
 In this study, all the experiments have been performed on a system with an Intel Core i7-1185G7 CPU at 3.00 GHz, 16 GB of RAM, and integrated Intel Iris Xe Graphics with 128 MB of VRAM. Additionally, the following software packages have been used to implement the proposed approach: PyTorch, NumPy, Pandas, Matplotlib, SpaCy, HuggingFace...
 
-    \chapter{Abbreviations}
-    \label{appendix:B}
-    \autoref{tab:abbreviations} describes the abbreviations and acronyms used throughout the chapters.
+\chapter{Abbreviations}
+\label{appendix:B}
+\autoref{tab:abbreviations} describes the abbreviations and acronyms used throughout the chapters.
+
 
 \begin{table}[H]
-\begin{flushright}
 \centering
-\begin{tabular}{ll}
+\footnotesize
+\begin{tabularx}{\textwidth}{ l l >{\justifying\arraybackslash}X }
 \toprule
-\textbf{Abbreviation} & \textbf{Explanation} \\ 
+\textbf{Abbreviation} & \textbf{Full Form} & \textbf{Glossary Definition} \\
 \midrule
-AI & artificial intelligence\\[0.2em]
-DH & digital humanities\\[0.2em]
-QA & question-answering\\[0.2em]
-QAS & question-answering system\\[0.2em]
-RAG & retrieval-augmented generation\\[0.2em]
-LLM & large language model\\[0.2em]
-IR & information retrieval\\[0.2em]
-KB & knowledge base\\[0.2em]
-NLP & natural language processing\\[0.2em]
-ML & machine learning\\[0.2em]
-TF-IDF & term frequency-inverse document frequency\\[0.2em]
-BM25 & best match 25\\[0.2em]
-TREC & Text REtrieval Conference\\[0.2em]
-RNN & recurrent neural network\\[0.2em]
-LSTM & long short-term memory\\[0.2em]
-CRF & conditional random field\\[0.2em]
-SVM & support vector machine\\[0.2em]
+AI    & Artificial Intelligence & The field of computer science dedicated to creating systems capable of performing tasks that typically require human intelligence, such as reasoning, learning, and problem-solving. \\
+\cmidrule(lr){1-2}
+DH    & Digital Humanities & An interdisciplinary field that applies computational methods and tools to humanities research, analysis, and dissemination. \\
+\cmidrule(lr){1-2}
+QA    & Question-Answering & A technology or task in which a system provides precise answers to questions posed in natural language. \\
+\cmidrule(lr){1-2}
+QAS   & Question-Answering System & A system designed to answer questions automatically by processing natural language input, often using methods from IR and NLP. \\
+\cmidrule(lr){1-2}
+RAG   & Retrieval-Augmented Generation & An approach combining information retrieval with generative models, allowing AI to reference external data sources when generating answers. \\
+\cmidrule(lr){1-2}
+LLM   & Large Language Model & A neural network trained on massive text corpora to generate or understand human language, such as GPT or BERT. \\
+\cmidrule(lr){1-2}
+IR    & Information Retrieval & The process of searching, retrieving, and ranking relevant documents or data from large collections based on user queries. \\
+\cmidrule(lr){1-2}
+KB    & Knowledge Base & A structured collection of information or data, often used to support reasoning, search, or retrieval in AI systems. \\
+\cmidrule(lr){1-2}
+NLP   & Natural Language Processing & The area of AI focused on enabling computers to understand, interpret, and generate human language. \\
+\cmidrule(lr){1-2}
+ML    & Machine Learning & A subset of AI that involves training algorithms to recognize patterns and make decisions based on data. \\
+\cmidrule(lr){1-2}
+TF-IDF & Term Frequency-Inverse Document Frequency & A statistical measure used in IR to evaluate how important a word is to a document relative to a corpus, balancing term frequency and document rarity. \\
+\cmidrule(lr){1-2}
+BM25  & Best Match 25 & A ranking function used in IR to estimate the relevance of documents to a given search query, based on term frequency and document length normalization. \\
+\cmidrule(lr){1-2}
+TREC  & Text REtrieval Conference & An ongoing series of workshops and evaluations focused on advancing research in text retrieval and related tasks. \\
+\cmidrule(lr){1-2}
+RNN   & Recurrent Neural Network & A type of neural network architecture designed to process sequential data by maintaining a form of memory of previous inputs. \\
+\cmidrule(lr){1-2}
+LSTM  & Long Short-Term Memory & A special kind of RNN capable of learning long-range dependencies, often used for tasks like language modeling or time series prediction. \\
+\cmidrule(lr){1-2}
+CRF   & Conditional Random Field & A probabilistic graphical model used for structured prediction, especially in NLP tasks such as sequence labeling. \\
+\cmidrule(lr){1-2}
+SVM   & Support Vector Machine & A supervised machine learning algorithm used for classification and regression, which finds the optimal boundary between classes in the feature space. \\
 \bottomrule
-\end{tabular}
-\caption{Abbreviations and explanations}
+\end{tabularx}
+\caption{Abbreviations and acronyms used in the thesis with their full forms and definitions.}
 \label{tab:abbreviations}
-\end{flushright}
 \end{table}
+
 
 \end{appendices}
 
@@ -248,7 +265,6 @@ SVM & support vector machine\\[0.2em]
 \cleardoublepage
 \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
-\nocite{noauthor_was_nodate}
 \printbibliography
 
 \end{document}
