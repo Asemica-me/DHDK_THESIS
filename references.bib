@@ -654,6 +654,55 @@ more than two thirds of factual questions in this evaluation.},
 	keywords = {Computer Science - Computation and Language, Computer Science - Information Retrieval},
 }
 
+
+@misc{asai_self-rag_2023,
+	title = {Self-{RAG}: {Learning} to {Retrieve}, {Generate}, and {Critique} through {Self}-{Reflection}},
+	shorttitle = {Self-{RAG}},
+	url = {http://arxiv.org/abs/2310.11511},
+	doi = {10.48550/arXiv.2310.11511},
+	abstract = {Despite their remarkable capabilities, large language models (LLMs) often produce responses containing factual inaccuracies due to their sole reliance on the parametric knowledge they encapsulate. Retrieval-Augmented Generation (RAG), an ad hoc approach that augments LMs with retrieval of relevant knowledge, decreases such issues. However, indiscriminately retrieving and incorporating a fixed number of retrieved passages, regardless of whether retrieval is necessary, or passages are relevant, diminishes LM versatility or can lead to unhelpful response generation. We introduce a new framework called Self-Reflective Retrieval-Augmented Generation (Self-RAG) that enhances an LM's quality and factuality through retrieval and self-reflection. Our framework trains a single arbitrary LM that adaptively retrieves passages on-demand, and generates and reflects on retrieved passages and its own generations using special tokens, called reflection tokens. Generating reflection tokens makes the LM controllable during the inference phase, enabling it to tailor its behavior to diverse task requirements. Experiments show that Self-RAG (7B and 13B parameters) significantly outperforms state-of-the-art LLMs and retrieval-augmented models on a diverse set of tasks. Specifically, Self-RAG outperforms ChatGPT and retrieval-augmented Llama2-chat on Open-domain QA, reasoning and fact verification tasks, and it shows significant gains in improving factuality and citation accuracy for long-form generations relative to these models.},
+	urldate = {2025-07-27},
+	publisher = {arXiv},
+	author = {Asai, Akari and Wu, Zeqiu and Wang, Yizhong and Sil, Avirup and Hajishirzi, Hannaneh},
+	month = oct,
+	year = {2023},
+	note = {arXiv:2310.11511},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language, Computer Science - Machine Learning},
+}
+
+
+@misc{han_retrieval-augmented_2025,
+	title = {Retrieval-{Augmented} {Generation} with {Graphs} ({GraphRAG})},
+	url = {http://arxiv.org/abs/2501.00309},
+	doi = {10.48550/arXiv.2501.00309},
+	abstract = {Retrieval-augmented generation (RAG) is a powerful technique that enhances downstream task execution by retrieving additional information, such as knowledge, skills, and tools from external sources. Graph, by its intrinsic "nodes connected by edges" nature, encodes massive heterogeneous and relational information, making it a golden resource for RAG in tremendous real-world applications. As a result, we have recently witnessed increasing attention on equipping RAG with Graph, i.e., GraphRAG. However, unlike conventional RAG, where the retriever, generator, and external data sources can be uniformly designed in the neural-embedding space, the uniqueness of graph-structured data, such as diverse-formatted and domain-specific relational knowledge, poses unique and significant challenges when designing GraphRAG for different domains. Given the broad applicability, the associated design challenges, and the recent surge in GraphRAG, a systematic and up-to-date survey of its key concepts and techniques is urgently desired. Following this motivation, we present a comprehensive and up-to-date survey on GraphRAG. Our survey first proposes a holistic GraphRAG framework by defining its key components, including query processor, retriever, organizer, generator, and data source. Furthermore, recognizing that graphs in different domains exhibit distinct relational patterns and require dedicated designs, we review GraphRAG techniques uniquely tailored to each domain. Finally, we discuss research challenges and brainstorm directions to inspire cross-disciplinary opportunities. Our survey repository is publicly maintained at https://github.com/Graph-RAG/GraphRAG/.},
+	urldate = {2025-07-27},
+	publisher = {arXiv},
+	author = {Han, Haoyu and Wang, Yu and Shomer, Harry and Guo, Kai and Ding, Jiayuan and Lei, Yongjia and Halappanavar, Mahantesh and Rossi, Ryan A. and Mukherjee, Subhabrata and Tang, Xianfeng and He, Qi and Hua, Zhigang and Long, Bo and Zhao, Tong and Shah, Neil and Javari, Amin and Xia, Yinglong and Tang, Jiliang},
+	month = jan,
+	year = {2025},
+	note = {arXiv:2501.00309},
+	keywords = {Computer Science - Computation and Language, Computer Science - Information Retrieval, Computer Science - Machine Learning},
+}
+
+@inproceedings{zhuang_tilde_2021,
+	address = {Virtual Event Canada},
+	title = {{TILDE}: {Term} {Independent} {Likelihood} {moDEl} for {Passage} {Re}-ranking},
+	isbn = {9781450380379},
+	shorttitle = {{TILDE}},
+	url = {https://dl.acm.org/doi/10.1145/3404835.3462922},
+	doi = {10.1145/3404835.3462922},
+	language = {en},
+	urldate = {2025-07-27},
+	booktitle = {Proceedings of the 44th {International} {ACM} {SIGIR} {Conference} on {Research} and {Development} in {Information} {Retrieval}},
+	publisher = {ACM},
+	author = {Zhuang, Shengyao and Zuccon, Guido},
+	month = jul,
+	year = {2021},
+	pages = {1483--1492},
+}
+
+
 @misc{gna_wiki_2024,
 	title = {Wiki {GNA} {Manuale} {Operativo} v.1.4},
 	copyright = {CC BY 4.0},

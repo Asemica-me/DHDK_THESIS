@@ -17,6 +17,55 @@ This chapter therefore provides a comprehensive overview of the state of the art
 {0pt}
 Retrieval-augmented generation (RAG) is a hybrid approach that addresses key limitations of traditional LLMs, knowledge staleness, limited context awareness, and lack of output traceability \parencite{vaibhav_retrieval-augmented_2025,gao_retrieval-augmented_2024, gupta_comprehensive_2024}. While LLMs excel in generating fluent, human-like text, they often falter when facing domain-specific queries or requests for information beyond their training cutoff. RAG directly addresses these challenges by integrating external information retrieval within the generation process, ensuring outputs are more factual, current, and grounded in verifiable sources \citep{wang_searching_2024}.
 
+\subsection{RAG Pipeline: Components and Standard Practices}
+Modern RAG systems follow a multi-stage pipeline that has become increasingly modular and sophisticated in recent research \citep{vaibhav_retrieval-augmented_2025,wang_searching_2024}. 
+
+The standard workflow includes the following components:
+\begin{itemize}
+  \item \textbf{Query understanding and classification:} Not all queries require retrieval from external sources. Advanced systems first analyse and classify incoming queries to determine whether retrieval is necessary or if the LLM alone suffices. This step leverages natural language understanding techniques to extract key entities, relationships, and user intent, improving efficiency and reducing unnecessary retrieval latency.
+  %Data Preparation and Indexing
+    \item \textbf{Document indexing and chunking:} Raw data from source documents is preprocessed: cleaned, segmented into manageable "chunks" at token, sentence, or semantic level, and converted into dense vector representations (embeddings). Recent studies recommend dynamic or semantic chunking over simple fixed-size splitting, as it better preserves context and improves retrieval quality -- especially in heterogeneous domains.
+    \item \textbf{Embedding and Vector Database:} Both document chunks and user queries are embedded into a shared vector space using models fine-tuned for semantic similarity (e.g., BAAI/bge, LLM-Embedder, intfloat/e5). These vectors are stored in efficient vector databases (e.g., Milvus, Faiss, Qdrant), selected based on scalability, indexing strategies, and support for hybrid (vector plus keyword) search capabilities.
+    \item \textbf{Retrieval and query transformation:} Upon receiving a user query, the system encodes it into a vector and retrieves the top-k most relevant chunks from the indexed knowledge base (KB) using similarity search. Robustness is enhanced through hybrid retrieval, which combines dense (vector-based, e.g., DPR, Contriever) and sparse (lexical, e.g., BM25) methods. Advanced query transformation techniques -- including query rewriting, decomposition, or hypothetical document generation (e.g., HyDE)-- can further improve retrieval effectiveness.
+    \item \textbf{Re-ranking:} Initially retrieved candidates are often re-ranked based on relevance to the original query, using additional models (DLM-based) -- e.g., cross-encoders like monoT5, monoBERT, or RankLLaMA, which jointly consider the query and each candidate -- or more sophisticated algorithms through heuristics. This contextualization ensures that the most pertinent information is prioritized for the generative model.\\See \autoref{tab:rerank_algorithms} for a summary on re-ranking techniques.
+    \item \textbf{Repacking and summarization:} In some cases, retrieved passages may be reorganized or summarized to distill key information, especially when dealing with lengthy corpora. This step can involve extractive summarization or abstractive (e.g., with Pegasus or T5) techniques to condense information and fit within the context window of the generator model.
+    \item \textbf{Generation:} The generative model -- usually a transformer-based LLM such as T5, BART, or GPT -- synthesizes a response conditioned on both the original query and the retrieved context, integrating intrinsic model knowledge with external evidence to produce a coherent, accurate, and contextually grounded answer.
+    \item \textbf{Post-processing and output delivery with attribution:} Generated response may undergo post-processing to ensure coherence, factual accuracy, and adherence to any specific output formats or constraints. This can include additional validation steps, such as fact-checking against trusted sources or applying heuristics to ensure the response is grounded in the retrieved context. Additionally, RAG systems increasingly support source attribution—citing or linking to retrieved documents to enhance transparency, interpretability, and user trust.
+\end{itemize}
+\citep{vaibhav_retrieval-augmented_2025,wang_searching_2024,gupta_comprehensive_2024}.
+
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Algorithm} & \textbf{Rationale} \\
+\midrule
+Cross-Encoders & Joint encoding of query and document for fine-grained relevance scoring. \\
+\cmidrule(lr){1-2}
+TILDE \citep{zhuang_tilde_2021} & Token-level likelihoods for queries across a collection, allowing fast re-ranking by summing the probabilities of query tokens given each candidate passage. \\
+\cmidrule(lr){1-2}
+Learning-to-Rank (LTR \citep{gupta_comprehensive_2024}) & Traditional machine learning ranking approaches: \textbf{a) Pointwise:} predicts relevance score for each document independently; \textbf{b) Pairwise:} compares pairs of documents to learn relative relevance; \textbf{c) Listwise:} considers the entire ranked list at once.\\
+\cmidrule(lr){1-2}
+Hybrid sparse + dense scoring & Blends scores from dense retrievers (semantic similarity -- e.g., DPR, Contriever) and sparse methods (lexical overlap -- e.g., BM25, TF-IDF) for robust ranking. Sometimes uses learnable weighting \citep{wang_searching_2024}. \\
+\cmidrule(lr){1-2}
+Graph-based \citep{han_retrieval-augmented_2025} & Constructs a graph of candidates (nodes) based on relationships (semantic, citation, or knowledge graph edges), then uses graph algorithms  (e.g., PageRank, label propagation) to identify central passages. \\
+\cmidrule(lr){1-2}
+Self-RAG (LLM-enhanced reranking) \citep{asai_self-rag_2023} & Uses LLMs directly to score or select the most relevant passages, sometimes via few-shot prompting or chain-of-thought reasoning. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.5em}
+\caption{Algorithms for document re-ranking in RAG pipelines.}
+\label{tab:rerank_algorithms}
+\end{table}
+
+
+
+
+
+
+
 The RAG pipeline typically consists of two main stages: \textbf{retrieval} and \textbf{generation} (\cite{odsc-community_retrieval-augmented_2024}). The process begins with indexing, where raw data is cleaned, extracted, segmented into manageable "chunks", and encoded into vector representations. These embeddings are then stored in a vector database to facilitate efficient similarity searches. Upon receiving a user query, the system encodes it into a vector and retrieves the top-k most relevant chunks from the indexed knowledge base. In the second stage, the retrieved documents are passed to a generative model, often built upon Transformer architectures \citep{vaswani_attention_2017}. This module synthesizes the original query with the retrieved information to formulate a well-informed, coherent, and contextually appropriate response \citep{arslan_survey_2024}.
 
 This modular mechanism (\autoref{fig:rag}) overcomes the limitations of static model parameters by continuously incorporating domain-specific and updated information. Recent contributions have helped to formally systematize the RAG pipeline's, with frameworks delineating specific interdependent modules such as query classification, retrieval, re-ranking, and generation \parencite{wang_searching_2024}.
