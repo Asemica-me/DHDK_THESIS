@@ -8,6 +8,56 @@
 	year = {2025},
 }
 
+@misc{GROBID,
+    title = {GROBID},
+    howpublished = {\url{https://github.com/kermitt2/grobid}},
+    publisher = {GitHub},
+    year = {2008--2025},
+    archivePrefix = {swh},
+    eprint = {1:dir:dab86b296e3c3216e2241968f0d63b68e8209d3c}
+}
+
+@misc{li_death_2024,
+	title = {The {Death} of {Feature} {Engineering}? {BERT} with {Linguistic} {Features} on {SQuAD} 2.0},
+	shorttitle = {The {Death} of {Feature} {Engineering}?},
+	url = {http://arxiv.org/abs/2404.03184},
+	doi = {10.48550/arXiv.2404.03184},
+	abstract = {Machine reading comprehension is an essential natural language processing task, which takes into a pair of context and query and predicts the corresponding answer to query. In this project, we developed an end-to-end question answering model incorporating BERT and additional linguistic features. We conclude that the BERT base model will be improved by incorporating the features. The EM score and F1 score are improved 2.17 and 2.14 compared with BERT(base). Our best single model reaches EM score 76.55 and F1 score 79.97 in the hidden test set. Our error analysis also shows that the linguistic architecture can help model understand the context better in that it can locate answers that BERT only model predicted "No Answer" wrongly.},
+	urldate = {2025-07-28},
+	publisher = {arXiv},
+	author = {Li, Jiawei and Zhang, Yue},
+	month = apr,
+	year = {2024},
+	note = {arXiv:2404.03184},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language},
+}
+
+
+@misc{rajpurkar_squad_2016,
+	title = {{SQuAD}: 100,000+ {Questions} for {Machine} {Comprehension} of {Text}},
+	shorttitle = {{SQuAD}},
+	url = {http://arxiv.org/abs/1606.05250},
+	doi = {10.48550/arXiv.1606.05250},
+	abstract = {We present the Stanford Question Answering Dataset (SQuAD), a new reading comprehension dataset consisting of 100,000+ questions posed by crowdworkers on a set of Wikipedia articles, where the answer to each question is a segment of text from the corresponding reading passage. We analyze the dataset to understand the types of reasoning required to answer the questions, leaning heavily on dependency and constituency trees. We build a strong logistic regression model, which achieves an F1 score of 51.0\%, a significant improvement over a simple baseline (20\%). However, human performance (86.8\%) is much higher, indicating that the dataset presents a good challenge problem for future research. The dataset is freely available at https://stanford-qa.com},
+	urldate = {2025-07-28},
+	publisher = {arXiv},
+	author = {Rajpurkar, Pranav and Zhang, Jian and Lopyrev, Konstantin and Liang, Percy},
+	month = oct,
+	year = {2016},
+	note = {arXiv:1606.05250},
+	keywords = {Computer Science - Computation and Language},
+}
+
+
+@misc{noauthor_rag_2025,
+	title = {{RAG} vs {Traditional} {QA} - {GeeksforGeeks}},
+	url = {https://web.archive.org/web/20250728131605/https://www.geeksforgeeks.org/nlp/rag-vs-traditional-qa/},
+	urldate = {2025-07-28},
+	month = jul,
+	year = {2025},
+}
+
+
 @misc{noauthor_ibm_2025,
 	title = {{IBM} {Watson}},
 	copyright = {Creative Commons Attribution-ShareAlike License},
@@ -183,6 +233,69 @@ In February 2013, IBM announced that Watson's first commercial application would
 	year = {2023},
 	doi = {10.1201/9781003244332-5},
 	pages = {110--140},
+}
+
+
+@article{jobin_global_2019,
+	title = {The global landscape of {AI} ethics guidelines},
+	volume = {1},
+	issn = {2522-5839},
+	url = {https://www.nature.com/articles/s42256-019-0088-2},
+	doi = {10.1038/s42256-019-0088-2},
+	language = {en},
+	number = {9},
+	urldate = {2025-07-28},
+	journal = {Nature Machine Intelligence},
+	author = {Jobin, Anna and Ienca, Marcello and Vayena, Effy},
+	month = sep,
+	year = {2019},
+	pages = {389--399},
+}
+
+
+@inproceedings{amershi_software_2019,
+	address = {Montreal, QC, Canada},
+	title = {Software {Engineering} for {Machine} {Learning}: {A} {Case} {Study}},
+	copyright = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+	isbn = {9781728117607},
+	shorttitle = {Software {Engineering} for {Machine} {Learning}},
+	url = {https://ieeexplore.ieee.org/document/8804457/},
+	doi = {10.1109/ICSE-SEIP.2019.00042},
+	urldate = {2025-07-28},
+	booktitle = {2019 {IEEE}/{ACM} 41st {International} {Conference} on {Software} {Engineering}: {Software} {Engineering} in {Practice} ({ICSE}-{SEIP})},
+	publisher = {IEEE},
+	author = {Amershi, Saleema and Begel, Andrew and Bird, Christian and DeLine, Robert and Gall, Harald and Kamar, Ece and Nagappan, Nachiappan and Nushi, Besmira and Zimmermann, Thomas},
+	month = may,
+	year = {2019},
+	pages = {291--300},
+}
+
+
+@misc{thakur_beir_2021,
+	title = {{BEIR}: {A} {Heterogenous} {Benchmark} for {Zero}-shot {Evaluation} of {Information} {Retrieval} {Models}},
+	shorttitle = {{BEIR}},
+	url = {http://arxiv.org/abs/2104.08663},
+	doi = {10.48550/arXiv.2104.08663},
+	abstract = {Existing neural information retrieval (IR) models have often been studied in homogeneous and narrow settings, which has considerably limited insights into their out-of-distribution (OOD) generalization capabilities. To address this, and to facilitate researchers to broadly evaluate the effectiveness of their models, we introduce Benchmarking-IR (BEIR), a robust and heterogeneous evaluation benchmark for information retrieval. We leverage a careful selection of 18 publicly available datasets from diverse text retrieval tasks and domains and evaluate 10 state-of-the-art retrieval systems including lexical, sparse, dense, late-interaction and re-ranking architectures on the BEIR benchmark. Our results show BM25 is a robust baseline and re-ranking and late-interaction-based models on average achieve the best zero-shot performances, however, at high computational costs. In contrast, dense and sparse-retrieval models are computationally more efficient but often underperform other approaches, highlighting the considerable room for improvement in their generalization capabilities. We hope this framework allows us to better evaluate and understand existing retrieval systems, and contributes to accelerating progress towards better robust and generalizable systems in the future. BEIR is publicly available at https://github.com/UKPLab/beir.},
+	urldate = {2025-07-28},
+	publisher = {arXiv},
+	author = {Thakur, Nandan and Reimers, Nils and Rücklé, Andreas and Srivastava, Abhishek and Gurevych, Iryna},
+	month = oct,
+	year = {2021},
+	note = {arXiv:2104.08663},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language, Computer Science - Information Retrieval},
+}
+
+@book{voorhees_trec_2005,
+	address = {Cambridge, Mass},
+	series = {Digital libraries and electronic publishing},
+	title = {{TREC}: experiment and evaluation in information retrieval},
+	isbn = {9780262220736},
+	shorttitle = {{TREC}},
+	publisher = {MIT Press},
+	editor = {Voorhees, E. and Harman, D. K. and {National Institute of Standards and Technology (U.S.)}},
+	year = {2005},
+	keywords = {Conference papers and proceedings, Congresses, Information storage and retrieval systems, Text REtrieval Conference, Text processing (Computer science)},
 }
 
 
@@ -671,6 +784,100 @@ more than two thirds of factual questions in this evaluation.},
 }
 
 
+@misc{noauthor_call_nodate,
+	title = {Call for {Experiments}: {Generative} {KI}, {LLMs} und {GPT} bei digitalen {Editionen} ({DHd2024}) {\textbar} {DHd}-{Blog}},
+	url = {https://dhd-blog.org/?p=20404},
+	urldate = {2025-07-28},
+}
+
+
+@misc{hurch_hsa_2024,
+	title = {{HSA} - {Hugo} {Schuchardt} {Archiv}},
+	url = {https://web.archive.org/web/20241120122545/https://gams.uni-graz.at/context:hsa},
+	urldate = {2025-07-28},
+	author = {Hurch, Bernhard (ed.)},
+	month = nov,
+	year = {2024},
+}
+
+
+
+@article{pollin_new_2023,
+	title = {New {Ways} of {Creating} {Research} {Data}: {Conversion} of {Unstructured} {Text} to {TEI} {XML} using {GPT} on the {Correspondence} of {Hugo} {Schuchardt} with a {Web} {Prototype} for {Prompt} {Engineering}. {FORGE} 2023. {Tübingen}},
+	copyright = {Creative Commons Attribution 4.0 International, Open Access},
+	shorttitle = {New {Ways} of {Creating} {Research} {Data}},
+	url = {https://zenodo.org/record/8425162},
+	doi = {10.5281/ZENODO.8425162},
+	abstract = {This paper explores the use of prompt engineering to streamline the creation of humanities research data by converting unstructured correspondence texts into the TEI XML format. The approach optimizes language models such as GPT to produce accurate structured data while preserving context. The paper discusses the iterative refinement of the conversion process, challenges and potential solutions, and presents a user-friendly web prototype. Overall, prompt engineering shows potential for improving the efficiency of research data creation in the humanities.},
+	urldate = {2025-07-28},
+	author = {Pollin, Christopher and Steiner, Christian and Zach, Constantin},
+	month = oct,
+	year = {2023},
+	keywords = {Digital Edition, Generative AI, Research Data},
+}
+
+
+@article{pollin_workshop_2024,
+	title = {Workshop {Generative} {KI}, {LLMs} und {GPT} bei digitalen {Editionen}},
+	url = {https://zenodo.org/records/10893761},
+	abstract = {Dieser Workshop konzentriert sich auf die Erforschung der Anwendungsmöglichkeiten und Herausforderungen von KI-basierten Anwendungen wie GPT und Large Language Models (LLMs) im Kontext digitaler Editionen. GPT-4, mindestens bis Juli 2023 das führende Modell, bietet erhebliche Potenziale, z.B. für die Umwandlung von unstrukturiertem Text in strukturierte Daten und die Erkennung von benannten Entitäten. Dennoch liefert es bislang noch unbefriedigende Ergebnisse, weshalb sorgfältige Überwachung und Feedbacksysteme unerlässlich sind. Die Integration von LLMs in Arbeitsabläufe und Webentwicklungsprojekte ist vielversprechend, erfordert jedoch noch konzeptionelle und dann auch technische Vorstudien. In Anbetracht der rasanten KI- und LLM-Entwicklungen lädt der Workshop dazu ein, zu experimentieren und Strategien für den effektiven Einsatz dieser Modelle in digitalen Editionsprojekten zu diskutieren.},
+	language = {deu},
+	urldate = {2025-07-28},
+	author = {Pollin, Christopher and Scholger, Martina and Sahle, Patrick and Vogeler, Georg and Schaßan, Torsten and Dumont, Stefan and Fischer, Franz and Henny-Krahmer, Ulrike and Fritze, Christiane and Roeder, Torsten and Czmiel, Alexander},
+	month = mar,
+	year = {2024},
+	keywords = {Artificial intelligence, Digital humanities},
+}
+
+
+@misc{kuczera_chatgpt_2024,
+	title = {{ChatGPT} und generative {KI} in der mediävistischen {Grundlagenforschung} {\textbar} {H}-{Soz}-{Kult}. {Kommunikation} und {Fachinformation} für die {Geschichtswissenschaften} {\textbar} {Geschichte} im {Netz} {\textbar} {History} in the web},
+	url = {https://www.hsozkult.de/event/id/event-142284},
+	abstract = {Tagung vom 19.-20. September 2024 an der Universität des Saarlandes},
+	language = {de},
+	urldate = {2025-07-28},
+	journal = {H-Soz-Kult. Kommunikation und Fachinformation für die Geschichtswissenschaften},
+	author = {Kuczera, Andreas and Armbruster, Stephan},
+	month = jul,
+	year = {2024},
+}
+
+
+
+@article{pollin_when_2025,
+	title = {When it was 2024 – {Generative} {AI} in the field of digital scholarly editions},
+	volume = {10},
+	issn = {2510-1358},
+	url = {https://zfdg.de/2025_008},
+	doi = {10.17175/2025_008},
+	abstract = {Der Beitrag reflektiert den aktuellen Forschungsstand zur Anwendung generativer KI im Bereich der digitalen wissenschaftlichen Edition. Er basiert auf Experimenten, die 2024 bei einem DHd-Workshop präsentiert und diskutiert wurden, und bezieht weitere Publikationen zum Thema ein. Die Untersuchung identifiziert acht Anwendungsfelder generativer KI, vorwiegend in Form von Large Language Models (LLMs), in der wissenschaftlichen Editorik: (1.) Dokumentation der Textüberlieferung, (2.) Nachbearbeitung retrodigitalisierter Editionen, (3.) Textgewinnung und -codierung (Transkription, Dokument-Layout-Analyse, OCR / HTR-Nachbearbeitung, grundlegendes Markup), (4.) Normalisierung, (5.) Erkennung von Named Entities (NER) und tiefere semantische Annotation, (6.) Informationsanreicherung, (7.) Übersetzung und (8.) Zusammenfassung. In den durchgeführten Experimenten wurde der Einsatz generativer KI im gesamten Editionsprozess konzeptualisiert, auch wenn sich NER als Bereich mit den meisten Beiträgen erwies. Im abschließenden Teil des Beitrags werden Erfordernisse an die weitere Forschung benannt: Aus praktischer Perspektive müssen standardisierte Workflow-Orchestrierungen und Evaluationsprotokolle entwickelt werden. Aus theoretischer Sicht bedarf es systematischer Untersuchungen möglicher Stärken und Schwächen von LLMs bei deren Verwendung in digitalen Editionen sowie einer kritischen Reflexion über inhärente Schieflagen und ethische Fragen.},
+	language = {en},
+	urldate = {2025-07-28},
+	journal = {Zeitschrift für digitale Geisteswissenschaften},
+	author = {Pollin, Christopher and Fischer, Franz and Sahle, Patrick and Scholger, Martina and Vogeler, Georg},
+	year = {2025},
+	keywords = {Digitale Edition, Experiment, Künstliche Intelligenz, Optische Zeichenerkennung, Transkription},
+}
+
+@article{di_marcantonio_intelligenza_2024,
+	title = {Intelligenza artificiale, {Large} {Language} {Models} ({LLMs}) e {Retrieval}-{Augmented} {Generation} ({RAG}). {Nuovi} strumenti per l’accesso alle risorse archivistiche e bibliografiche},
+	volume = {13},
+	copyright = {Creative Commons Attribution 4.0 International},
+	url = {https://bibliothecae.unibo.it/article/view/19982},
+	doi = {10.6092/ISSN.2283-9364/19982},
+	abstract = {I Large Language Models (LLMs) e i Retrieval-Augmented Generation (RAG) offrono un nuovo paradigma per l’interrogazione e la restituzione di informazioni, rendendo i processi di recupero delle risorse più efficienti e accurati grazie alla loro capacità di apprendere e generare delle risposte basate su vasti database di conoscenza. Il contributo prova ad illustrare questi sistemi in una forma semplificata al fine di aprire una riflessione scientifica sulla possibilità di integrare queste tecnologie nei sistemi di restituzione delle risorse archivistiche e bibliografiche, e più in generale del patrimonio culturale.},
+	language = {it},
+	number = {1},
+	urldate = {2025-07-28},
+	journal = {Bibliothecae.it},
+	author = {Di Marcantonio, Giorgia},
+	month = jul,
+	year = {2024},
+	keywords = {Archivi, Biblioteche, Intelligenza Artificiale (AI), Large Language Models (LLMs), Restituzione della conoscenza, Retrieval-Augmented Generation (RAG)},
+	pages = {146--173},
+}
+
+
 @misc{han_retrieval-augmented_2025,
 	title = {Retrieval-{Augmented} {Generation} with {Graphs} ({GraphRAG})},
 	url = {http://arxiv.org/abs/2501.00309},
@@ -843,17 +1050,6 @@ more than two thirds of factual questions in this evaluation.},
 	journal = {Signity Solutions},
 	author = {Jaswal, Amrita},
 	month = feb,
-	year = {2025},
-}
-
-@misc{noauthor_rag_2025,
-	title = {{RAG} vs {Traditional} {QA}},
-	url = {https://www.geeksforgeeks.org/nlp/rag-vs-traditional-qa/},
-	abstract = {Your All-in-One Learning Portal: GeeksforGeeks is a comprehensive educational platform that empowers learners across domains-spanning computer science and programming, school education, upskilling, commerce, software tools, competitive exams, and more.},
-	language = {en-US},
-	urldate = {2025-07-23},
-	journal = {GeeksforGeeks},
-	month = apr,
 	year = {2025},
 }
 

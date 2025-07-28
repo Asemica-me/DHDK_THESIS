@@ -4,6 +4,7 @@
 \begin{spacing}{1.5}
 
 \section{Prototype}
+\pdfcomment{use of langchain, cf. Akkiraju et al. 2024}
 
 \section{Full-scale implementation}
 
@@ -19,15 +20,24 @@
       - Multilingual Embedding Model (multilingual-e5-large)
       - FAISS Index Optimization for Retrieval
 
-\section{Contextual Retrieval Pipeline}
+\section{Candidates Retrieval}
+\pdfcomment{
+      APPROFONDIMENTO:\\
+(wang_searching_2024) --> more on retrieval techniques experiments (e.g., hyde, graph, re-rank w/ cross-encoders, etc.), rivedi 
+{hakdagli_hybrid_2024} --> hybrid retrieval
+{mulani 2024 re-ranking}
+}
       - Top-k Similarity Search
       - Document Grouping by Provenance
-\subsection{Prompt Engineering Techniques}
-      - System Instructions and Constraints
-      - Dynamic Citation Handling
-\subsection{Generative Model Integration}
+
+\section{Generation}
+- open source and proprietary LLMs \citep{noauthor_open_2025}
       - Mistral NeMo LLM Configuration
       - Response Generation and Validation
+
+      \subsection{Prompt Engineering Techniques}
+      - System Instructions and Constraints
+      - Dynamic Citation Handling
 
 \section{User Interface}
 - Streamlit Application
@@ -54,5 +64,8 @@
       - Error Handling and Recovery
 
 \section{Evaluation}
+
+\pdfcomment{ Akkiraju (2024) fifteen RAG pipeline control points, empirical results on accuracy-latency tradeoffs between large and small LLMs. }
+
 
 \end{spacing}

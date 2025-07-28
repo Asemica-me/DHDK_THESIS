@@ -15,12 +15,12 @@
 \label{tab:abbreviations} \\
 \\
 \toprule
-\textbf{Abbreviation} & \textbf{Full form} & \textbf{Glossary definition} \\
+\textbf{Abbreviation / Term} & \textbf{Full form} & \textbf{Glossary definition} \\
 \midrule
 \endfirsthead
 
 \toprule
-\textbf{Abbreviation} & \textbf{Full form} & \textbf{Glossary definition} \\
+\textbf{Abbreviation / Term} & \textbf{Full form} & \textbf{Glossary definition} \\
 \midrule
 \endhead
 
@@ -47,13 +47,21 @@ IR    & Information Retrieval & The process of searching, retrieving, and rankin
 \cmidrule(lr){1-3}
 KB    & Knowledge Base & A structured collection of information or data, often used to support reasoning, search, or retrieval in AI systems. \\
 \cmidrule(lr){1-3}
+NL & Natural Language & The everyday language used by humans for communication, which NLP systems aim to understand and generate. \\
+\cmidrule(lr){1-3}
 NLP   & Natural Language Processing & The area of AI focused on enabling computers to understand, interpret, and generate human language. \\
+\cmidrule(lr){1-3}
+NLG   & Natural Language Generation & The process of automatically generating human-like text from structured data or models, often used in chatbots and content creation. \\
+\cmidrule(lr){1-3}
+NL & Natural Language & The everyday language used by humans for communication, which NLP systems aim to understand and generate. \\
 \cmidrule(lr){1-3}
 ML    & Machine Learning & A subset of AI that involves training algorithms to recognize patterns and make decisions based on data. \\
 \cmidrule(lr){1-3}
 TF-IDF & Term Frequency-Inverse Document Frequency & A statistical measure used in IR to evaluate how important a word is to a document relative to a corpus, balancing term frequency and document rarity. \\
 \cmidrule(lr){1-3}
 BM25  & Best Match 25 & A ranking function used in IR to estimate the relevance of documents to a given search query, based on term frequency and document length normalization.\\
+\cmidrule(lr){1-3}
+PRF   & Precision-Recall-F1 & Metrics used to evaluate the performance of classification models, where precision measures the accuracy of positive predictions, recall measures the ability to find all relevant instances, and F1 is the harmonic mean of precision and recall. \\
 \cmidrule(lr){1-3}
 TREC  & Text REtrieval Conference & An ongoing series of workshops and evaluations focused on advancing research in text retrieval and related tasks. \\
 \cmidrule(lr){1-3}
@@ -66,5 +74,59 @@ LSTM  & Long Short-Term Memory & A special kind of RNN capable of learning long-
 CRF   & Conditional Random Field & A probabilistic graphical model used for structured prediction, especially in NLP tasks such as sequence labeling. \\
 \cmidrule(lr){1-3}
 SVM   & Support Vector Machine & A supervised machine learning algorithm used for classification and regression, which finds the optimal boundary between classes in the feature space. \\
+\cmidrule(lr){1-3}
+Word2Vec & Word to Vector & A technique for representing words as vectors in a continuous vector space, capturing semantic relationships between words based on their context in large text corpora. \\
+\cmidrule(lr){1-3}
+GloVe  & Global Vectors for Word Representation & An unsupervised learning algorithm for obtaining vector representations of words, which captures global statistical information from a corpus. \\
+\cmidrule(lr){1-3}
+BERT  & Bidirectional Encoder Representations from Transformers & A pre-trained language model that uses the Transformer architecture to understand the context of words in a sentence by considering both left and right contexts simultaneously. \\
+\cmidrule(lr){1-3}
+GPT   & Generative Pre-trained Transformer & A type of LLM that uses the Transformer architecture.\\
+\cmidrule(lr){1-3}
+T5    & Text-to-Text Transfer Transformer & A versatile LLM that treats all NLP tasks as text-to-text problems, allowing it to be fine-tuned for various applications. \\
+\cmidrule(lr){1-3}
+E5    & Embedding-based model for information retrieval & A family of models designed to generate high-quality embeddings for text, improving retrieval performance in IR tasks. \\
+\cmidrule(lr){1-3}
+BGE   & BAAI General Embedding & A family of models designed to generate high-quality embeddings for text, improving retrieval performance in IR tasks. \\
+\cmidrule(lr){1-3}
+intfloat & intfloat/e5 & A specific implementation of the E5 model, optimized for generating embeddings for information retrieval tasks. \\
+\cmidrule(lr){1-3}
+LLM-Embedder & LLM-Embedder & A model designed to generate embeddings for text using large language models, enhancing the quality of semantic representations for retrieval tasks. \\
+\cmidrule(lr){1-3}
+embeddings &    & Dense vector representations of text that capture semantic meaning, used in various NLP tasks including retrieval and classification. \\
+\cmidrule(lr){1-3}
+chunking &    & The process of breaking down text into smaller, manageable pieces or "chunks" to facilitate processing and analysis in NLP tasks. \\
+\cmidrule(lr){1-3}
+vector database &    & A specialized database designed to store and retrieve high-dimensional vectors efficiently, often used in RAG systems for managing embeddings. \\
+\cmidrule(lr){1-3}
+retriever &    & A component of a system responsible for searching and retrieving relevant documents or information from a database or corpus based on user queries. \\
+\cmidrule(lr){1-3}
+ranking function &    & A mathematical function used to score and order documents based on their relevance to a given query, often employed in IR systems. \\
+\cmidrule(lr){1-3}
+XML & eXtensible Markup Language & A markup language used to encode documents in a format that is both human-readable and machine-readable, often used for data interchange. \\
+\cmidrule(lr){1-3}
+TEI & Text Encoding Initiative & A set of guidelines for encoding literary and linguistic texts in XML, providing a standardized way to represent complex textual structures. \\
+\cmidrule(lr){1-3} 
+MARC/RDA & Machine-Readable Cataloging / Resource Description and Access & Standards for encoding bibliographic information in a machine-readable format, widely used in libraries and information systems. \\
+GROBID & GeneRation Of BIbliographic Data & A machine learning library for extracting and structuring bibliographic information from scholarly documents, often used in academic publishing and research. \\
+Milvus & Milvus Vector Database & An open-source vector database designed for efficient storage, indexing, and retrieval of high-dimensional vectors, commonly used in RAG systems. \\
+\cmidrule(lr){1-3}
+Faiss  & Facebook AI Similarity Search & A library for efficient similarity search and clustering of
+dense vectors, widely used in RAG systems for indexing and searching large datasets. \\
+\cmidrule(lr){1-3}
+Qdrant & Qdrant Vector Database & An open-source vector database that provides efficient storage and retrieval of high-dimensional vectors, supporting hybrid search capabilities. \\
+\cmidrule(lr){1-3}
+HyDE  & Hybrid Document Embedding & A method that combines dense vector representations with traditional keyword-based indexing to improve retrieval performance in RAG systems. \\
+\cmidrule(lr){1-3}
+Hybrid Search & Hybrid Search & A search approach that combines vector-based retrieval with traditional keyword search, allowing for more comprehensive and context-aware results in RAG systems. \\
+\cmidrule(lr){1-3}
+TILDE & TILDE (TILDE is a framework for building RAG systems) & A framework designed to facilitate the development and deployment of RAG systems, providing tools for data preparation, indexing, and retrieval. \\
+\cmidrule(lr){1-3}
+LTR   & Learning-to-Rank & A machine learning approach used to optimize the ranking of search results based on user interactions and relevance feedback, improving the quality of retrieved documents in RAG systems. \\
+\cmidrule(lr){1-3}
+self-rag & Self-Retrieval-Augmented Generation & A variant of RAG where the system retrieves relevant information from its own generated content, enhancing the context and accuracy of responses. \\
+\cmidrule(lr){1-3}
+RAGAS & Retrieval-Augmented Generation with Adaptive Sampling & An advanced RAG approach that dynamically selects and retrieves the most relevant information based on the context of the query, improving the efficiency and accuracy of responses. \\
+\cmidrule(lr){1-3}
 \bottomrule
 \end{tabularx}
