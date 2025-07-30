@@ -172,7 +172,6 @@
 \newpage
 \thispagestyle{empty} 
 \mbox{}                
-\setcounter{figure}{0}
 
 % Main Content (Arabic page numbering)
 \mainmatter
@@ -180,7 +179,7 @@
 \renewcommand{\figureautorefname}{Fig.}
 \renewcommand{\tableautorefname}{Tab.}
 \renewcommand{\chapterautorefname}{Chap.}
-\renewcommand{\sectionautorefname}{§}
+\renewcommand{\sectionautorefname}{Sec.}
 \makeatletter
 \renewcommand{\thefootnote}{\textsuperscript{\arabic{footnote}}}
 \renewcommand\@makefntext[1]{%
@@ -206,7 +205,9 @@
     \chapter{Implementation details}
     \label{appendix:A}
 
-In this study, all the experiments have been performed on a system with an Intel Core i7-1185G7 CPU at 3.00 GHz, 16 GB of RAM, and integrated Intel Iris Xe Graphics with 128 MB of VRAM. Additionally, the following software packages have been used to implement the proposed approach: PyTorch, NumPy, Pandas, Matplotlib, SpaCy, HuggingFace...
+In this study, all the experiments have been performed on a system with an Intel Core i7-1185G7 CPU at 3.00 GHz, 16 GB of RAM, and integrated Intel Iris Xe Graphics with 128 MB of VRAM. 
+
+\noindent Additionally, the following software packages have been used to implement the proposed approach: PyTorch, NumPy, Pandas, Matplotlib, SpaCy, HuggingFace...
 
 \input{chapters/appendixB.tex}
 
