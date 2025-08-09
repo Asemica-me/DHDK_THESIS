@@ -14,8 +14,9 @@
 \usepackage{ragged2e}
 \usepackage{ltablex}
 \keepXColumns
-\renewcommand\tabularxcolumn[1]{>{\noindent\justifying\arraybackslash}m{#1}} % If you want justified + no indent in X columns
+\renewcommand\tabularxcolumn[1]{>{\noindent\justifying\arraybackslash}m{#1}}
 
+\usepackage{amssymb}
 \usepackage{lmodern}
 \usepackage{fancyhdr}
 \usepackage{tocloft}
@@ -38,9 +39,18 @@
 \captionsetup{font={bf,small}, labelfont=bf, justification=raggedright, singlelinecheck=false}
 
 \usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
 \counterwithout{figure}{chapter}
 \counterwithout{table}{chapter}
 
+\usepackage{amssymb}
+\usepackage{fvextra}
+\usepackage{listings}
+\lstset{
+  breaklines=true,
+  basicstyle=\ttfamily\small,
+  frame=single
+}
 
 \usepackage{multirow, tabularx, xurl}
 
@@ -84,6 +94,8 @@
 \titleformat{\chapter}[display]
   {\normalfont\huge\bfseries}
   {\chaptertitlename\ \thechapter}{20pt}{\Huge} 
+
+\titlespacing*{\subsubsection}{2em}{*0}{*0}
 
 
 % Customize Table of Contents

@@ -4,7 +4,7 @@
 \sloppy
 In the landscape of AI, large language models (LLMs) have demonstrated remarkable results in text generation and understanding. Yet, when applied to real-world tasks such as question answering, these models still face significant limitations. As already mentioned in \autoref{chap:QAS}, LLMs are prone to hallucinations,\footnote{In the context of LLMs, hallucinations refer to outputs that are plausible-sounding but factually incorrect, fabricated, or unsupported by the underlying data or external sources \citep{harsh_comprehending_2024}.} rely on static and often outdated training data, and offer limited transparency or traceability in their outputs. Additionally, they may struggle to incorporate domain-specific context or organizational knowledge \citep{vaibhav_retrieval-augmented_2025}. These factors pose challenges for domains -- like cultural heritage, GLAM (Galleries, Libraries, Archives and Museums) and archaeology -- where reliability, provenance, and interpretive rigor are fundamental requirements \citep{di_marcantonio_intelligenza_2024}.
 
-To address these concerns, retrieval-augmented generation (RAG)\footnote{For more information about RAG technique, see \url{https://en.wikipedia.org/wiki/Retrieval-augmented_generation}.} has emerged as a crucial methodological advance. It improves the factual grounding and contextual relevance of generated answers, thorugh the integration of external and verifiable knowledge at inference time, thereby reducing the risk of generating fabricated or distorted information \citep{martineau_what_2023}. As discussed in \autoref{sec:llm-agents}, this approach represents a significant step beyond both traditional information retrieval and earlier neural QA models, which were often brittle, domain-dependent, or struggled to adapt to evolving information needs.
+To address these concerns, retrieval-augmented generation (RAG)\footnote{For more information about RAG technique, see \url{https://en.wikipedia.org/wiki/Retrieval-augmented_generation}.} has emerged as a crucial methodological advance. It improves the factual grounding and contextual relevance of generated answers, thorugh the integration of external and verifiable knowledge at inference time, thereby reducing the risk of generating fabricated or distorted information \citep{martineau_what_2023}. As discussed in \autoref{sec:llm-agents}, this approach represents a significant step beyond both traditional information retrieval and earlier neural QA models, which were often brittle, domain-dependent, or struggled to adapt to evolving information needs.chunks
 
 The adoption of RAG in question answering reflects a broader evolution within the field: from early symbolic and rule-based systems, through statistical and information retrieval approaches, to today’s transformer-based, generative architectures. This shift has transformed not only the technical capabilities of QA systems but also their applicability to complex, heterogeneous knowledge domains.
 
@@ -17,7 +17,7 @@ This chapter therefore provides a comprehensive overview of the state of the art
 {0pt}
 Retrieval-augmented generation (RAG) is a hybrid approach designed to address several critical limitations of traditional LLMs, such as knowledge staleness, limited context awareness, and insufficient output traceability \parencite{vaibhav_retrieval-augmented_2025,gao_retrieval-augmented_2024, gupta_comprehensive_2024}. While LLMs excel at producing fluent, human-like text, they often falter when facing domain-specific queries or requests for information beyond their training cutoff. RAG directly addresses these challenges by integrating external information retrieval within the generation process, allowing outputs to be more factual, up-to-date, and grounded in verifiable sources \citep{wang_searching_2024}.
 
-At its core, a typical RAG workflow consists of two main stages: \textbf{retrieval} and \textbf{generation} (\cite{odsc-community_retrieval-augmented_2024}). The process begins with preprocessing and indexing, where raw data is cleaned, extracted, segmented into manageable "chunks", and encoded into vector representations. These embeddings are then stored in a vector database (e.g., Milvus, Faiss, Qdrant)\footnote{Cf. glossary in \autoref{appendix:B}.} to facilitate efficient similarity searches. When a user submits a query, it is encoded in the same vector space, and the system retrieves the top-k most relevant chunks from the indexed knowledge base. In the subsequent stage, these retrieved documents are passed as context to a generative language model -- often based on Transformer architectures \citep{vaswani_attention_2017} -- which synthesizes a response that blends the original query with external evidence, producing answers that are both coherent and contextually appropriate \citep{arslan_survey_2024}.
+At its core, a typical RAG workflow consists of two main stages: \textbf{retrieval} and \textbf{generation} (\cite{odsc-community_retrieval-augmented_2024}). The process begins with preprocessing and indexing, where raw data is cleaned, extracted, segmented into manageable ``chunks'', and encoded into vector representations. These embeddings are then stored in a vector database (e.g., Milvus, Faiss, Qdrant)\footnote{Cf. glossary in \autoref{appendix:B}.} to facilitate efficient similarity searches. When a user submits a query, it is encoded in the same vector space, and the system retrieves the top-k most relevant chunks from the indexed knowledge base. In the subsequent stage, these retrieved documents are passed as context to a generative language model -- often based on Transformer architectures \citep{vaswani_attention_2017} -- which synthesizes a response that blends the original query with external evidence, producing answers that are both coherent and contextually appropriate \citep{arslan_survey_2024}.
 
 This modular design (\autoref{fig:rag}) enables the continuous incorporation of domain-specific and current information, overcoming the constraints of static model parameters. Recent contributions have helped to formally systematize the RAG pipeline's, with frameworks delineating specific interdependent modules such as query classification, retrieval, reranking, and generation \parencite{wang_searching_2024,gao_retrieval-augmented_2024}.
 
@@ -36,7 +36,7 @@ The standard workflow includes the following components:
 \begin{itemize}
   \item \textbf{Query understanding and classification:} Not all queries require retrieval from external sources. Advanced systems first analyse and classify incoming queries to determine whether retrieval is necessary or if the LLM alone suffices. This step leverages natural language understanding (NLU) techniques to extract key entities, relationships, and user intent, improving efficiency and reducing unnecessary retrieval latency.
   %Data Preparation and Indexing
-    \item \textbf{Document indexing and chunking:} Raw data from source documents is preprocessed: cleaned, segmented into manageable "chunks" at token, sentence, or semantic level, and converted into dense vector representations (embeddings). Recent studies recommend dynamic or semantic chunking over simple fixed-size splitting, as it better preserves context and improves retrieval quality -- especially in heterogeneous domains.
+    \item \textbf{Document indexing and chunking:} Raw data from source documents is preprocessed: cleaned, segmented into manageable chunks at token, sentence, or semantic level, and converted into dense vector representations (embeddings). Recent studies recommend dynamic or semantic chunking over simple fixed-size splitting, as it better preserves context and improves retrieval quality -- especially in heterogeneous domains.
     \item \textbf{Embedding and Vector Database:} Both document chunks and user queries are embedded into a shared vector space using models fine-tuned for semantic similarity (e.g., BAAI/bge, LLM-Embedder, intfloat/e5). These vectors are stored in efficient vector databases (e.g., Milvus, Faiss, Qdrant), selected based on scalability, indexing strategies, and support for hybrid (vector plus keyword) search capabilities.
     \item \textbf{Retrieval and query transformation:} Upon receiving a user query, the system encodes it into a vector and retrieves the top-k most relevant chunks from the indexed knowledge base (KB) using similarity search. Robustness is enhanced through hybrid retrieval, which combines dense (vector-based, e.g., DPR, Contriever) and sparse (lexical, e.g., BM25) methods. Advanced query transformation techniques -- including query rewriting, decomposition, or hypothetical document generation (e.g., HyDE)-- can further improve retrieval effectiveness.
     \item \textbf{Reranking:} Initially retrieved candidates are often re-ranked based on relevance to the original query, using additional models (DLM-based) -- e.g., cross-encoders like monoT5, monoBERT, or RankLLaMA, which jointly consider the query and each candidate -- or more sophisticated algorithms through heuristics. This contextualization ensures that the most pertinent information is prioritized for the generative model.\\See \autoref{tab:rerank_algorithms} for a summary on reranking techniques.
@@ -54,15 +54,13 @@ The standard workflow includes the following components:
 \toprule
 \textbf{Algorithm} & \textbf{Rationale} \\
 \midrule
-Cross-Encoder & Joint encoding of query and document for fine-grained relevance scoring. \\
-\cmidrule(lr){1-2}
-DLM & Deep language model-based reranking -- e.g. monoT5, monoBERT, RankLLaMA --, leveraging pre-trained models to assess relevance. \\
+Cross-encoder rerankers with DLMs & DLMs (deep language models)-based rerankers (e.g., monoT5, monoBERT, RankLLaMA) jointly encode concatenated query-document pairs for fine-grained relevance scoring. These models are fine-tuned to classify relevance as ``true'' or ``false'', and at inference, documents are ranked by the predicted probability of the ``true'' label \citep{wang_searching_2024}. \\
 \cmidrule(lr){1-2}
 TILDE \citep{zhuang_tilde_2021} & Token-level likelihoods for queries across a collection, allowing fast reranking by summing the probabilities of query tokens given each candidate passage. \\
 \cmidrule(lr){1-2}
 Learning-to-Rank (LTR) \citep{gupta_comprehensive_2024} & Traditional machine learning ranking approaches: \textbf{a) Pointwise:} predicts relevance score for each document independently; \textbf{b) Pairwise:} compares pairs of documents to learn relative relevance; \textbf{c) Listwise:} considers the entire ranked list at once.\\
 \cmidrule(lr){1-2}
-HyDe  & Generates hypothetical documents from queries for dense retrieval.\\
+HyDe \citep{gao_precise_2022}  & Generates hypothetical documents from queries for dense retrieval.\\
 \cmidrule(lr){1-2}
 Hybrid Search (sparse + dense scoring) & Blends scores from dense retrievers (semantic similarity -- e.g., DPR, Contriever) and sparse methods (lexical overlap -- e.g., BM25, TF-IDF) for robust ranking. Sometimes uses learnable weighting \citep{wang_searching_2024}. \\
 \cmidrule(lr){1-2}
@@ -88,11 +86,17 @@ Self-RAG (LLM-enhanced reranking) \citep{asai_self-rag_2023} & Uses LLMs directl
 \textbf{Module}         & \textbf{Method(s)} & \textbf{Functionality} \\
 \midrule
 Retrieval         & Hybrid with HyDE            & Combines Hybrid Search (BM25 + dense) and HyDE pseudo-documents. \\
-Reranking         & monoT5                      & Deep LM-based reranker (good balance of quality and speed). \\
+\cmidrule(lr){1-3}
+Reranking         & DLM w/ monoT5                      & Deep LM-based reranker (good balance of quality and speed). \\
+\cmidrule(lr){1-3}
 Chunking          & Small2big / Sliding Windows & Organizing chunk block relationships for context preservation. \\
+\cmidrule(lr){1-3}
 Embedding         & LLM-Embedder                & Dense supervised retriever, best trade-off performance/size. \\
+\cmidrule(lr){1-3}
 Vector Database   & Milvus                      & Best coverage of index type, scalability, hybrid search, cloud-native. \\
+\cmidrule(lr){1-3}
 Repacking         & Reverse                     & Puts most relevant context close to the query. \\
+\cmidrule(lr){1-3}
 Summarization     & Recomp                      & Both extractive and abstractive methods tested; Recomp performs best. \\
 \bottomrule
 \end{tabularx}

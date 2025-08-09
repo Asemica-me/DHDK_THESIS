@@ -1,71 +1,281 @@
 \chapter{Methodology}
 \label{chap:methodology}
-\pdfcomment{WIP}
 \begin{spacing}{1.5}
 
+This chapter details the methodological workflow for designing and implementing the GNA QA system. The system leverages a RAG pipeline tailored to the Geoportale Nazionale per l’Archeologia (GNA) knowledge base (KB). It comprises modular components for data acquisition, preprocessing, retrieval, generation, feedback collection, and evaluation. The methodology evolved through iterative development: beginning with a prototype built on LangChain and advancing to a full-scale system with custom components optimized for resource efficiency and multilingual support.
+
+
 \section{Prototype}
-\pdfcomment{use of langchain, cf. Akkiraju et al. 2024}
+The initial prototype served as a proof-of-concept integrating core RAG elements using off-the-shelf tools \citep{mishra_using_2024,akkiraju_facts_2024}. The pipeline combined:
+\begin{itemize}
+      \item a CSV-based knowledge base,
+      \item a FAISS vector store,
+      \item the Mistral NeMo large language model,
+      \item and a Streamlit-based interface.
+\end{itemize}
+
+The prototype uses LangChain for managing prompts, memory, and asynchronous streaming.\footnote{LangChain is an open-source framework designed to simplify the development of applications powered by LLMs. For further details and practical examples, consult the official documentation at \url{https://python.langchain.com/docs/introduction/}.} The interface allows users to input NL queries in Italian and receive fluent, context-aware responses.\nocite{noauthor_langchain_2024}
+
+Evaluation was conducted via a dual approach:
+\begin{enumerate}
+      \item \textbf{Human Assessment}, using a 5-point Likert scale to rate and annotate consistency, fluency, completeness, and relevance \citep{abeysinghe_challenges_2024};
+      \item \textbf{LLM-as-a-Judge}, where GPT-3.5 is used to auto-evaluate responses via few-shot prompting.\footnote{See also \citep{svikhnushina_approximating_2023} for method inspiration.}
+\end{enumerate}
+
+Challenges included limited scalability, resource inefficiency, lack of chunk-level metadata control and the absence of standardized
+evaluation methods and benchmarks. These findings informed the redesign of the full system.
 
 \section{Full-scale implementation}
+The full system was re-engineered from scratch to support dynamic, scalable document ingestion, contextual retrieval, and high-precision answer generation using open-source LLMs. All LangChain dependencies were removed in favor of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The final architecture includes:
+\begin{itemize}
+      \item a custom knowledge base construction module, which includes sitemap generation and web-crawling,
+      \item semantic chunking and metadata enrichment,
+      \item LLM-based vector embeddings,
+      \item a FAISS vector store for retrieval,
+      \item a generation module with open-source Mistral NeMo model,
+      \item generative response with inline citation handling,
+      \item a reactive front-end interface built on Streamlit,
+      \item and a feedback management system.
+\end{itemize}
 
+\sloppy
 \section{Knowledge-Base Construction and Preprocessing}
 \subsection{Sitemap Generation}
-      - URL Discovery and Filtering
-      - Crawling Policies and Content Parsing
+The sitemap is constructed via a focused breadth-first crawler targeting the MediaWiki documentation (\url{https://gna.cultura.gov.it/wiki}) of the GNA \citep{mic_mic_2019}. 
+The crawler:
+\begin{itemize}
+      \item starts at the root node (\texttt{\href{https://web.archive.org/web/20250803092155/https://gna.cultura.gov.it/wiki/index.php/Pagina_principale}{Pagina\_principale}}\nocite{noauthor_wiki_2025});
+      \item follows internal links matching \texttt{/wiki/index.php/}, excluding namespaces such as \texttt{Special:}, \texttt{User:}, or \texttt{Talk:};
+      \item removes query parameters to avoid duplicates;
+      \item applies a polite crawling policy (1-second delay, custom user-agent header);
+      \item imposes crawl depth (max 10) and page limits (max 200 pages);
+      \item and generates a structured sitemap in XML format.
+\end{itemize}
+
+HTML is parsed using BeautifulSoup, isolating the main content via focusing on the \texttt{div} with \texttt{id="mw-content-text"}, and excluding sidebars and footers. The output is serialized into an XML file (\texttt{GNA\_\_sitemap.xml}) including last-modified timestamps, priority, and change frequency. 
+
+This sitemap serves as the foundation for subsequent document crawling and chunking.
+
 \subsection{Document Crawling and Chunking}
-      - Content Extraction and Semantic Preservation
-      - Chunking Strategy and Metadata Enrichment
-      - Special Content Handling (text/tables/images)
-\subsection{Vector Embeddings and Storage}
-      - Multilingual Embedding Model (multilingual-e5-large)
-      - FAISS Index Optimization for Retrieval
+Crawling retrieves the URLs listed in the sitemap. The system fetches HTML content asynchronously, applying retries and concurrency limits. During parsing:
+\begin{itemize}
+      \item extraneous HTML elements are stripped;
+      \item headers (\texttt{h1-h6}), paragraphs, tables, and images are preserved in semantic order;
+      \item a hierarchical structure is reconstructed to retain navigational breadcrumbs.
+\end{itemize}
+      
+Content is then chunked using a sliding window strategy of max-512 characters per chunk and 128-character overlap. Each chunk includes metadata such as \texttt{source URL}, \texttt{page title}, \texttt{section headers}, \texttt{chunk ID}, \texttt{content type} (text, table, image), \texttt{keywords}, \texttt{named entities}.\footnote{Output: 835 structured chunks saved in \texttt{data/chunks\_memory.json}.}
+
+NER is performed using spaCy (\texttt{it\_core\_news\_md}), while keywords are extracted with KeyBERT (\texttt{multilingual model paraphrase-multilingual-MiniLM-L12-v2}). Tables are chunked as standalone elements, and image references are retained for OCR via Tesseract when applicable.
+
+\sloppy
+\subsection{Vector Embeddings}
+Document chunks are converted into dense embeddings using the \texttt{intfloat/multilingual-e5-large} model from Sentence Transformers. This model was selected for its multilingual capabilities and efficiency in generating high-quality embeddings for semantic search tasks. Batches of text chunks are encoded and normalized, with their embeddings cached to prevent unnecessary recomputation. A FAISS database is constructed using inner-product (dot product) search to facilitate rapid similarity matching, while metadata is maintained separately and linked to each chunk by its unique ID.\footnote{Output: FAISS index stored in \texttt{.faiss\_db}, linked with its metadata.}
 
 \section{Candidates Retrieval}
-\pdfcomment{
-      APPROFONDIMENTO:\\
-(wang_searching_2024) --> more on retrieval techniques experiments (e.g., hyde, graph, re-rank w/ cross-encoders, etc.), rivedi 
-{hakdagli_hybrid_2024} --> hybrid retrieval
-{mulani 2024 re-ranking}
+Once a user submits a query, it is embedded using the same model to ensure vector space consistency. The system performs a top-k similarity search\footnote{The default value of \texttt{k=5} was determined empirically to balance response quality and token constraints.} over the FAISS index to identify the most semantically relevant document chunks. Retrieved chunks are grouped by provenance using their metadata, particularly provenance (source URL), document title from the original web section, content hierarchy (e.g., section headings), and content type (text, table, image). This grouping is essential for enhancing the coherence of generated answers, as it ensures that related information from the same source is passed together to the generation module. Additionally, it supports contextual disambiguation and reduces repetition among retrieved content.
+
+The system applies an additional heuristic to prioritize more comprehensive sources, penalizing extremely short or contextless chunks. This helps to filter out non-informative fragments and improve the factual density of the retrieved content.
+
+Finally, the grouped candidates and their associated metadata are passed to the generation module to enable inline citation. Although the QA system is primarily designed for Italian, given the language of the knowledge base, the retrieval module supports multilingual queries by design thanks to its encoder, and is optimized for efficient CPU-based deployments.
+
+\subsection{ABLATION}
+
+
+\begin{table}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{tabular}{l c *{10}{c}} % Method, Query rewrite, then 10 numeric columns
+\toprule
+& & \multicolumn{5}{c}{\textbf{SINGLE-HOP}} & \multicolumn{5}{c}{\textbf{COMBINED (single+multi-hop)}} \\
+\cmidrule(lr){3-7}\cmidrule(lr){8-12}
+\textbf{Method} & \shortstack[c]{\textbf{Query}\\\textbf{rewrite}} & R@5 & MRR & nDCG@5 & ap@5 & Latency & R@5 & MRR & nDCG@5 & ap@5 & Latency \\
+\midrule
+Dense                         &            & \underline{67.51} & \textbf{47.04} & \underline{52.18} & \textbf{47.04} & \underline{0.29}  & 50.78 & 48.21 & 53.70 & 34.98 & \underline{0.19} \\
+    &  \checkmark & 58.07 & 36.76 & 42.09 & 36.76 & 5.98 & 42.64 & 35.41 & 41.32 & 26.24 & 3.10   \\
+\addlinespace
+BM25                          &            & 65.15 & 43.56 & 48.98 & 43.56 & \textbf{0.001} & \underline{53.09} & \textbf{51.23} & \textbf{57.13} & \underline{35.50} & \textbf{0.001} \\
+    &  \checkmark & 57.87 & 37.37 & 42.50 & 37.37 & 1.98 & 46.65 & 42.15 & 48.33 & 29.38 & 1.20     \\
+\addlinespace
+Hybrid      &            & \textbf{69.68} & \underline{46.72} & \textbf{52.49} & \underline{46.72} & 0.33  & \textbf{53.98} & \underline{50.93} & \underline{56.92} & \textbf{36.15} & 0.32 \\
+    &  \checkmark & 57.48 & 37.48 & 42.48 & 37.48 & 4.38 & 43.52 & 38.41 & 44.10 & 27.68 & 3.21     \\
+Rerank     &  &  &  &  &  &  & & &  & &      \\
+\hspace{0.5em}+ Dense         &            & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
+    &  \checkmark & 52.55 & 31.66 & 36.87 & 31.66 & 4.76 & 38.16 & 30.45 & 36.0 & 22.51 & 3.46     \\
+\hspace{0.5em}+ BM25          &            & 37.40 & 22.38 & 26.09 & 22.38 & 0.86  & 30.42 & 25.89 & 30.58 & 17.81 & 0.61 \\
+    &  \checkmark & 43.89 & 25.87 & 30.35 & 25.87 & 10.02 &  &  &  &  &      \\
+\hspace{0.5em}+ Hybrid        &            & 43.50 & 24.70 & 29.33 & 24.70 & 1.67  & 33.06 & 26.36 & 31.26 & 18.70 & 0.87 \\
+    &  \checkmark & 38.58 & 21.14 & 25.47 & 21.14 & 6.51 & 29.98 & 23.95 & 28.66 & 16.44 & 6.75     \\
+\bottomrule
+\end{tabular}%
 }
-      - Top-k Similarity Search
-      - Document Grouping by Provenance
+\caption{Results for different retrieval methods on test datasets. Best per column is bold and the second-best is underlined. The latency is measured in seconds per query.}
+\label{tab:benchmark}
+\end{table}
+
+
+
 
 \section{Generation}
-- open source and proprietary LLMs \citep{noauthor_open_2025}
-      - Mistral NeMo LLM Configuration
-      - Response Generation and Validation
+The generation phase employs Mistral NeMo,\footnote{\url{https://web.archive.org/web/20250803120348/https://mistral.ai/news/mistral-nemo}.\nocite{noauthor_mistral_2025}} an open-source LLM accessible via a dedicated Mistral API and hosted independently. The choice of this model was driven by multiple factors:
+\begin{itemize}
+      \item open-source availability and permissive license,
+      \item strong performance on multilingual tasks,
+      \item low latency and high throughput on CPU hardware,
+      \item availability of an official API for direct deployment integration.
+      \item ability to handle long context windows -- e.g., up to 128 thousands tokens, which is sufficient for processing multiple retrieved chunks.
+\end{itemize}
 
-      \subsection{Prompt Engineering Techniques}
-      - System Instructions and Constraints
-      - Dynamic Citation Handling
+Among available open-source LLMs evaluated -- e.g., LLaMA 3, OpenAI, Falcon --, only Mistral NeMo satisfied all criteria in terms of language coverage, response control, and reproducibility, while also providing infrastructure for model fine-tuning and evaluation in research contexts.\footnote{For an overview between open-source and proprietary solutions, see: \textcite{noauthor_open_2025}.}
+
+The generation module is designed to produce fluent, context-aware answers with inline citations. It uses a custom prompt template that includes system instructions (see \autoref{sec:prompt_engineering}), user query, top-k retrieved chunks (grouped and cited), chat history and memory (to support context-aware follow-up).
+
+The API request includes temperature, top-p, and max token constraints, with defaults of:
+\begin{itemize}
+      \item temperature = 0.3, to ensure factuality;
+      \item top-p = 0.9, to control diversity;
+      \item max-tokens = 512, to limit response length.
+\end{itemize}
+
+Responses are post-processed to verify the inclusion of inline citations, language alignment for Italian, and basic formatting (e.g., numbered citations, paragraph boundaries).
+
+\subsection{Prompt Engineering Techniques} \label{sec:prompt_engineering}
+The system uses structured prompt engineering to ensure accurate, traceable, and contextually coherent answers. The prompt template is dynamically generated with the following components:
+
+\subsubsection*{System Instructions and Constraints}
+A custom system message (\autoref{fig:system_prompt}) is injected at the top of the prompt to guide the model’s behavior. This message instructs the system to enforce neutrality in its answers, prioritize relevant and verifiable information, and include inline citations in square brackets that correspond to metadata entries. It also explicitly discourages hallucinations and speculative responses.
+
+\begin{figure}[H]
+\begin{Verbatim}[breaklines=true]
+   system_content = """
+        Sei un assistente virtuale incaricato di rispondere a domande sul manuale operativo del Geoportale Nazionale per l'Archeologia (GNA), gestito dall'Istituto Centrale per il Catalogo e la Documentazione (ICCD).
+
+        Segui sempre queste regole:
+        1. Non rispondere a una domanda con un'altra domanda.
+        2. Rispondi **sempre** in italiano, indipendentemente dalla lingua della domanda, a meno che l'utente non richieda esplicitamente un'altra lingua.
+        3. Cita le fonti utilizzando la notazione [numero] dove:
+            - Le fonti sono fornite nel contesto della domanda e sono numerate in ordine crescente;
+            - Usa numeri diversi per fonti diverse;
+            - Non includere mai l'URL nel corpo della risposta;
+        4. Alla fine della risposta, aggiungi un elenco di riferimenti con il seguente formato, su righe separate:
+            [ID] URL_completo
+        5. Se non hai informazioni sufficienti per rispondere, rispondi "Non ho informazioni sufficienti".
+
+        Le tue risposte devono essere sempre:
+        - Disponibili, professionali e naturali
+        - Grammaticalmente corrette e coerenti
+        - Espresse con frasi semplici, evitando formulazioni complesse o frammentate
+        - Complete e chiare, evitando di lasciare domande senza risposta
+        """
+\end{Verbatim}
+\caption{System prompt specifying assistant constraints and response instructions.}\label{fig:system_prompt}
+\end{figure}
+
+\subsubsection*{Dynamic Citation Handling}
+
+Each chunk passed to the LLM is numbered and grouped with its metadata (title, URL). When generating a response, Mistral is instructed to cite only the chunks used, ensuring traceability. Post-processing checks for unmatched citations or unreferenced metadata.
+
+This modular prompting strategy proved crucial for maintaining factual consistency while supporting multilingual input and long-form reasoning.
 
 \section{User Interface}
-- Streamlit Application
-      - Session State Management
-      - Asynchronous Query Processing
--Interaction Features
-      - Inline Feedback Mechanism
+The user interface (UI) is implemented using Streamlit, selected for its fast prototyping capabilities, built-in support for asynchronous processing, and integration with Python-based NLP components. The front end acts as the primary touchpoint between users and the GNA QA system, displaying generated answers with inline citations, and collecting user feedback.
+
+\subsection{Streamlit User Experience}
+The Streamlit app is organized into three main areas:
+\begin{enumerate}
+      \item \textbf{Sidebar:} Contains MiC refernce, institutional links to the GNA documentation, and contextual help describing the assistant’s capabilities. It also provides functional controls including a \texttt{Clear Chat History} button to reset the session (\texttt{st.session\_state.chat\_history}) and a \texttt{Download Feedback} button for exporting user queries and system's responses.
+      \item \textbf{Main interface:} Provides a natural language input field (\texttt{st.chat\_input}) for querying the assistant. It displays the chat history, including:
+      \begin{itemize}
+        \item user messages,
+        \item assistant responses (formatted via \texttt{st.chat\_message}),
+        \item feedback buttons (3 points Likert-scale) for each assistant reply.
+      \end{itemize}
+      \item \textbf{Session features}: 
+      \begin{itemize}
+      \item Chat history is limited to the most recent 10 exchanges (\texttt{MAX\_HISTORY}), which are stored and updated in \texttt{st.session\_state};
+      \item Feedback from individual message indexes is stored as a set (\texttt{st.session\_state.feedback\_given}), allowing the system to prevent duplicate ratings and dynamically update UI feedback (e.g., ``Valutazione registrata con successo.'').
+      \end{itemize}
+      
+\end{enumerate}
+
+\subsection{Session State Management}
+To ensure smooth, stateful interactions and to minimize computational overhead, the system makes extensive use of \texttt{st.session\_state}. This approach allows chat memory for both user and assistant messages to persist, enables caching of API results -- including responses generated by Mistral and citation mappings -- and facilitates the tracking of feedback.\footnote{For more details on Streamlit session state management, see \url{https://docs.streamlit.io/}.\nocite{noauthor_streamlit_2025}} In addition, the system incorporates Python’s \texttt{asyncio} and \texttt{concurrent.futures} modules to support non-blocking retrieval and generation. For each interaction with the language model, a new event loop is created to maintain compatibility with Streamlit’s execution model, and the query to the model is run in a thread-safe environment using a \texttt{ThreadPoolExecutor}. This pattern guarantees UI responsiveness and provides a fluid user experience even under high network latency or API response times.
 
 \section{Feedback Management}
-- Feedback Data Collection
-- streamlit local collection
+To support iterative improvement of the assistant and promote user engagement, the system integrates an interactive feedback module that allows users to rate each answer directly within the Streamlit interface. This design is intended to support continuous quality assessment and transparent evaluation of LLM-generated content.
 
-      - SQLite Database
-      - Feedback Rating System (3-point Likert)
-      - Automated GitHub sync
-      - Conflict Resolution Protocols
+\subsection{Collection}
+Each assistant response is immediately followed by three clickable UI buttons in the form of a 3-point Likert scale, enabling users to provide a quick evaluation:
+\begin{itemize}
+\item 1 star $\star$ - Poor: The answer is incorrect, incomplete, or irrelevant.
+\item 2 stars $\star\star$ - Fair: The answer is partially correct but lacks clarity or depth.
+\item 3 stars $\star\star\star$ - Good: The answer is accurate, complete, and well-structured.
+\end{itemize}
+
+This mechanism is implemented using Streamlit’s interactive widgets. Once a rating is submitted, the system prevents duplicate feedback using an in-memory tracking set (\texttt{st.session\_state.feedback\_given}). The interface then displays a confirmation message (e.g., ``\textit{Valutazione registrata con successo.}''), improving transparency.
+
+\subsection{Storage and Export}
+Feedback is stored locally in a SQLite database (\texttt{feedback.db}) with the following schema:
+
+\begin{figure}[H]
+\begin{Verbatim}[breaklines=true]
+                  CREATE TABLE feedback (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp TEXT NOT NULL,
+                        message_index INTEGER NOT NULL,
+                        question TEXT NOT NULL,
+                        answer TEXT NOT NULL,
+                        rating INTEGER NOT NULL
+                  );
+\end{Verbatim}
+\caption{Schema of the feedback's SQL databse.}\label{fig:sql_schema}
+\end{figure}
+
+This structure supports reproducibility and traceability by maintaining a clear mapping between: the user's query string, the generated response, the rating score (1-3) and the associated timestamp (i.e., time of submission). All records are saved with minimal overhead, using parameterized SQL insertions and transaction-safe commits.\\
+
+To ensure long-term preservation and collaborative accessibility of user feedback, the system implements a mechanism for periodic synchronization of collected feedback with a persistent repository. This setup enables version control over user interaction logs, supports iterative evaluation by external reviewers, and enables rollback and comparison across model updates.\footnote{This implementation is intended for controlled research use only. For production environments, secure alternatives such as authenticated APIs and hardened database infrastructures are recommended to ensure data safety and compliance with privacy standards.}\\
+
+From the sidebar, users can export all feedback as a \texttt{.csv} file using the \textit{``Esporta feedback''} button. This functionality is powered by the \texttt{export\_feedbacks()} function, which queries the database and converts it to a downloadable format using Pandas. 
+
+This export can be used by researchers, developers, or project coordinators to assess the assistant's performance over time.
+
 
 \section{Resource Optimization Strategies}
+Deploying a multilingual RAG workflow with different language models integrated and semantic search poses non-trivial challenges for environments lacking access to GPUs or large memory allocations. To ensure the GNA QA system remains responsive and cost-efficient, especially for open usage, several optimization strategies were integrated into the pipeline.
+
 \subsection{Memory Management}
-      - Garbage Collection Routines
-      - Caching Mechanisms
+To reduce RAM usage during embedding, retrieval, and generation, the following practices were adopted:
+\begin{itemize}
+\item \textbf{Garbage collection routines:} Explicit calls to Python's garbage collector (\texttt{gc.collect()}) were introduced to free unused memory between embedding and response generation steps.
+\item \textbf{Batch processing:} Document chunks are processed in batches to minimize memory overhead, especially during retrieval.
+\item \textbf{Lazy loading:} All embeddings are computed once and stored to disk. On app startup, only metadata is loaded, and the FAISS index is memory-mapped to reduce RAM footprint.
+\item \textbf{Asynchronous processing:} Streamlit's async capabilities allow the UI to remain responsive while background tasks are executed, preventing memory spikes during long-running operations.
+\item \textbf{Session cache clearance:} \texttt{st.session\_state} objects are pruned after each session or on manual reset by the user to prevent memory bloating during prolonged use.
+\end{itemize}
+
 \subsection{Computational Constraints Mitigation}
-      - CPU-Only Deployment Adaptations
-      - Error Handling and Recovery
+Given the constraint of CPU-only deployments on platforms like Streamlit Cloud, the following strategies were implemented:
+\begin{itemize}
+\item \textbf{Model selection:} The use of \texttt{intfloat/multilingual-e5-large} for embedding provides a trade-off between semantic accuracy and compute efficiency, even without GPU acceleration.
+\item \textbf{API offloading:} Offloading generative tasks to an external API prevents the local system from being overloaded and allows scaling independently of frontend performance.
+\item \textbf{Timeout and fallback handlers:} If the generation request exceeds 10 seconds or fails -- e.g., due to API rate limits --, the app returns a graceful fallback response, allowing users to retry or simplify their query without crashing the app.
+\item \textbf{Asynchronous I/O:} For embedding, retrieval, and response generation, asynchronous requests reduce UI freezing and ensure smoother user experience even under high latency conditions.
+\end{itemize}
 
 \section{Evaluation}
+Evaluation of GNAvigator was conducted across two dimensions: response quality and system usability, using both qualitative and automated metrics.
 
-\pdfcomment{ Akkiraju (2024) fifteen RAG pipeline control points, empirical results on accuracy-latency tradeoffs between large and small LLMs. }
+in this phase several challenges arose due to the absence of standardized
+evaluation methods and benchmarks. The lack of a golden standard – a verified set of responses representing objective truth – made it difficult to comprehensively assess accuracy. Additionally, there were no predefined benchmarks for internal institutional tasks, nor a baseline system for comparison, as real users or domain experts were unavailable for testing at this stage. While taxonomies for LLM evaluation exist (Guo et al., 2023), they are not universally applicable to chatbot and QA assessment. Moreover,
+commonly used algorithmic metrics such as BLEU, ROUGE, and METEOR are
+considered ineffective for dialogue systems (Deriu et al., 2019; Liu et al., 2016), reinforcing the need for human evaluation as a complementing approach (Mehri and
+Eskenazi, 2020; Abeysinghe, 2024).
+
+\citep{liu_how_2016} for not using automed metrics like BLEU, ROUGE, etc.
+
+Akkiraju (2024) fifteen RAG pipeline control points, empirical results on accuracy-latency tradeoffs between large and small LLMs.
 
 
 \end{spacing}
