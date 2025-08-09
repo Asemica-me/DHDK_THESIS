@@ -152,9 +152,9 @@ dense vectors, widely used in RAG systems for indexing and searching large datas
 \cmidrule(lr){1-3}
 Qdrant & Qdrant Vector Database & An open-source vector database that provides efficient storage and retrieval of high-dimensional vectors, supporting hybrid search capabilities. \\
 \cmidrule(lr){1-3}
-DLM reranking & Deep language model-based reranking uses fine-tuned models that jointly encode query-document pairs and classify their relevance as ``true'' or ``false''. At inference, documents are ranked by the probability of being labeled ``true''. \\
+DLM reranking & Deep language model reranking & Deep language model-based reranking uses fine-tuned models that jointly encode query-document pairs and classify their relevance as ``true'' or ``false''. At inference, documents are ranked by the probability of being labeled ``true''. \\
 \cmidrule(lr){1-3}
-HyDE  & Hybrid Document Embedding & A method that combines dense vector representations with traditional keyword-based indexing to improve retrieval performance in RAG systems. \\
+HyDE  & Hypothetical Document Embeddings & A method that generates a brief, plausible answer to the query first, then embeds that ``hypothetical doc'' for retrieval. This richer proxy query improves vector search recall/precision in RAG context, especially for vague or underspecified queries. \\
 \cmidrule(lr){1-3}
 Hybrid Search &  & A search approach that combines vector-based retrieval with traditional keyword search, allowing for more comprehensive and context-aware results in RAG systems. \\
 \cmidrule(lr){1-3}

@@ -79,7 +79,7 @@ The system applies an additional heuristic to prioritize more comprehensive sour
 
 Finally, the grouped candidates and their associated metadata are passed to the generation module to enable inline citation. Although the QA system is primarily designed for Italian, given the language of the knowledge base, the retrieval module supports multilingual queries by design thanks to its encoder, and is optimized for efficient CPU-based deployments.
 
-\subsection{ABLATION}
+\subsection{ABLATION}\label{sec:retrieval_ablation}
 
 
 \begin{table}[H]
@@ -87,33 +87,47 @@ Finally, the grouped candidates and their associated metadata are passed to the 
 \resizebox{\linewidth}{!}{%
 \setlength{\tabcolsep}{3pt}
 \footnotesize
-\begin{tabular}{l c *{10}{c}} % Method, Query rewrite, then 10 numeric columns
+\begin{tabular}{l c c *{10}{c}} % Method, Query rewrite, Rerank, then 10 numeric columns
 \toprule
-& & \multicolumn{5}{c}{\textbf{SINGLE-HOP}} & \multicolumn{5}{c}{\textbf{COMBINED (single+multi-hop)}} \\
-\cmidrule(lr){3-7}\cmidrule(lr){8-12}
-\textbf{Method} & \shortstack[c]{\textbf{Query}\\\textbf{rewrite}} & R@5 & MRR & nDCG@5 & ap@5 & Latency & R@5 & MRR & nDCG@5 & ap@5 & Latency \\
+& & & \multicolumn{5}{c}{\textbf{SINGLE-HOP}} & \multicolumn{5}{c}{\textbf{COMBINED (single+multi-hop)}} \\
+\cmidrule(lr){4-8}\cmidrule(lr){9-13}
+\textbf{Method} & \shortstack[c]{\textbf{Query}\\\textbf{rewrite}} & \textbf{Rerank} & R@5 & MRR & nDCG@5 & ap@5 & Latency & R@5 & MRR & nDCG@5 & ap@5 & Latency \\
 \midrule
-Dense                         &            & \underline{67.51} & \textbf{47.04} & \underline{52.18} & \textbf{47.04} & \underline{0.29}  & 50.78 & 48.21 & 53.70 & 34.98 & \underline{0.19} \\
-    &  \checkmark & 58.07 & 36.76 & 42.09 & 36.76 & 5.98 & 42.64 & 35.41 & 41.32 & 26.24 & 3.10   \\
+Dense   &  \xmark     & \xmark & \underline{67.51} & \textbf{47.04} & \underline{52.18} & \textbf{47.04} & \underline{0.29}  & 50.78 & 48.21 & 53.70 & 34.98 & \underline{0.19} \\
+        &  \checkmark & \xmark & 58.07 & 36.76 & 42.09 & 36.76 & 5.98 & 42.64 & 35.41 & 41.32 & 26.24 & 3.10   \\
+        & \xmark      &  \checkmark  & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
+        & \checkmark  &  \checkmark  & 52.55 & 31.66 & 36.87 & 31.66 & 4.76 & 38.16 & 30.45 & 36.0 & 22.51 & 3.46     \\
 \addlinespace
-BM25                          &            & 65.15 & 43.56 & 48.98 & 43.56 & \textbf{0.001} & \underline{53.09} & \textbf{51.23} & \textbf{57.13} & \underline{35.50} & \textbf{0.001} \\
-    &  \checkmark & 57.87 & 37.37 & 42.50 & 37.37 & 1.98 & 46.65 & 42.15 & 48.33 & 29.38 & 1.20     \\
+BM25                          & \xmark & \xmark & 65.15 & 43.56 & 48.98 & 43.56 & \textbf{0.001} & \underline{53.09} & \textbf{51.23} & \textbf{57.13} & \underline{35.50} & \textbf{0.001} \\
+                              & \checkmark & \xmark & 57.87 & 37.37 & 42.50 & 37.37 & 1.98 & 46.65 & 42.15 & 48.33 & 29.38 & 1.20     \\
+                              & \xmark      &  \checkmark  & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
+                              & \checkmark  &  \checkmark  & 43.89 & 25.87 & 30.35 & 25.87 & 10.02 & 35.18 & 30.33 & 35.68 & 20.59 & 4.96     \\
 \addlinespace
-Hybrid      &            & \textbf{69.68} & \underline{46.72} & \textbf{52.49} & \underline{46.72} & 0.33  & \textbf{53.98} & \underline{50.93} & \underline{56.92} & \textbf{36.15} & 0.32 \\
-    &  \checkmark & 57.48 & 37.48 & 42.48 & 37.48 & 4.38 & 43.52 & 38.41 & 44.10 & 27.68 & 3.21     \\
-Rerank     &  &  &  &  &  &  & & &  & &      \\
-\hspace{0.5em}+ Dense         &            & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
-    &  \checkmark & 52.55 & 31.66 & 36.87 & 31.66 & 4.76 & 38.16 & 30.45 & 36.0 & 22.51 & 3.46     \\
-\hspace{0.5em}+ BM25          &            & 37.40 & 22.38 & 26.09 & 22.38 & 0.86  & 30.42 & 25.89 & 30.58 & 17.81 & 0.61 \\
-    &  \checkmark & 43.89 & 25.87 & 30.35 & 25.87 & 10.02 &  &  &  &  &      \\
-\hspace{0.5em}+ Hybrid        &            & 43.50 & 24.70 & 29.33 & 24.70 & 1.67  & 33.06 & 26.36 & 31.26 & 18.70 & 0.87 \\
-    &  \checkmark & 38.58 & 21.14 & 25.47 & 21.14 & 6.51 & 29.98 & 23.95 & 28.66 & 16.44 & 6.75     \\
+Hybrid                        &          &  &  &  &  &  &  &  &  &  &  &      \\
+\hspace{0.5em}\textit{+ fuse RRk}          & \xmark   & \xmark & \textbf{69.68} & \underline{46.72} & \textbf{52.49} & \underline{46.72} & 0.33  & \textbf{53.98} & \underline{50.93} & \underline{56.92} & \textbf{36.15} & 0.32 \\
+                              & \checkmark & \xmark & 57.48 & 37.48 & 42.48 & 37.48 & 4.38  & 43.52 & 38.41 & 44.10 & 27.68 & 3.21     \\
+                              & \xmark      &  \checkmark  & 43.50 & 24.70 & 29.33 & 24.70 & 1.67  & 33.06 & 26.36 & 31.26 & 18.70 & 0.87 \\
+                              & \checkmark  &  \checkmark  & 38.58 & 21.14 & 25.47 & 21.14 & 6.51 & 29.98 & 23.95 & 28.66 & 16.44 & 6.75     \\
+\hspace{0.5em}\textit{+ alpha 0.3}   & \xmark   & \xmark &  &  &  &  &  &  &  &  &  &      \\
+                              & \checkmark & \xmark &  &  &  &  &  &  &  &  &  &    \\
+                              & \xmark      &  \checkmark  &  &  &  &  &  &  &  &  &  &    \\
+                              & \checkmark  &  \checkmark  &  &  &  &  &  &  &  &  &  &    \\
+\addlinespace
+\addlinespace
+Rerank                        &          &  &  &  &  &  &  &  &  &  &  &      \\
+\hspace{0.5em}+ Dense         &          &  & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
+                              & \checkmark & & 52.55 & 31.66 & 36.87 & 31.66 & 4.76 & 38.16 & 30.45 & 36.0 & 22.51 & 3.46     \\
+\hspace{0.5em}+ BM25          &          &  & 37.40 & 22.38 & 26.09 & 22.38 & 0.86  & 30.42 & 25.89 & 30.58 & 17.81 & 0.61 \\
+                              & \checkmark & & 43.89 & 25.87 & 30.35 & 25.87 & 10.02 &  &  &  &  &      \\
+\hspace{0.5em}+ Hybrid        &          &  & 43.50 & 24.70 & 29.33 & 24.70 & 1.67  & 33.06 & 26.36 & 31.26 & 18.70 & 0.87 \\
+                              & \checkmark & & 38.58 & 21.14 & 25.47 & 21.14 & 6.51 & 29.98 & 23.95 & 28.66 & 16.44 & 6.75     \\
 \bottomrule
 \end{tabular}%
 }
 \caption{Results for different retrieval methods on test datasets. Best per column is bold and the second-best is underlined. The latency is measured in seconds per query.}
 \label{tab:benchmark}
 \end{table}
+
 
 
 
