@@ -1,8 +1,7 @@
 \chapter{Methodology}
 \label{chap:methodology}
 \begin{spacing}{1.5}
-
-This chapter details the methodological workflow for designing and implementing the GNA QA system. The system leverages a RAG pipeline tailored to the Geoportale Nazionale per l’Archeologia (GNA) knowledge base (KB). It comprises modular components for data acquisition, preprocessing, retrieval, generation, feedback collection, and evaluation. The methodology evolved through iterative development: beginning with a prototype built on LangChain and advancing to a full-scale system with custom components optimized for resource efficiency and multilingual support.
+This chapter details the methodological workflow for designing and implementing the GNA QA system. The system leverages a RAG pipeline tailored to the Geoportale Nazionale per l’Archeologia (GNA) knowledge base (KB). It comprises modular components for data acquisition, preprocessing, retrieval, generation, feedback collection, and evaluation. The methodology evolved through iterative development: beginning with a prototype built on LangChain and advancing to a full-scale system with custom components optimised for resource efficiency and multilingual support.
 
 
 \section{Prototype}
@@ -22,7 +21,7 @@ Evaluation was conducted via a dual approach:
       \item \textbf{LLM-as-a-Judge}, where GPT-3.5 is used to auto-evaluate responses via few-shot prompting.\footnote{See also \citep{svikhnushina_approximating_2023} for method inspiration.}
 \end{enumerate}
 
-Challenges included limited scalability, resource inefficiency, lack of chunk-level metadata control and the absence of standardized
+Challenges included limited scalability, resource inefficiency, lack of chunk-level metadata control and the absence of standardised
 evaluation methods and benchmarks. These findings informed the redesign of the full system.
 
 \section{Full-scale implementation}
@@ -39,7 +38,7 @@ The full system was re-engineered from scratch to support dynamic, scalable docu
 \end{itemize}
 
 \sloppy
-\section{Knowledge-Base Construction and Preprocessing}
+\section{Data Acquisition and Preprocessing}
 \subsection{Sitemap Generation}
 The sitemap is constructed via a focused breadth-first crawler targeting the MediaWiki documentation (\url{https://gna.cultura.gov.it/wiki}) of the GNA \citep{mic_mic_2019}. 
 The crawler:
@@ -52,7 +51,7 @@ The crawler:
       \item and generates a structured sitemap in XML format.
 \end{itemize}
 
-HTML is parsed using BeautifulSoup, isolating the main content via focusing on the \texttt{div} with \texttt{id="mw-content-text"}, and excluding sidebars and footers. The output is serialized into an XML file (\texttt{GNA\_\_sitemap.xml}) including last-modified timestamps, priority, and change frequency. 
+HTML is parsed using BeautifulSoup, isolating the main content via focusing on the \texttt{div} with \texttt{id="mw-content-text"}, and excluding sidebars and footers. The output is serialised into an XML file (\texttt{GNA\_\_sitemap.xml}) including last-modified timestamps, priority, and change frequency. 
 
 This sitemap serves as the foundation for subsequent document crawling and chunking.
 
@@ -66,70 +65,77 @@ Crawling retrieves the URLs listed in the sitemap. The system fetches HTML conte
       
 Content is then chunked using a sliding window strategy of max-512 characters per chunk and 128-character overlap. Each chunk includes metadata such as \texttt{source URL}, \texttt{page title}, \texttt{section headers}, \texttt{chunk ID}, \texttt{content type} (text, table, image), \texttt{keywords}, \texttt{named entities}.\footnote{Output: 835 structured chunks saved in \texttt{data/chunks\_memory.json}.}
 
-NER is performed using spaCy (\texttt{it\_core\_news\_md}), while keywords are extracted with KeyBERT (\texttt{multilingual model paraphrase-multilingual-MiniLM-L12-v2}). Tables are chunked as standalone elements, and image references are retained for OCR via Tesseract when applicable.
+NER is performed using spaCy (\texttt{it\_core\_news\_md}), while keywords are extracted with KeyBERT multilingual model (\textit{paraphrase-multilingual-MiniLM-L12-v2}). Tables are chunked as standalone elements, and image references are retained for OCR via Tesseract when applicable.
+
+This contributes to creating the knowledge base, which is stored in a JSON file (\texttt{data\/knowledge\_base.json}) for subsequent embedding, retrieval and generation tasks.
 
 \sloppy
 \subsection{Vector Embeddings}
-Document chunks are converted into dense embeddings using the \texttt{intfloat/multilingual-e5-large} model from Sentence Transformers. This model was selected for its multilingual capabilities and efficiency in generating high-quality embeddings for semantic search tasks. Batches of text chunks are encoded and normalized, with their embeddings cached to prevent unnecessary recomputation. A FAISS database is constructed using inner-product (dot product) search to facilitate rapid similarity matching, while metadata is maintained separately and linked to each chunk by its unique ID.\footnote{Output: FAISS index stored in \texttt{.faiss\_db}, linked with its metadata.}
+Document chunks are converted into dense vector representations using the \textit{intfloat\/multilingual-e5-large} model from Sentence Transformers. This model was selected for its multilingual encoding capabilities and strong performance in semantic retrieval tasks, making it suitable for the predominantly Italian knowledge base while allowing also cross-lingual queries. 
+
+Text chunks are processed in batches and transformed into L2-normalised embeddings to ensure vector magnitudes are uniform. Embeddings are cached locally to avoid redundant computation across runs. The normalised vectors are stored in a FAISS \texttt{IndexFlatIP} index, which performs brute-force nearest neighbor search using the inner product (dot product) as metric. Alongside the vector index, a separate metadata store is maintained, linking each embedding to its corresponding chunk through a unique identifier. This separation enables efficient similarity search in FAISS while preserving quick access to rich metadata such as source URL, document structure, and content type for downstream processing.\footnote{Output: FAISS index stored in \texttt{.faiss\_db}, linked with its metadata.}
+
+These embeddings and their associated metadata form the foundation for the retrieval stage, where user queries -- also encoded with the same \textit{multilingual-e5-large} model, to guarantee that both queries and documents share the same normalised vector space -- are matched against the stored vectors to identify the most semantically relevant chunks for answer generation.
 
 \section{Candidates Retrieval}
-Once a user submits a query, it is embedded using the same model to ensure vector space consistency. The system performs a top-k similarity search\footnote{The default value of \texttt{k=5} was determined empirically to balance response quality and token constraints.} over the FAISS index to identify the most semantically relevant document chunks. Retrieved chunks are grouped by provenance using their metadata, particularly provenance (source URL), document title from the original web section, content hierarchy (e.g., section headings), and content type (text, table, image). This grouping is essential for enhancing the coherence of generated answers, as it ensures that related information from the same source is passed together to the generation module. Additionally, it supports contextual disambiguation and reduces repetition among retrieved content.
+When a user submits a query, it is embedded using the same encoder to ensure vector space consistency. The FAISS index, configured for inner-product similarity, is queried to return the top-k candidate chunks.\footnote{The default value of \texttt{k=5} was determined empirically to balance response quality and token constraints.} Retrieval is executed entirely within the vector space to maximise speed and maintain consistent scoring across CPU-based deployments. The retrieved results are enriched with their stored metadata, which includes source URL, document title from the original web section, hierarchical section headings, and content type (text, table, image). Candidates are then grouped by provenance, ensuring that related chunks from the same source URL are passed together into the generation stage, thus improving contextual coherence, supporting inline citation, and reducing redundancy.
 
-The system applies an additional heuristic to prioritize more comprehensive sources, penalizing extremely short or contextless chunks. This helps to filter out non-informative fragments and improve the factual density of the retrieved content.
+To further improve factual density, a lightweight filtering heuristic is applied to penalise very short or contextless chunks, deprioritising fragments that lack substantive information. The grouped and filtered candidates are returned as structured context objects, ready to be consumed by the answer generation module. 
 
-Finally, the grouped candidates and their associated metadata are passed to the generation module to enable inline citation. Although the QA system is primarily designed for Italian, given the language of the knowledge base, the retrieval module supports multilingual queries by design thanks to its encoder, and is optimized for efficient CPU-based deployments.
+This retrieval framework serves as the baseline for subsequent ablation studies described in the evaluation phase (cf. \autoref{sec:exp_ablation}), where alternative retrieval strategies and scoring variations are tested against this reference implementation.
 
-\subsection{ABLATION}\label{sec:retrieval_ablation}
+\subsection{Experimental Setup for Ablation Studies}\label{sec:exp_ablation}
+To systematically evaluate the contribution of various retrieval strategies, an experimental setup was implemented following an ablation logic. In this context, ablation refers to the process of selectively removing or isolating individual components to measure their specific impact on overall performance. None of the evaluated approaches was integrated into the main system; instead, each was tested independently to allow for a broader performance comparison, as detailed in \autoref{sec:evaluation_protocol}. 
 
+The following retrieval configurations were tested:
+\begin{itemize}
+    \item \textbf{Dense:} uses dense vector embeddings for retrieval. It wraps the FAISS vector database (via \texttt{VectorDatabaseWrapper}) and returns the top-k chunks ranked by embedding-based similarity scores. Queries are cached using a normalized MD5 hash to avoid recomputation, and batch querying is supported.
+    \item \textbf{BM25:} employs the BM25 algorithm for traditional keyword-based retrieval. The index is built over concatenated fields -- \texttt{title}, \texttt{keywords}, \texttt{headers\_context}, and \texttt{document} -- from the same metadata store. Text is preprocessed for Italian (stopword removal, stemming, and clitic/apocope handling), then tokenized. Batch mode is also supported.
+    \item \textbf{Hybrid:} combines the dense retriever and BM25 to balance semantic and lexical matching. We tested two fusion strategies:
+    \begin{itemize}
+            \item \textbf{Weighted RRF:} aggregates ranks from both retrievers using Weighted Reciprocal Rank Fusion (RRF). The fusion score for document $d$ is computed as
+\[
+\frac{w_\mathrm{dense}}{k + \mathrm{rank}_\mathrm{dense}} + \frac{w_\mathrm{sparse}}{k + \mathrm{rank}_\mathrm{sparse}}, \quad k = 60
+\]
+with default weights $w_{\text{dense}} = w_{\text{sparse}} = 1.0$, \text{\texttt{candidate\_k}} = 50, and \text{\texttt{top\_k}} = 5.
+            \item \textbf{Score-blend:} merges normalized scores from both retrievers using a custom blending function that allows for fine-tuning the influence of each method:
+\[
+S_{\text{norm},d} = \frac{S_d - \min(S_d)}{\max(S_d) - \min(S_d)}, \quad  
+S_{\text{norm},s} = \frac{S_s - \min(S_s)}{\max(S_s) - \min(S_s)}
+\]
+\[
+S_h = S_{\text{norm},d} + \alpha \cdot S_{\text{norm},s}
+\]
+where $\alpha$ controls the influence of the sparse retriever ($w_d = w_s = 1$, $k = 60$). \citep{wang_searching_2024} Unlike RRF, this method requires compatible score scales between retrievers.\footnote{Edge-case behaviors include: \textbf{a)} \textit{Document appears in only one list}: in Score-blend, it keeps its normalized score (the missing side contributes zero), while in RRF, it receives only one rank term and typically ranks lower than documents appearing in both lists; \textbf{b)} \textit{All scores equal in a list}: in Score-blend, normalization produces identical values, so BM25 adds little influence, while RRF still differentiates by rank order.}
+\end{itemize}
+\end{itemize}
+%\noindent\subsection*{\textit{\Large What to pick?}}
+\vspace{1em}
+\noindent{\textit{\Large What to pick?}}
 
-\begin{table}[H]
-\centering
-\resizebox{\linewidth}{!}{%
-\setlength{\tabcolsep}{3pt}
-\footnotesize
-\begin{tabular}{l c c *{10}{c}} % Method, Query rewrite, Rerank, then 10 numeric columns
-\toprule
-& & & \multicolumn{5}{c}{\textbf{SINGLE-HOP}} & \multicolumn{5}{c}{\textbf{COMBINED (single+multi-hop)}} \\
-\cmidrule(lr){4-8}\cmidrule(lr){9-13}
-\textbf{Method} & \shortstack[c]{\textbf{Query}\\\textbf{rewrite}} & \textbf{Rerank} & R@5 & MRR & nDCG@5 & ap@5 & Latency & R@5 & MRR & nDCG@5 & ap@5 & Latency \\
-\midrule
-Dense   &  \xmark     & \xmark & \underline{67.51} & \textbf{47.04} & \underline{52.18} & \textbf{47.04} & \underline{0.29}  & 50.78 & 48.21 & 53.70 & 34.98 & \underline{0.19} \\
-        &  \checkmark & \xmark & 58.07 & 36.76 & 42.09 & 36.76 & 5.98 & 42.64 & 35.41 & 41.32 & 26.24 & 3.10   \\
-        & \xmark      &  \checkmark  & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
-        & \checkmark  &  \checkmark  & 52.55 & 31.66 & 36.87 & 31.66 & 4.76 & 38.16 & 30.45 & 36.0 & 22.51 & 3.46     \\
-\addlinespace
-BM25                          & \xmark & \xmark & 65.15 & 43.56 & 48.98 & 43.56 & \textbf{0.001} & \underline{53.09} & \textbf{51.23} & \textbf{57.13} & \underline{35.50} & \textbf{0.001} \\
-                              & \checkmark & \xmark & 57.87 & 37.37 & 42.50 & 37.37 & 1.98 & 46.65 & 42.15 & 48.33 & 29.38 & 1.20     \\
-                              & \xmark      &  \checkmark  & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
-                              & \checkmark  &  \checkmark  & 43.89 & 25.87 & 30.35 & 25.87 & 10.02 & 35.18 & 30.33 & 35.68 & 20.59 & 4.96     \\
-\addlinespace
-Hybrid                        &          &  &  &  &  &  &  &  &  &  &  &      \\
-\hspace{0.5em}\textit{+ fuse RRk}          & \xmark   & \xmark & \textbf{69.68} & \underline{46.72} & \textbf{52.49} & \underline{46.72} & 0.33  & \textbf{53.98} & \underline{50.93} & \underline{56.92} & \textbf{36.15} & 0.32 \\
-                              & \checkmark & \xmark & 57.48 & 37.48 & 42.48 & 37.48 & 4.38  & 43.52 & 38.41 & 44.10 & 27.68 & 3.21     \\
-                              & \xmark      &  \checkmark  & 43.50 & 24.70 & 29.33 & 24.70 & 1.67  & 33.06 & 26.36 & 31.26 & 18.70 & 0.87 \\
-                              & \checkmark  &  \checkmark  & 38.58 & 21.14 & 25.47 & 21.14 & 6.51 & 29.98 & 23.95 & 28.66 & 16.44 & 6.75     \\
-\hspace{0.5em}\textit{+ alpha 0.3}   & \xmark   & \xmark &  &  &  &  &  &  &  &  &  &      \\
-                              & \checkmark & \xmark &  &  &  &  &  &  &  &  &  &    \\
-                              & \xmark      &  \checkmark  &  &  &  &  &  &  &  &  &  &    \\
-                              & \checkmark  &  \checkmark  &  &  &  &  &  &  &  &  &  &    \\
-\addlinespace
-\addlinespace
-Rerank                        &          &  &  &  &  &  &  &  &  &  &  &      \\
-\hspace{0.5em}+ Dense         &          &  & 45.47 & 25.41 & 30.36 & 25.41 & 1.30  & 34.57 & 27.71 & 32.90 & 19.48 & 0.82 \\
-                              & \checkmark & & 52.55 & 31.66 & 36.87 & 31.66 & 4.76 & 38.16 & 30.45 & 36.0 & 22.51 & 3.46     \\
-\hspace{0.5em}+ BM25          &          &  & 37.40 & 22.38 & 26.09 & 22.38 & 0.86  & 30.42 & 25.89 & 30.58 & 17.81 & 0.61 \\
-                              & \checkmark & & 43.89 & 25.87 & 30.35 & 25.87 & 10.02 &  &  &  &  &      \\
-\hspace{0.5em}+ Hybrid        &          &  & 43.50 & 24.70 & 29.33 & 24.70 & 1.67  & 33.06 & 26.36 & 31.26 & 18.70 & 0.87 \\
-                              & \checkmark & & 38.58 & 21.14 & 25.47 & 21.14 & 6.51 & 29.98 & 23.95 & 28.66 & 16.44 & 6.75     \\
-\bottomrule
-\end{tabular}%
-}
-\caption{Results for different retrieval methods on test datasets. Best per column is bold and the second-best is underlined. The latency is measured in seconds per query.}
-\label{tab:benchmark}
-\end{table}
+The choice between Weighted RRF and Score-blend depends on the specific retrieval context. RRF is particularly suitable when score scales between retrievers are incompatible or unstable, as its rank-based aggregation is less sensitive to scale differences and prioritizes consensus across retrieval methods. Conversely, Score-blend is more appropriate when per-query scores are reliable, as it allows fine-grained control over the relative influence of dense and sparse components, enabling more tailored retrieval behaviour.\\
 
 
+\noindent Additional ablation experiments included:\\
 
+\noindent\subsubsection*{\Large Query Rewrite}
+Query Rewrite is a retrieval enhancement technique designed to reformulate the user’s input query in order to increase the likelihood of retrieving relevant documents. In the context of these experiments, query rewriting is realised as a multi-strategy process that generates alternative query variants through complementary transformations, each targeting different aspects of query understanding and expansion \citep{li_dmqr-rag_2024}. Specifically, the approach integrates:
+\begin{itemize}
+      \item \textbf{Core Content Extraction (CCE)} -- a sequence-to-sequence transformation, using the \textit{it5-small model}, that rewrites the query to capture its essential informational content while removing peripheral terms.
+      \item \textbf{Keyword Expansion (QE)} -- key terms are extracted with KeyBERT and enriched with n-gram combinations and synonym substitutions to introduce semantically related expressions.
+      \item \textbf{General Query Rewriting (GQR)} -- this process is based on spaCy functionalities of lemmatization and stopword removal, producing a normalized lexical form of the query.
+      \item \textbf{Pseudo-Relevance Feedback (PRF)} -- top-ranked documents from an initial retrieval pass are analysed to extract additional high-frequency terms not present in the original query, which are then appended to form an expanded query.
+      \item \textbf{Query Decomposition} -- conjunctive or disjunctive queries are split into simpler sub-queries, each covering a distinct semantic aspect.
+\end{itemize}
+
+These strategies can be applied individually or in combination (\texttt{strategy="all"}), producing a set of reformulated queries. Each reformulated query is submitted to the base retriever (Dense, BM25, Hybrid variants) to have the resulting candidate documents.\\
+
+
+\noindent\subsubsection*{\Large Rerank}
+
+Rerank is a post-retrieval refinement process that reorders an initial set of candidate documents according to a more precise relevance estimation. In our implementation, this stage operates as a wrapper over a base retriever (Dense, BM25, or Hybrid) and uses a transformer-based cross-encoder model (\textit{cross-encoder/ms-marco-MiniLM-L-6-v2}) to jointly encode the query and each candidate document, producing a contextual relevance score. Unlike the base retriever, which typically evaluates query–document similarity using independent embeddings or lexical term matching, the cross-encoder considers full cross-attention between query and document tokens, enabling a richer semantic alignment.
+
+At runtime, the reranker receives the top-N candidates from the base retriever (with N controlled by \texttt{max\_rerank\_candidates}, set to 50), tokenizes each query–document pair, and performs inference in batches with mixed-precision support when available. The raw model outputs are interpreted as relevance scores, and candidates are sorted accordingly, producing a final top-k list with improved ordering accuracy.
 
 
 \section{Generation}
@@ -158,8 +164,8 @@ Responses are post-processed to verify the inclusion of inline citations, langua
 \subsection{Prompt Engineering Techniques} \label{sec:prompt_engineering}
 The system uses structured prompt engineering to ensure accurate, traceable, and contextually coherent answers. The prompt template is dynamically generated with the following components:
 
-\subsubsection*{System Instructions and Constraints}
-A custom system message (\autoref{fig:system_prompt}) is injected at the top of the prompt to guide the model’s behavior. This message instructs the system to enforce neutrality in its answers, prioritize relevant and verifiable information, and include inline citations in square brackets that correspond to metadata entries. It also explicitly discourages hallucinations and speculative responses.
+\subsubsection*{System Instructions, Boundaries and Constraints}
+A custom system message (\autoref{fig:system_prompt}) is injected at the top of the prompt to guide the model’s behavior. This message instructs the system to enforce neutrality in its answers, prioritise relevant and verifiable information, and include inline citations in square brackets that correspond to metadata entries. It also explicitly discourages hallucinations and speculative responses.
 
 \begin{figure}[H]
 \begin{Verbatim}[breaklines=true]
@@ -193,31 +199,103 @@ Each chunk passed to the LLM is numbered and grouped with its metadata (title, U
 
 This modular prompting strategy proved crucial for maintaining factual consistency while supporting multilingual input and long-form reasoning.
 
+
+\section{Evaluation Protocol}\label{sec:evaluation_protocol}
+Evaluation was conducted across two dimensions: 
+\begin{itemize}
+      \item \textbf{Quantitative}, using metrics such as Recall (R@), Mean Reciprocal Rank (MRR@), Normalized Discounted Cumulative Gain (nDCG@), Average Precision (AP@), and Latency to assess retrieval performance;
+      \item \textbf{Qualitative}, gathering user feedback on response relevance, fluency, completeness, and usability.
+\end{itemize}
+
+This dual perspective follows the recognition that effective RAG-based chatbots require not only accurate retrieval and generation but also operational efficiency and adaptability \citep{akkiraju_facts_2024}. The evaluation process is designed to be iterative, allowing for continuous refinement of the system based on user interactions and performance metrics.
+
+The evaluation faced several structural limitations:
+\begin{itemize}
+      \item \textbf{Absence of a golden standard:} there was no authoritative, verified set of responses to serve as an absolute accuracy benchmark.
+      \item \textbf{No baseline system:} internal institutional tasks lacked comparable legacy solutions or predefined benchmarks.
+      \item \textbf{Lack of real users or domain experts:} the system was initially developed without direct input from actual users, limiting the applicability of findings. Human evaluation by real end-users was integrated later in the process.
+      \item \textbf{Limited applicability of traditional automated metrics:} common algorithmic measures such as BLEU, ROUGE, and METEOR are widely used in text generation but have been shown to be ineffective in dialogue and QA contexts \citep{deriu_survey_2020,liu_how_2016}.
+\end{itemize}
+
+Given these limitations, ..... aligning with recommendations from recent RAG evaluation literature.
+
+
+In this phase several challenges arose due to the absence of standardised
+evaluation methods and benchmarks. The lack of a golden standard – a verified set of responses representing objective truth – made it difficult to comprehensively assess accuracy. Additionally, there were no predefined benchmarks for internal institutional tasks, nor a baseline system for comparison, as real users or domain experts were unavailable for testing at this stage. While taxonomies for LLM evaluation exist (Guo et al., 2023), they are not universally applicable to chatbot and QA assessment. Moreover,
+commonly used algorithmic metrics such as BLEU, ROUGE, and METEOR are
+considered ineffective for dialogue systems (Deriu et al., 2019; Liu et al., 2016), reinforcing the need for human evaluation as a complementing approach (Mehri and
+Eskenazi, 2020; Abeysinghe, 2024).
+
+Akkiraju (2024) fifteen RAG pipeline control points, empirical results on accuracy-latency tradeoffs between large and small LLMs.
+
+\subsection{Datasets}\label{sec:datasets}
+
+Two synthetic evaluation sets were created:
+\begin{itemize}
+      \item \textbf{Single-hop dataset:} 508 queries designed to elicit single-document answers, each with a single gold document. This set tests the system's ability to retrieve and generate answers based on isolated chunks of information.
+      \item \textbf{Combined dataset:} 400 additional queries that require multi-hop reasoning, where answers are derived from multiple documents (2-4 chunks), for a total of 908 queries entries. This set evaluates the system's capacity to integrate information from various sources and generate coherent, contextually rich responses.
+\end{itemize}
+
+Tasks:
+
+
+\subsection{Metrics}\label{sec:metrics}
+
+\citep{liu_how_2016} for not using automed metrics like BLEU, ROUGE, etc.
+
+\begin{itemize}
+    \item R@5 (Recall at 5): Measures the fraction of relevant documents retrieved in the top 5 results.
+    \item MRR (Mean Reciprocal Rank): Evaluates the rank position of the first relevant document.
+    \item nDCG@5 (Normalised Discounted Cumulative Gain at 5): Measures ranking quality, emphasising higher placement of relevant results.
+    \item AP@5 (Average Precision at 5): Computes the average of precision values at each relevant document within the top 5.
+    \item Latency: Average retrieval time per query (in seconds).
+\end{itemize}
+
+\subsection{Experimental Setup for Ablation Studies}
+Describe the retrieval configurations tested (Dense, BM25, Hybrid + Weighted RRF, Hybrid + Score-blend) and how they differ.
+\begin{itemize}
+    \item Dense: Uses dense vector embeddings for retrieval.
+    \item BM25: Employs the BM25 algorithm for traditional keyword-based retrieval.
+    \item Hybrid + Weighted RRF: Combines dense and BM25 results using a weighted Reciprocal Rank Fusion (RRF) strategy.
+    \item Hybrid + Score-blend: Merges scores from both methods using a custom blending function.
+    \item Query Rewrite: Applies query rewriting to improve retrieval relevance.
+    \item Rerank: Applies a reranking step to refine the top results based on relevance.
+\end{itemize}
+Ablations tested the effect of enabling/disabling query rewriting and reranking across both datasets, measuring R@5, MRR, nDCG@5, AP@5, and latency.
+The design aligns with Akkiraju et al.’s emphasis on control-point evaluation, ensuring that performance changes can be tied to specific retrieval and orchestration steps rather than observed only at the output level.
+
+Note whether query rewriting and reranking were applied in each configuration, as shown in your table.
+
+
+
 \section{User Interface}
 The user interface (UI) is implemented using Streamlit, selected for its fast prototyping capabilities, built-in support for asynchronous processing, and integration with Python-based NLP components. The front end acts as the primary touchpoint between users and the GNA QA system, displaying generated answers with inline citations, and collecting user feedback.
 
+Why the UI matters methodologically (collecting user feedback, enabling qualitative eval).
+
+One screenshot max;
+
 \subsection{Streamlit User Experience}
-The Streamlit app is organized into three main areas:
+The Streamlit app is organised into three main areas:
 \begin{enumerate}
       \item \textbf{Sidebar:} Contains MiC refernce, institutional links to the GNA documentation, and contextual help describing the assistant’s capabilities. It also provides functional controls including a \texttt{Clear Chat History} button to reset the session (\texttt{st.session\_state.chat\_history}) and a \texttt{Download Feedback} button for exporting user queries and system's responses.
       \item \textbf{Main interface:} Provides a natural language input field (\texttt{st.chat\_input}) for querying the assistant. It displays the chat history, including:
       \begin{itemize}
-        \item user messages,
-        \item assistant responses (formatted via \texttt{st.chat\_message}),
-        \item feedback buttons (3 points Likert-scale) for each assistant reply.
+            \item user messages,
+            \item assistant responses (formatted via \texttt{st.chat\_message}),
+            \item feedback buttons (3 points Likert-scale) for each assistant reply.
       \end{itemize}
       \item \textbf{Session features}: 
       \begin{itemize}
-      \item Chat history is limited to the most recent 10 exchanges (\texttt{MAX\_HISTORY}), which are stored and updated in \texttt{st.session\_state};
-      \item Feedback from individual message indexes is stored as a set (\texttt{st.session\_state.feedback\_given}), allowing the system to prevent duplicate ratings and dynamically update UI feedback (e.g., ``Valutazione registrata con successo.'').
+            \item Chat history is limited to the most recent 10 exchanges (\texttt{MAX\_HISTORY}), which are stored and updated in \texttt{st.session\_state};
+            \item Feedback from individual message indexes is stored as a set (\texttt{st.session\_state.feedback\_given}), allowing the system to prevent duplicate ratings and dynamically update UI feedback (e.g., ``Valutazione registrata con successo.'').
       \end{itemize}
-      
 \end{enumerate}
 
 \subsection{Session State Management}
-To ensure smooth, stateful interactions and to minimize computational overhead, the system makes extensive use of \texttt{st.session\_state}. This approach allows chat memory for both user and assistant messages to persist, enables caching of API results -- including responses generated by Mistral and citation mappings -- and facilitates the tracking of feedback.\footnote{For more details on Streamlit session state management, see \url{https://docs.streamlit.io/}.\nocite{noauthor_streamlit_2025}} In addition, the system incorporates Python’s \texttt{asyncio} and \texttt{concurrent.futures} modules to support non-blocking retrieval and generation. For each interaction with the language model, a new event loop is created to maintain compatibility with Streamlit’s execution model, and the query to the model is run in a thread-safe environment using a \texttt{ThreadPoolExecutor}. This pattern guarantees UI responsiveness and provides a fluid user experience even under high network latency or API response times.
+To ensure smooth, stateful interactions and to minimise computational overhead, the system makes extensive use of \texttt{st.session\_state}. This approach allows chat memory for both user and assistant messages to persist, enables caching of API results -- including responses generated by Mistral and citation mappings -- and facilitates the tracking of feedback.\footnote{For more details on Streamlit session state management, see \url{https://docs.streamlit.io/}.\nocite{noauthor_streamlit_2025}} In addition, the system incorporates Python’s \texttt{asyncio} and \texttt{concurrent.futures} modules to support non-blocking retrieval and generation. For each interaction with the language model, a new event loop is created to maintain compatibility with Streamlit’s execution model, and the query to the model is run in a thread-safe environment using a \texttt{ThreadPoolExecutor}. This pattern guarantees UI responsiveness and provides a fluid user experience even under high network latency or API response times.
 
-\section{Feedback Management}
+\section{Feedback Loop}
 To support iterative improvement of the assistant and promote user engagement, the system integrates an interactive feedback module that allows users to rate each answer directly within the Streamlit interface. This design is intended to support continuous quality assessment and transparent evaluation of LLM-generated content.
 
 \subsection{Collection}
@@ -247,7 +325,7 @@ Feedback is stored locally in a SQLite database (\texttt{feedback.db}) with the 
 \caption{Schema of the feedback's SQL databse.}\label{fig:sql_schema}
 \end{figure}
 
-This structure supports reproducibility and traceability by maintaining a clear mapping between: the user's query string, the generated response, the rating score (1-3) and the associated timestamp (i.e., time of submission). All records are saved with minimal overhead, using parameterized SQL insertions and transaction-safe commits.\\
+This structure supports reproducibility and traceability by maintaining a clear mapping between: the user's query string, the generated response, the rating score (1-3) and the associated timestamp (i.e., time of submission). All records are saved with minimal overhead, using parameterised SQL insertions and transaction-safe commits.\\
 
 To ensure long-term preservation and collaborative accessibility of user feedback, the system implements a mechanism for periodic synchronization of collected feedback with a persistent repository. This setup enables version control over user interaction logs, supports iterative evaluation by external reviewers, and enables rollback and comparison across model updates.\footnote{This implementation is intended for controlled research use only. For production environments, secure alternatives such as authenticated APIs and hardened database infrastructures are recommended to ensure data safety and compliance with privacy standards.}\\
 
@@ -256,40 +334,39 @@ From the sidebar, users can export all feedback as a \texttt{.csv} file using th
 This export can be used by researchers, developers, or project coordinators to assess the assistant's performance over time.
 
 
-\section{Resource Optimization Strategies}
+\section{Resource and Deployment Constraints}
 Deploying a multilingual RAG workflow with different language models integrated and semantic search poses non-trivial challenges for environments lacking access to GPUs or large memory allocations. To ensure the GNA QA system remains responsive and cost-efficient, especially for open usage, several optimization strategies were integrated into the pipeline.
 
 \subsection{Memory Management}
 To reduce RAM usage during embedding, retrieval, and generation, the following practices were adopted:
 \begin{itemize}
 \item \textbf{Garbage collection routines:} Explicit calls to Python's garbage collector (\texttt{gc.collect()}) were introduced to free unused memory between embedding and response generation steps.
-\item \textbf{Batch processing:} Document chunks are processed in batches to minimize memory overhead, especially during retrieval.
+\item \textbf{Batch processing:} Document chunks are processed in batches to minimise memory overhead, especially during retrieval.
 \item \textbf{Lazy loading:} All embeddings are computed once and stored to disk. On app startup, only metadata is loaded, and the FAISS index is memory-mapped to reduce RAM footprint.
 \item \textbf{Asynchronous processing:} Streamlit's async capabilities allow the UI to remain responsive while background tasks are executed, preventing memory spikes during long-running operations.
-\item \textbf{Session cache clearance:} \texttt{st.session\_state} objects are pruned after each session or on manual reset by the user to prevent memory bloating during prolonged use.
+\item \textbf{Cache clearing policies:} \texttt{st.session\_state} objects are pruned after each session or on manual reset by the user to prevent memory bloating during prolonged use.
 \end{itemize}
 
 \subsection{Computational Constraints Mitigation}
 Given the constraint of CPU-only deployments on platforms like Streamlit Cloud, the following strategies were implemented:
 \begin{itemize}
-\item \textbf{Model selection:} The use of \texttt{intfloat/multilingual-e5-large} for embedding provides a trade-off between semantic accuracy and compute efficiency, even without GPU acceleration.
+\item \textbf{Model selection:} The use of \textit{intfloat/multilingual-e5-large} for embedding provides a trade-off between semantic accuracy and compute efficiency, even without GPU acceleration.
 \item \textbf{API offloading:} Offloading generative tasks to an external API prevents the local system from being overloaded and allows scaling independently of frontend performance.
 \item \textbf{Timeout and fallback handlers:} If the generation request exceeds 10 seconds or fails -- e.g., due to API rate limits --, the app returns a graceful fallback response, allowing users to retry or simplify their query without crashing the app.
 \item \textbf{Asynchronous I/O:} For embedding, retrieval, and response generation, asynchronous requests reduce UI freezing and ensure smoother user experience even under high latency conditions.
 \end{itemize}
 
-\section{Evaluation}
-Evaluation of GNAvigator was conducted across two dimensions: response quality and system usability, using both qualitative and automated metrics.
 
-in this phase several challenges arose due to the absence of standardized
-evaluation methods and benchmarks. The lack of a golden standard – a verified set of responses representing objective truth – made it difficult to comprehensively assess accuracy. Additionally, there were no predefined benchmarks for internal institutional tasks, nor a baseline system for comparison, as real users or domain experts were unavailable for testing at this stage. While taxonomies for LLM evaluation exist (Guo et al., 2023), they are not universally applicable to chatbot and QA assessment. Moreover,
-commonly used algorithmic metrics such as BLEU, ROUGE, and METEOR are
-considered ineffective for dialogue systems (Deriu et al., 2019; Liu et al., 2016), reinforcing the need for human evaluation as a complementing approach (Mehri and
-Eskenazi, 2020; Abeysinghe, 2024).
-
-\citep{liu_how_2016} for not using automed metrics like BLEU, ROUGE, etc.
-
-Akkiraju (2024) fifteen RAG pipeline control points, empirical results on accuracy-latency tradeoffs between large and small LLMs.
+\section{Ethics and Data Governance}
+The GNA QA system is designed with a strong emphasis on ethical considerations and data governance, particularly in the context of cultural heritage and public information. Key principles include:
+\begin{itemize}
+\item \textbf{Transparency:} The system provides clear information about its data sources, methodologies, and limitations, ensuring users understand how answers are generated and the provenance of information.
+\item \textbf{Privacy:} The system avoids processing personally identifiable information (PII) and ensures that all data used is publicly available or explicitly licensed for use in research and educational contexts.
+\item \textbf{Licensing:} All components, including the knowledge base, models, and software libraries, are selected based on permissive licenses that allow for academic and non-commercial use, ensuring compliance with legal and ethical standards.
+\item \textbf{Auditability:} The system maintains logs of user interactions, feedback, and system performance, enabling ongoing evaluation and improvement while respecting user privacy and data protection regulations.
+\end{itemize}
+These principles guide the development and deployment of the GNA QA system, ensuring it serves as a responsible and ethical tool for cultural heritage public engagement.
+Provenance, PII avoidance, licensing, auditability.
 
 
 \end{spacing}
