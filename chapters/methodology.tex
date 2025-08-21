@@ -85,20 +85,23 @@ To further improve factual density, a lightweight filtering heuristic is applied
 This retrieval framework serves as the baseline for subsequent ablation studies described in the evaluation phase (cf. \autoref{sec:exp_ablation}), where alternative retrieval strategies and scoring variations are tested against this reference implementation.
 
 \subsection{Experimental Setup for Ablation Studies}\label{sec:exp_ablation}
-To systematically evaluate the contribution of various retrieval strategies, an experimental setup was implemented following an ablation logic. In this context, ablation refers to the process of selectively removing or isolating individual components to measure their specific impact on overall performance. None of the evaluated approaches was integrated into the main system; instead, each was tested independently to allow for a broader performance comparison, as detailed in \autoref{sec:evaluation_protocol}. 
+To systematically evaluate the contribution of different retrieval strategies. we conducted a series of ablation experiments. In this context, \textit{ablation} refers to the systematic removal, isolation, or modification of system components in order to evaluate their specific effect on overall performance. Importantly, none of the tested approaches was permanently integrated into the main pipeline; instead, each configuration was evaluated independently to allow for a broader performance comparison, as detailed in \autoref{sec:evaluation_protocol}. The results were then compared to the baseline retrieval outcomes.
 
-The following retrieval configurations were tested:
+The following retrieval configurations were implemented and evaluated:
 \begin{itemize}
-    \item \textbf{Dense:} uses dense vector embeddings for retrieval. It wraps the FAISS vector database (via \texttt{VectorDatabaseWrapper}) and returns the top-k chunks ranked by embedding-based similarity scores. Queries are cached using a normalized MD5 hash to avoid recomputation, and batch querying is supported.
-    \item \textbf{BM25:} employs the BM25 algorithm for traditional keyword-based retrieval. The index is built over concatenated fields -- \texttt{title}, \texttt{keywords}, \texttt{headers\_context}, and \texttt{document} -- from the same metadata store. Text is preprocessed for Italian (stopword removal, stemming, and clitic/apocope handling), then tokenized. Batch mode is also supported.
-    \item \textbf{Hybrid:} combines the dense retriever and BM25 to balance semantic and lexical matching. We tested two fusion strategies:
+    \item \textbf{Dense retrieval.}\\
+    This method employs dense vector embeddings for document representation and similarity search. It relies on FAISS as the underlying vector database, wrapped via the \texttt{VectorDatabaseWrapper} module. Queries are encoded into embeddings and compared with pre-computed document embeddings, returning the top-k results ranked by inner-product similarity. Query embeddings are cached using a normalised MD5 hash to avoid redundant computations, and batch querying is supported.
+    \item \textbf{BM25 retrieval.}\\ 
+    A traditional sparse retriever based on the BM25 algorithm. The index was constructed over concatenated metadata fields -- \texttt{title}, \texttt{keywords}, \texttt{headers\_context}, and \texttt{document} -- from the same chunks metadata store. Preprocessing was applied specifically for Italian, including stopword removal, stemming, and handling of clitics and apocope forms. The tokenised corpus was then indexed for lexical matching. As with dense retrieval, a batch mode was implemented. The default cutoff parameter (k = 5) was selected empirically to balance response quality against tokenisation and latency constraints.
+    \item \textbf{Hybridetrieval.}\\ 
+    To combine semantic similarity with lexical matching, hybrid retrieval strategies were explored. Two fusion techniques were implemented:
     \begin{itemize}
-            \item \textbf{Weighted RRF:} aggregates ranks from both retrievers using Weighted Reciprocal Rank Fusion (RRF). The fusion score for document $d$ is computed as
+            \item \textbf{Weighted Reciprocal Rank Fusion (RRF):} ranks from dense and sparse retrievers are aggregated using RRF. The fusion score for document $d$ is computed as:
 \[
-\frac{w_\mathrm{dense}}{k + \mathrm{rank}_\mathrm{dense}} + \frac{w_\mathrm{sparse}}{k + \mathrm{rank}_\mathrm{sparse}}, \quad k = 60
+\frac{w_\mathrm{dense}}{k + \mathrm{rank}_\mathrm{dense}} + \frac{w_\mathrm{sparse}}{k + \mathrm{rank}_\mathrm{sparse}}
 \]
-with default weights $w_{\text{dense}} = w_{\text{sparse}} = 1.0$, \text{\texttt{candidate\_k}} = 50, and \text{\texttt{top\_k}} = 5.
-            \item \textbf{Score-blend:} merges normalized scores from both retrievers using a custom blending function that allows for fine-tuning the influence of each method:
+where the default weights parameters were $w_{\text{dense}} = w_{\text{sparse}} = 1.0$, candidates set size = 50, and \text{\texttt{k}} = 60.
+            \item \textbf{Score-blend fusion:} here, normalised scores from the two retrievers are merged using a custom blending function that allows for fine-tuning the influence of each method:
 \[
 S_{\text{norm},d} = \frac{S_d - \min(S_d)}{\max(S_d) - \min(S_d)}, \quad  
 S_{\text{norm},s} = \frac{S_s - \min(S_s)}{\max(S_s) - \min(S_s)}
@@ -106,36 +109,38 @@ S_{\text{norm},s} = \frac{S_s - \min(S_s)}{\max(S_s) - \min(S_s)}
 \[
 S_h = S_{\text{norm},d} + \alpha \cdot S_{\text{norm},s}
 \]
-where $\alpha$ controls the influence of the sparse retriever ($w_d = w_s = 1$, $k = 60$). \citep{wang_searching_2024} Unlike RRF, this method requires compatible score scales between retrievers.\footnote{Edge-case behaviors include: \textbf{a)} \textit{Document appears in only one list}: in Score-blend, it keeps its normalized score (the missing side contributes zero), while in RRF, it receives only one rank term and typically ranks lower than documents appearing in both lists; \textbf{b)} \textit{All scores equal in a list}: in Score-blend, normalization produces identical values, so BM25 adds little influence, while RRF still differentiates by rank order.}
+where $S_{\text{norm},d}$ and $S_{\text{norm},s}$ are the min–max normalised scores of the dense and sparse retrievers, respectively, and $\alpha$ controls the relative weight of the sparse component ($w_d = w_s = 1$, $k = 60$) \citep{wang_searching_2024}. Unlike RRF, this approach requires that scores from different retrievers are defined on comparable scales.
 \end{itemize}
 \end{itemize}
 %\noindent\subsection*{\textit{\Large What to pick?}}
 \vspace{1em}
 \noindent{\textit{\Large What to pick?}}
 
-The choice between Weighted RRF and Score-blend depends on the specific retrieval context. RRF is particularly suitable when score scales between retrievers are incompatible or unstable, as its rank-based aggregation is less sensitive to scale differences and prioritizes consensus across retrieval methods. Conversely, Score-blend is more appropriate when per-query scores are reliable, as it allows fine-grained control over the relative influence of dense and sparse components, enabling more tailored retrieval behaviour.\\
+The choice between RRF and Score-blend depends on the specific retrieval context. RRF is particularly suitable when score scales between retrievers are incompatible or unstable, as its rank-based aggregation is less sensitive to scale differences and prioritises consensus across retrieval methods. Conversely, Score-blend is more appropriate when per-query scores are reliable, as it allows finer control over the relative influence of dense and sparse components. Edge-case behaviors include: 
+\begin{enumerate}[(a)] 
+\item \textit{Document appears in only one list}: RRF ranks it lower, while Score-blend assigns it a normalised score from the contributing retriever;
+\item \textit{All scores equal in a list}: Score-blend reduces the contribution of that retriever, whereas RRF still differentiates documents by rank.
+\end{enumerate}
 
 
-\noindent Additional ablation experiments included:\\
-
-\noindent\subsubsection*{\Large Query Rewrite}
-Query Rewrite is a retrieval enhancement technique designed to reformulate the user’s input query in order to increase the likelihood of retrieving relevant documents. In the context of these experiments, query rewriting is realised as a multi-strategy process that generates alternative query variants through complementary transformations, each targeting different aspects of query understanding and expansion \citep{li_dmqr-rag_2024}. Specifically, the approach integrates:
+\noindent \subsubsection*{\Large Query Rewrite}
+To sharpen retrieval quality, we experimented with \textit{query rewriting}, i.e. reformulating user queries to increase the likelihood of retrieving relevant documents. Within these experiments, query rewriting was conceived as a multi-strategy process that generates alternative query variants through complementary transformations, each targeting different aspects of query understanding and manipulation \citep{li_dmqr-rag_2024}. Specifically, the approach integrates:
 \begin{itemize}
-      \item \textbf{Core Content Extraction (CCE)} -- a sequence-to-sequence transformation, using the \textit{it5-small model}, that rewrites the query to capture its essential informational content while removing peripheral terms.
-      \item \textbf{Keyword Expansion (QE)} -- key terms are extracted with KeyBERT and enriched with n-gram combinations and synonym substitutions to introduce semantically related expressions.
-      \item \textbf{General Query Rewriting (GQR)} -- this process is based on spaCy functionalities of lemmatization and stopword removal, producing a normalized lexical form of the query.
-      \item \textbf{Pseudo-Relevance Feedback (PRF)} -- top-ranked documents from an initial retrieval pass are analysed to extract additional high-frequency terms not present in the original query, which are then appended to form an expanded query.
-      \item \textbf{Query Decomposition} -- conjunctive or disjunctive queries are split into simpler sub-queries, each covering a distinct semantic aspect.
+      \item \textbf{Core Content Extraction (CCE)} -- a sequence-to-sequence transformation using the \textit{it5-small} model, that rewrites the query to capture its essential informational content while removing peripheral terms.
+      \item \textbf{Keyword Expansion (QE)} -- extraction of key terms with KeyBERT, followed by enrichment through n-gram combinations and synonym substitutions to introduce semantically related expressions.
+      \item \textbf{General Query Rewriting (GQR)} -- linguistic normalisation based on spaCy lemmatisation and stopword removal, yielding canonical query forms.
+      \item \textbf{Pseudo-Relevance Feedback (PRF)} -- top-ranked documents from an initial retrieval pass are analysed to extract additional high-frequency terms not present in the original query, which are then appended to the original query to form an expanded version.
+      \item \textbf{Query Decomposition} -- conjunctive or disjunctive queries are split into simpler sub-queries, each addressing a distinct semantic aspect.
 \end{itemize}
 
-These strategies can be applied individually or in combination (\texttt{strategy="all"}), producing a set of reformulated queries. Each reformulated query is submitted to the base retriever (Dense, BM25, Hybrid variants) to have the resulting candidate documents.\\
+These strategies can be applied individually or in combination (\texttt{strategy="all"}), producing a set of reformulated queries submitted to the base retriever (Dense, BM25, or Hybrid).\\
 
 
-\noindent\subsubsection*{\Large Rerank}
+\noindent\subsubsection*{\Large Reranking}
 
-Rerank is a post-retrieval refinement process that reorders an initial set of candidate documents according to a more precise relevance estimation. In our implementation, this stage operates as a wrapper over a base retriever (Dense, BM25, or Hybrid) and uses a transformer-based cross-encoder model (\textit{cross-encoder/ms-marco-MiniLM-L-6-v2}) to jointly encode the query and each candidate document, producing a contextual relevance score. Unlike the base retriever, which typically evaluates query–document similarity using independent embeddings or lexical term matching, the cross-encoder considers full cross-attention between query and document tokens, enabling a richer semantic alignment.
+Finally, a \textit{reranking} stage was introduced to refine retrieval outcomes. Reranking is a post-retrieval process that reorders an initial set of candidate documents based on a more precise estimation of their relevance. In our implementation, this component operates as a wrapper around a base retriever (Dense, BM25, or Hybrid) and uses a transformer-based cross-encoder model (\textit{cross-encoder/ms-marco-MiniLM-L-6-v2}) to jointly encode the query and each candidate document, assigning a contextual relevance score. Unlike the base retriever, which typically evaluates query–document similarity using independent embeddings or lexical term matching, the cross-encoder considers full cross-attention between query and document tokens, thereby capturing finer semantic relationships.
 
-At runtime, the reranker receives the top-N candidates from the base retriever (with N controlled by \texttt{max\_rerank\_candidates}, set to 50), tokenizes each query–document pair, and performs inference in batches with mixed-precision support when available. The raw model outputs are interpreted as relevance scores, and candidates are sorted accordingly, producing a final top-k list with improved ordering accuracy.
+At runtime, the reranker receives the top-N candidates (with \texttt{N} = 50) from the base retriever, tokenises each query–document pair, and performs inference in batches with mixed-precision support when available. The final output consists of a top-k ranked list reordered by cross-encoder scores. This stage provided a more precise estimation of relevance, compensating for weaknesses in both dense and sparse retrieval alone.
 
 
 \section{Generation}
@@ -148,7 +153,7 @@ The generation phase employs Mistral NeMo,\footnote{\url{https://web.archive.org
       \item ability to handle long context windows -- e.g., up to 128 thousands tokens, which is sufficient for processing multiple retrieved chunks.
 \end{itemize}
 
-Among available open-source LLMs evaluated -- e.g., LLaMA 3, OpenAI, Falcon --, only Mistral NeMo satisfied all criteria in terms of language coverage, response control, and reproducibility, while also providing infrastructure for model fine-tuning and evaluation in research contexts.\footnote{For an overview between open-source and proprietary solutions, see: \textcite{noauthor_open_2025}.}
+Among available open-source LLMs evaluated -- e.g., LLaMA 3, OpenAI, Falcon --, only Mistral NeMo satisfied all criteria in terms of language coverage, response control, and reproducibility, while also providing infrastructure for embeddings fine-tuning and evaluation in research contexts.\footnote{For an overview between open-source and proprietary models, read \textcite{noauthor_open_2025}.}
 
 The generation module is designed to produce fluent, context-aware answers with inline citations. It uses a custom prompt template that includes system instructions (see \autoref{sec:prompt_engineering}), user query, top-k retrieved chunks (grouped and cited), chat history and memory (to support context-aware follow-up).
 
@@ -164,84 +169,115 @@ Responses are post-processed to verify the inclusion of inline citations, langua
 \subsection{Prompt Engineering Techniques} \label{sec:prompt_engineering}
 The system uses structured prompt engineering to ensure accurate, traceable, and contextually coherent answers. The prompt template is dynamically generated with the following components:
 
-\subsubsection*{System Instructions, Boundaries and Constraints}
-A custom system message (\autoref{fig:system_prompt}) is injected at the top of the prompt to guide the model’s behavior. This message instructs the system to enforce neutrality in its answers, prioritise relevant and verifiable information, and include inline citations in square brackets that correspond to metadata entries. It also explicitly discourages hallucinations and speculative responses.
+\noindent\subsubsection*{\large System Instructions, Boundaries and Constraints}
+A custom system message (\autoref{lst:system_prompt}) is injected at the top of the prompt to guide the model’s behavior. This message instructs the system to enforce neutrality in its answers, prioritise relevant and verifiable information, and include inline citations in square brackets that correspond to metadata entries. It also explicitly discourages hallucinations and speculative responses.
 
-\begin{figure}[H]
-\begin{Verbatim}[breaklines=true]
-   system_content = """
-        Sei un assistente virtuale incaricato di rispondere a domande sul manuale operativo del Geoportale Nazionale per l'Archeologia (GNA), gestito dall'Istituto Centrale per il Catalogo e la Documentazione (ICCD).
+\vspace{0.6em}
+\begin{lstlisting}[breaklines=true,
+                  frame=none,
+                   caption={System prompt specifying assistant constraints and response instructions.},
+                   captionpos=b,
+                   label={lst:system_prompt}]
+system_content = """
+    Sei un assistente virtuale incaricato di rispondere a domande sul manuale operativo del Geoportale Nazionale per l'Archeologia (GNA), gestito dall'Istituto Centrale per il Catalogo e la Documentazione (ICCD).
 
-        Segui sempre queste regole:
-        1. Non rispondere a una domanda con un'altra domanda.
-        2. Rispondi **sempre** in italiano, indipendentemente dalla lingua della domanda, a meno che l'utente non richieda esplicitamente un'altra lingua.
-        3. Cita le fonti utilizzando la notazione [numero] dove:
-            - Le fonti sono fornite nel contesto della domanda e sono numerate in ordine crescente;
-            - Usa numeri diversi per fonti diverse;
-            - Non includere mai l'URL nel corpo della risposta;
-        4. Alla fine della risposta, aggiungi un elenco di riferimenti con il seguente formato, su righe separate:
-            [ID] URL_completo
-        5. Se non hai informazioni sufficienti per rispondere, rispondi "Non ho informazioni sufficienti".
+    Segui sempre queste regole:
+    1. Non rispondere a una domanda con un'altra domanda.
+    2. Rispondi **sempre** in italiano, indipendentemente dalla lingua della domanda, a meno che l'utente non richieda esplicitamente un'altra lingua.
+    3. Cita le fonti utilizzando la notazione [numero] dove:
+        - Le fonti sono fornite nel contesto della domanda e sono numerate in ordine crescente;
+        - Usa numeri diversi per fonti diverse;
+        - Non includere mai l'URL nel corpo della risposta;
+    4. Alla fine della risposta, aggiungi un elenco di riferimenti con il seguente formato, su righe separate:
+        [ID] URL completo
+    5. Se non hai informazioni sufficienti per rispondere, rispondi "Non ho informazioni sufficienti".
 
-        Le tue risposte devono essere sempre:
-        - Disponibili, professionali e naturali
-        - Grammaticalmente corrette e coerenti
-        - Espresse con frasi semplici, evitando formulazioni complesse o frammentate
-        - Complete e chiare, evitando di lasciare domande senza risposta
-        """
-\end{Verbatim}
-\caption{System prompt specifying assistant constraints and response instructions.}\label{fig:system_prompt}
-\end{figure}
+    Le tue risposte devono essere sempre:
+    - Disponibili, professionali e naturali
+    - Grammaticalmente corrette e coerenti
+    - Espresse con frasi semplici, evitando formulazioni complesse o frammentate
+    - Complete e chiare, evitando di lasciare domande senza risposta
+"""
+\end{lstlisting}
+\vspace{0.5em}
 
-\subsubsection*{Dynamic Citation Handling}
+
+\noindent\subsubsection*{\large Dynamic Citation Handling}
 
 Each chunk passed to the LLM is numbered and grouped with its metadata (title, URL). When generating a response, Mistral is instructed to cite only the chunks used, ensuring traceability. Post-processing checks for unmatched citations or unreferenced metadata.
 
-This modular prompting strategy proved crucial for maintaining factual consistency while supporting multilingual input and long-form reasoning.
+This modular prompting strategy proves crucial for maintaining factual consistency while supporting multilingual input and long-form reasoning.
 
 
 \section{Evaluation Protocol}\label{sec:evaluation_protocol}
-Evaluation was conducted across two dimensions: 
+Evaluation was conducted across two complementary dimensions: 
 \begin{itemize}
-      \item \textbf{Quantitative}, using metrics such as Recall (R@), Mean Reciprocal Rank (MRR@), Normalized Discounted Cumulative Gain (nDCG@), Average Precision (AP@), and Latency to assess retrieval performance;
-      \item \textbf{Qualitative}, gathering user feedback on response relevance, fluency, completeness, and usability.
+      \item \textbf{Quantitative}, focusing on retrieval performance through metrics such as Recall (R@), Mean Reciprocal Rank (MRR@), Normalised Discounted Cumulative Gain (nDCG@), Average Precision (AP@), and Latency to assess retrieval performance;
+      \item \textbf{Qualitative}, assessing the perceived quality and usability of responses through human feedback.
 \end{itemize}
 
-This dual perspective follows the recognition that effective RAG-based chatbots require not only accurate retrieval and generation but also operational efficiency and adaptability \citep{akkiraju_facts_2024}. The evaluation process is designed to be iterative, allowing for continuous refinement of the system based on user interactions and performance metrics.
+This dual perspective reflects the understanding that effective RAG-based QASs require not only accurate retrieval and generation but also operational efficiency and adaptability in real-world contexts \citep{akkiraju_facts_2024}. To support continuous refinement, the evaluation was designed as an iterative process, with quantitative results informing system optimisation and qualitative insights guiding user-centred adjustments.
 
-The evaluation faced several structural limitations:
+All retrieval configurations (Dense, BM25, Hybrid, Query Rewriting, and Reranking variants) were evaluated under the same protocol, ensuring comparability of results across ablation studies.
+
+\subsection{Structural Limitations}
+
+The evaluation faced a number of structural constraints:
 \begin{itemize}
-      \item \textbf{Absence of a golden standard:} there was no authoritative, verified set of responses to serve as an absolute accuracy benchmark.
-      \item \textbf{No baseline system:} internal institutional tasks lacked comparable legacy solutions or predefined benchmarks.
-      \item \textbf{Lack of real users or domain experts:} the system was initially developed without direct input from actual users, limiting the applicability of findings. Human evaluation by real end-users was integrated later in the process.
-      \item \textbf{Limited applicability of traditional automated metrics:} common algorithmic measures such as BLEU, ROUGE, and METEOR are widely used in text generation but have been shown to be ineffective in dialogue and QA contexts \citep{deriu_survey_2020,liu_how_2016}.
+      \item \textbf{Absence of a gold standard:} there was no authoritative or verified set of annotated responses to serve as a benchmark of correctness.
+      \item \textbf{No baseline system:} internal institutional tasks had no legacy solutions or established benchmarks for direct comparison.
+      \item \textbf{Limited availability of domain experts:} during the early phases, development was conducted without input from real users or expert annotators; human feedback was integrated only at a later stage.
+      \item \textbf{Limited applicability of automated generation metrics:} common algorithmic measures such as BLEU, ROUGE, and METEOR, although widely applied in text generation, have been shown to be ineffective for dialogue and QA evaluation \citep{deriu_survey_2020,liu_how_2016}.
 \end{itemize}
 
-Given these limitations, ..... aligning with recommendations from recent RAG evaluation literature.
+These constraints mirror challenges identified in recent RAG evaluation literature, which emphasises the lack of standardised protocols and the importance of balancing intrinsic metrics with human-centred evaluation (Guo et al., 2023; Mehri and Eskenazi, 2020; Abeysinghe, 2024). Akkiraju et al. (2024) further highlight the need to assess both accuracy and efficiency, pointing to critical control points in the RAG pipeline where trade-offs between retrieval quality and latency emerge.
 
-
-In this phase several challenges arose due to the absence of standardised
-evaluation methods and benchmarks. The lack of a golden standard – a verified set of responses representing objective truth – made it difficult to comprehensively assess accuracy. Additionally, there were no predefined benchmarks for internal institutional tasks, nor a baseline system for comparison, as real users or domain experts were unavailable for testing at this stage. While taxonomies for LLM evaluation exist (Guo et al., 2023), they are not universally applicable to chatbot and QA assessment. Moreover,
-commonly used algorithmic metrics such as BLEU, ROUGE, and METEOR are
-considered ineffective for dialogue systems (Deriu et al., 2019; Liu et al., 2016), reinforcing the need for human evaluation as a complementing approach (Mehri and
-Eskenazi, 2020; Abeysinghe, 2024).
-
-Akkiraju (2024) fifteen RAG pipeline control points, empirical results on accuracy-latency tradeoffs between large and small LLMs.
 
 \subsection{Datasets}\label{sec:datasets}
 
-Two synthetic evaluation sets were created:
+Two synthetic evaluation sets were created to support systematic analysis:
 \begin{itemize}
-      \item \textbf{Single-hop dataset:} 508 queries designed to elicit single-document answers, each with a single gold document. This set tests the system's ability to retrieve and generate answers based on isolated chunks of information.
-      \item \textbf{Combined dataset:} 400 additional queries that require multi-hop reasoning, where answers are derived from multiple documents (2-4 chunks), for a total of 908 queries entries. This set evaluates the system's capacity to integrate information from various sources and generate coherent, contextually rich responses.
+      \item \textbf{Single-hop dataset:} containing 508 queries designed to elicit single-document answers, each with a single gold document (cf. \autoref{lst:single-hop-example}). This dataset tested the system's ability to retrieve and generate answers based on isolated chunks of information.
+      \item \textbf{Combined dataset:} containing 400 additional queries that require multi-hop reasoning, where answers are derived from multiple documents (2-4 chunks), for a total of 908 queries entries (cf. \autoref{lst:combined-set-example}). This dataset assessed the system's capacity to integrate information from various sources and generate coherent contextual responses.
 \end{itemize}
 
-Tasks:
+
+\begin{lstlisting}[frame=none,
+                   caption={JSON output format for single-hop dataset items.},
+                   captionpos=b,
+                   label={lst:single-hop-example},
+  xleftmargin=0.2\textwidth,
+  xrightmargin=0.2\textwidth]
+{
+  "question": "<Italian question>",
+  "relevant_docs": ["<chunk_id>"],
+  "document_content": "<chunk text>"
+}
+\end{lstlisting}
+
+\vspace{0.6em}
+
+\begin{lstlisting}[frame=none,
+                   caption={JSON output format for combined dataset items, including single-hop and multi-hop questions.},
+                   captionpos=b,
+                   label={lst:combined-set-example},
+  xleftmargin=0.05\textwidth,
+  xrightmargin=0.05\textwidth]
+{
+  "question": "<Italian question>",
+  "relevant_docs": ["<chunk_id_1>", "<chunk_id_2>", "..."],
+  "document_content": ["<text_1>", "<text_2>", "..."],
+  "is_multihop": false|true,
+  "num_docs": 1|2|3|4
+}
+\end{lstlisting}
+\vspace{0.6em}
+
+Together, the datasets provided balanced coverage of both simple and complex retrieval scenarios. In both cases, questions were LLM-generated directly from the chunks corpus, with explicit prompt constraints to ensure grounding in the available content.
 
 
 \subsection{Metrics}\label{sec:metrics}
 
-\citep{liu_how_2016} for not using automed metrics like BLEU, ROUGE, etc.
 
 \begin{itemize}
     \item R@5 (Recall at 5): Measures the fraction of relevant documents retrieved in the top 5 results.
@@ -251,20 +287,20 @@ Tasks:
     \item Latency: Average retrieval time per query (in seconds).
 \end{itemize}
 
-\subsection{Experimental Setup for Ablation Studies}
-Describe the retrieval configurations tested (Dense, BM25, Hybrid + Weighted RRF, Hybrid + Score-blend) and how they differ.
-\begin{itemize}
-    \item Dense: Uses dense vector embeddings for retrieval.
-    \item BM25: Employs the BM25 algorithm for traditional keyword-based retrieval.
-    \item Hybrid + Weighted RRF: Combines dense and BM25 results using a weighted Reciprocal Rank Fusion (RRF) strategy.
-    \item Hybrid + Score-blend: Merges scores from both methods using a custom blending function.
-    \item Query Rewrite: Applies query rewriting to improve retrieval relevance.
-    \item Rerank: Applies a reranking step to refine the top results based on relevance.
-\end{itemize}
-Ablations tested the effect of enabling/disabling query rewriting and reranking across both datasets, measuring R@5, MRR, nDCG@5, AP@5, and latency.
-The design aligns with Akkiraju et al.’s emphasis on control-point evaluation, ensuring that performance changes can be tied to specific retrieval and orchestration steps rather than observed only at the output level.
+\subsubsection*{Reproducibility Metadata}
 
-Note whether query rewriting and reranking were applied in each configuration, as shown in your table.
+Each evaluation run stores a machine-readable report (JSON) capturing: dataset name (single-hop / multi-hop), creation timestamp (UTC), orchestrator and model identifiers (Mistral API model name), retrieval top-k and candidate-k settings, batch size, and device configuration. These artefacts enable precise traceability of conditions across ablation configurations (Dense, BM25, Hybrid, Query Rewriting variants, and Reranking).
+
+\subsection{Qualitative Assessment}
+To complement intrinsic metrics, qualitative evaluation focused on dimensions more directly linked to user experience:
+\begin{itemize}
+      \item \textbf{Relevance:} Whether the generated answer addressed the query meaningfully.
+      \item \textbf{Fluency:} Linguistic naturalness and readability of responses.
+      \item \textbf{Completeness:} Coverage of the key information needed to satisfy the query.
+      \item \textbf{Usability:} Perceived usefulness of the system as an interactive tool.
+\end{itemize}
+
+Human feedback was collected using a lightweight rating interface (3-point Likert-scale scoring), later exported as structured datasets for analysis. Although limited in scale, this qualitative perspective provided insights into aspects of response quality that purely algorithmic metrics could not capture, particularly in relation to user trust and system transparency.
 
 
 

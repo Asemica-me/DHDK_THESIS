@@ -1,10 +1,18 @@
 \chapter{Results}
 \label{chap:results}
-\pdfcomment{WIP}
 \begin{spacing}{1.5}
 
+This chapter presents the results with regards to the evaluation of the retrieval methods applied to the test datasets. We compare various configurations, including query rewriting and reranking, across single-hop and combined datasets.
 
-\section{Ablation Studies}\label{sec:retrieval_ablation}
+Briefly restate the test dataset size (400 queries) and the methodology adopted (automatic question generation, retrieval evaluation).
+Note the dual evaluation approach (intrinsic retrieval metrics + qualitative)
+
+compare prototype vs. full-scale implementation but HOW????
+
+We conducted a series of experiments to evaluate the performance of different retrieval methods, including dense, BM25, and hybrid approaches. The results are summarized in \autoref{tab:benchmark}, which shows the retrieval effectiveness measured by Recall@5 (R@5), Mean Reciprocal Rank (MRR), Normalized Discounted Cumulative Gain at 5 (nDCG@5), Average Precision at 5 (AP@5), and latency per query.
+
+
+\section{Ablation Studies and Retrieval Performance}\label{sec:retrieval_ablation}
 
 
 \begin{table}[H]
@@ -40,13 +48,13 @@ Hybrid                        &          &  &  &  &  &  &  &  &  &  &  &      \\
 \bottomrule
 \end{tabular}%
 }
-\caption{Results for different retrieval methods on test datasets. Best per column is bold and the second-best is underlined. The latency is measured in seconds per query.}
+\caption{Results for different retrieval methods on the test datasets. Best per column is bold and the second-best is underlined. Latency is measured in seconds per query. Reranking is performed using the \textit{cross-encoder/ms-marco-MiniLM-L-6-v2} model.}
 \label{tab:benchmark}
 \end{table}
 
 Provide a short interpretation — e.g., which configuration excels in which scenario, trade-offs between speed and accuracy, and performance differences between single-hop and combined datasets.
 
-\section{Qualitative analysis}
+\section{Qualitative Analysis}
 Results showed that:
 
 65\% of answers were rated as “Relevant”,
@@ -69,5 +77,12 @@ the lightweight UI,
 
 and the multilingual support.
 
+
+Include observations about citation traceability, coherence of generated answers.
+
+\section{Summary of Findings}
+Neutral recap of what the system achieved (e.g., scalability, stability, acceptable latency).
+
+Highlight consistency (or not) in performance with growing dataset size.
 
 \end{spacing}

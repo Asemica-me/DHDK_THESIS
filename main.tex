@@ -13,6 +13,7 @@
 \usepackage[bottom]{footmisc}
 \usepackage{ragged2e}
 \usepackage{ltablex}
+\usepackage[shortlabels]{enumitem}
 \keepXColumns
 \renewcommand\tabularxcolumn[1]{>{\noindent\justifying\arraybackslash}m{#1}}
 
@@ -31,6 +32,7 @@
     linkcolor=black,        % color of internal links (e.g., TOC)
     citecolor=blue
 ]{hyperref}
+\usepackage{listings}
 \usepackage[nameinlink,noabbrev]{cleveref}
 \usepackage{array}
 \usepackage[nottoc]{tocbibind}
@@ -118,6 +120,12 @@
 % Add List of Figures/Tables to TOC
 \renewcommand{\listfigurename}{List of Figures}
 \renewcommand{\listtablename}{List of Tables}
+\renewcommand{\lstlistlistingname}{List of Code Examples}
+
+\usepackage{etoolbox}
+\pretocmd{\lstlistoflistings}{%
+  \addcontentsline{toc}{chapter}{\lstlistlistingname}%
+}{}{}
 
 \usepackage{pdfcomment}
 \begin{document}
@@ -192,6 +200,9 @@
 \listoffigures
 \clearpage
 \listoftables
+\clearpage
+\lstlistoflistings
+\clearpage
 
 \newpage
 \thispagestyle{empty} 
