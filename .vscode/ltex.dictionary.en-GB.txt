@@ -7,3 +7,4 @@ reranker
 catalographic
 Georeferenced
 Paleontological
+agentic
