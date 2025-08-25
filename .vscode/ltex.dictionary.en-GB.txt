@@ -1,0 +1,9 @@
+st
+Streamlit
+GNA
+reranking
+Contriever
+reranker
+catalographic
+Georeferenced
+Paleontological

@@ -1,0 +1,15 @@
+{
+      // LTeX+ core
+  "ltex.language": "en-GB",
+  "ltex.enabled": ["latex"],
+  "ltex.additionalRules.motherTongue": "it",
+  "ltex.enabledRules": [
+    "EN_GB_SIMPLE_REPLACE",   // pushes UK spellings
+    "MORFOLOGIK_RULE_EN_GB"   // GB dictionary
+  ],
+  "ltex.disableRules": [
+    "OXFORD_SPELLING_Z_NOT_S" // ensures -ise/-isation are OK
+  ],
+  "ltex.checkFrequency": "edit",   // or "save" if you prefer fewer squiggles
+  "ltex.diagnosticSeverity": "information",
+}

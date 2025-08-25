@@ -1,5 +1,6 @@
 \documentclass[a4paper,12pt, openany]{book}  % Book class for thesis 
 \usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
 \usepackage{graphicx}
 \usepackage{geometry}
 \geometry{left=2cm, right=2cm, top=2cm, bottom=2cm} 
@@ -33,6 +34,9 @@
     citecolor=blue
 ]{hyperref}
 \usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{adjustbox}
 \usepackage[nameinlink,noabbrev]{cleveref}
 \usepackage{array}
 \usepackage[nottoc]{tocbibind}
@@ -57,7 +61,6 @@
 \usetikzlibrary{shapes, arrows, positioning, calc, fit, shapes.geometric, arrows.meta, decorations.pathreplacing, patterns}
 \usepackage{pgfplots}
 \usepackage{fvextra}
-\usepackage{listings}
 \lstset{
   breaklines=true,
   basicstyle=\ttfamily\small,
@@ -215,6 +218,7 @@
 \renewcommand{\tableautorefname}{Tab.}
 \renewcommand{\chapterautorefname}{Chap.}
 \renewcommand{\sectionautorefname}{Sec.}
+\renewcommand{\subsectionautorefname}{Sec.}
 \makeatletter
 \renewcommand{\thefootnote}{\textsuperscript{\arabic{footnote}}}
 \renewcommand\@makefntext[1]{%
@@ -243,7 +247,7 @@
 In this study, all the experiments have been executed in Python 3.11.9 on a system equipped with an Intel Core i7-1185G7 CPU at 3.00 GHz, 16 GB of RAM, and integrated Intel Iris Xe Graphics with 128 MB of VRAM.\\ 
 
 
-\noindent The ablation studies were conducted on the \textit{singlehop} dataset, comprising 508 queries, and on the \textit{combined} dataset, comprising 908 queries in total (singlehop plus multi-hop questions). The retrieval index, implemented using FAISS, contained 801 document chunks with a length of 687 words (average: 91.83 words). Evaluation was carried out in batch mode with a batch size of 32, retrieving up to \texttt{candidate\_k} = 50 documents per query before applying top-k selection ($k$ = 5). For hybrid retrieval configurations, the RRF parameter was set to $k$ = 60, with dense and sparse weights both equal to 1.0, while $\alpha$ = 0.3.\\
+\noindent The ablation studies were conducted on the \textit{singlehop} dataset, comprising 508 queries, and on the \textit{combined} dataset, comprising 908 queries in total (singlehop plus multi-hop questions). The retrieval index, implemented using FAISS, contained 801 document chunks with a length of 687 words (average: 91.83 words). Evaluation was carried out in batch mode with a batch size of 32, retrieving up to \texttt{candidate\_k} = 50 documents per query before applying top-$k$ selection ($k$ = 5). For hybrid retrieval configurations, the RRF parameter was set to $k$ = 60, with dense and sparse weights both equal to 1.0, while $\alpha$ = 0.3.\\
 
 \noindent Additionally, the proposed approach was implemented using the following libraries: PyTorch, Hugging Face Transformers, SentenceTransformers, PEFT, spaCy, KeyBERT, NLTK, FAISS, Rank-BM25, and scikit-learn. These were complemented by supporting and utility packages such as NumPy, Pandas, Matplotlib, Streamlit, Pillow (PIL), BeautifulSoup (bs4), httpx, and the MistralAI API, as well as standard Python libraries including asyncio, concurrent.futures, collections, functools, and urllib.
 

@@ -7,7 +7,19 @@ Explain what metrics values ~\% indicate for the GNA QA system.
 
 Discuss trade-offs: precision vs. recall in heritage QA; speed vs. accuracy; LLM hallucination vs. retrieval grounding.
 
-\section{Strenghts}
+PROTOTYPE.
+
+Overall, the prototype established:
+
+the technical feasibility of combining dense retrieval with generative models for Italian-language queries;
+
+the practical utility of combining human and LLM-based evaluation in the absence of gold standards;
+
+the main bottlenecks, namely limited scalability, lack of chunk-level metadata control, and inefficiencies introduced by LangChain’s orchestration.
+
+LangChain was invaluable as scaffolding: it accelerated prototyping, unified stateful conversation with retrieval-augmented prompts, and smoothed integration with Mistral and Streamlit. Yet the same abstractions that sped up early development also hid critical details (error handling, call scheduling, metadata routing). Recognising this trade-off helped you carve out clearer module boundaries in the subsequent architecture and design an evaluation-first workflow that is easier to profile, ablate, and optimise.
+
+\section{Strengths}
 Scalable crawling and chunking pipeline.
 
 Transparent retrieval with source citations.
@@ -16,7 +28,11 @@ Lightweight implementation (CPU-friendly, deployable on Streamlit).
 
 \section{Weaknesses}
 
-\section{Relatio to Previous Work}
+Limited adaptability to domain shifts, Maintenance and update strategy: the system is not designed to easily adapt to changes in the domain or knowledge base, which could affect its performance as the underlying information evolves.
+
+Security and privacy considerations: the prototype does not address potential security vulnerabilities or data privacy concerns associated with handling user queries and sensitive information.
+
+\section{Relation to Previous Work}
 Compare findings with studies in the bibliography; Show how this project aligns with or diverges from existing QA and RAG applications.
 
 \section{Implications for Digital Humanities}

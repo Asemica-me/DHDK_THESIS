@@ -43,14 +43,14 @@ Paleontological sites & A specific level dedicated to paleontological sites is c
 \bottomrule
 \end{tabularx}
 \vspace{0.5em}
-\caption{Types of archaeological data sources integrated into the GNA.}
+\caption{Types of archaeological data sources integrated into Geoportale Nazionale per l'Archeologia.}
 \label{tab:gna_data_sources}
 \end{table}
 
-\noindent These sources, once georeferenced and structured, are integrated into the GNA using standardised metadata and visualization protocols, to allow users to view, search, and analyze information in a spatially accurate and coherent manner \citep{boi_il_2023, acconcia_pubblicazione_2023}.
+\noindent These sources, once georeferenced and structured, are integrated into the GNA using standardised metadata and visualization protocols, to allow users to view, search, and analyse information in a spatially accurate and coherent manner \citep{boi_il_2023, acconcia_pubblicazione_2023}.
 
-\subsection{Stakeholders and Intended Users}
-The development of the GNA saw significant acceleration during the COVID-19 pandemic, which provided both the urgency and institutional impetus toward the creation of a unified digital platform for managing archaeological data nationwide. This initiative built upon years of prior collaboration between key stakeholders, including the Istituto Centrale per l’Archeologia (ICA) and the Istituto Centrale per il Catalogo e la Documentazione (ICCD), who had already developed a cataloging structure to document archaeological assessments and identified sites within the Sistema Informativo Generale del Catalogo (SiGECweb) \citep{calandra_il_2023, boi_il_2023}. The pandemic underscored the limitations of purely textual cataloging and catalyzed a shift toward a more dynamic and geospatially grounded approach, leading to the adoption of a GIS-based framework better suited for preventive archaeology and territorial planning. The result was a consolidated national infrastructure designed not only to support compliance with cultural heritage protection regulations but also to enable data harmonization across previously fragmented practices \citep{acconcia_pubblicazione_2023}.
+\subsection{Stakeholders and Intended Users}\label{sec:gna_plugin}
+The development of the GNA saw significant acceleration during the COVID-19 pandemic, which provided both the urgency and institutional impetus toward the creation of a unified digital platform for managing archaeological data nationwide. This initiative built upon years of prior collaboration between key stakeholders, including the Istituto Centrale per l’Archeologia (ICA) and the Istituto Centrale per il Catalogo e la Documentazione (ICCD), who had already developed a cataloging structure to document archaeological assessments and identified sites within the Sistema Informativo Generale del Catalogo (SiGECweb) \citep{calandra_il_2023, boi_il_2023}. The pandemic underscored the limitations of purely textual cataloguing and catalysed a shift toward a more dynamic and geospatially grounded approach, leading to the adoption of a GIS-based framework better suited for preventive archaeology and territorial planning. The result was a consolidated national infrastructure designed not only to support compliance with cultural heritage protection regulations but also to enable data harmonization across previously fragmented practices \citep{acconcia_pubblicazione_2023}.
 
 The GNA is primarily intended for use by:
 \begin{itemize}
@@ -61,7 +61,7 @@ The GNA is primarily intended for use by:
 
 \noindent For instance, major entities like TERNA (the national electricity grid operator), RFI (the Italian railway network), or the Milan Metro rely on the platform to assess archaeological constraints before launching construction projects. The platform helps them identify archaeological sites, deposits, and or protected areas that must be preserved. The GNA also supports compliance with European and Italian open data and transparency regulations, guaranteeing both civic access and the protection of intellectual property, as per national FOIA and EU directives\footnote{The FOIA (Freedom of Information Act) Guidelines are documents issued by the Italian National Anti-Corruption Authority (ANAC) to clarify and guide the implementation of the right to generalised civic access in Italy. The guidelines -- especially those from 2016 -- define the limits and exclusions to access, as well as specify the publication and transparency obligations for public administrations.\\See more at \url{https://foia.gov.it/normativa}.\nocite{noauthor_normativa_2016}} \citep{falcone_dematerializzazione_2023}.
 
-Central to the system is a QGIS\footnote{QGIS is a free, open-source Geographic Information System (GIS) software used for creating, managing, and analyzing geospatial data.} template that standardises data entry and visualization. This tool supports efficient integration of local information into the national infrastructure, offering users a unified territorial overview. It enables the comparison of diverse archaeological records, improves the quality of evaluations, and promotes transparency across institutional workflows. Thanks to its open-source foundation and modular structure, the GNA continues to evolve based on user feedback, maintaining a shared national standard while accommodating diverse local contributions \citep{calandra_il_2023, boi_il_2023}.
+Central to the system is a QGIS\footnote{QGIS is a free, open-source Geographic Information System (GIS) software used for creating, managing, and analysing geospatial data.} template that standardises data entry and visualization. This tool supports collaborative integration of local information into the national infrastructure, offering users a unified territorial overview. It enables the comparison of diverse archaeological records, improves the quality of evaluations, and promotes transparency across institutional workflows. Thanks to its open-source foundation and modular structure, the GNA continues to evolve based on user feedback, maintaining a shared national standard while accommodating diverse local contributions \citep{calandra_il_2023, boi_il_2023}.
 
 \subsection{User Manual and Operational Support}
 To guide users in correctly navigating the system, a collaboratively maintained user manual (\textit{manuale operativo}) is made available online through a MediaWiki environment hosted on the GNA server \citep{gna_wiki_2024}. This living document offers structured instructions on all aspects of data input, visualization, and management within the GNA platform.
@@ -76,7 +76,7 @@ In response to the challenges users face in quickly locating relevant informatio
 \subsection{Functional Requirements}
 Functional requirements define what the system must do to deliver value to users and stakeholders:
 \begin{itemize}
-    \item \textbf{Natural language understanding (NLU):} The system must interpret user queries phrased in natural language, supporting diverse question types (factoid, list, explanatory, etc.) and handling both simple and complex multi-part queries.
+    \item \textbf{Natural language understanding (NLU):} The system must interpret user queries phrased in natural language, supporting diverse question types (factoid, list, explanatory, etc.) and handling both simple and complex multipart queries.
     \item \textbf{Information retrieval:} The system must retrieve relevant passages or document segments from the GNA knowledge base, using vector similarity search over chunked content.
     \item \textbf{Context-aware answer generation:} The system must synthesise coherent, context-aware answers using RAG, drawing from retrieved passages and maintaining reference to original sources.
     \item \textbf{Source attribution and citation:} Answers must include traceable citations (e.g., URLs) to ensure transparency and support verification.
@@ -96,14 +96,14 @@ Non-functional requirements define how the system should operate to ensure quali
     \item \textbf{Security and privacy:} The system must securely handle sensitive data. User interactions should be anonymised, and no personally identifiable information should be stored.
     \item \textbf{Maintainability and extensibility:} The architecture must support modular updates (e.g., changing retrieval strategies), and facilitate maintenance, debugging, and future enhancements.
     \item \textbf{Resource efficiency:} The solution must operate efficiently within the limits of available hardware, minimising memory and compute consumption, especially for cloud deployment scenarios without GPU access.
-    \item \textbf{User accessibility:} The web interface must be usable by non-technical users and meet accessibility standards (e.g., clear labeling, visual feedback, keyboard navigation).
+    \item \textbf{User accessibility:} The web interface must be usable by non-technical users and meet accessibility standards (e.g., clear labelling, visual feedback, keyboard navigation).
     \item \textbf{Continuous evaluation:} The system must support automated and human-in-the-loop evaluation methodologies, generating reports on retrieval accuracy, answer quality, and user satisfaction over time.
 \end{itemize}
 
 \citep{abu_shawar_chatbots_2007,arslan_survey_2024,gupta_comprehensive_2024}\\
 
 
-The following chapter details the methodological framework and practical steps undertaken during the development of the system, providng in-depth explanation of the design choices, technical architecture, data preparation, implementation and evaluation processes.
+The following chapter details the methodological framework and practical steps undertaken during the development of the system, providing in-depth explanation of the design choices, technical architecture, data preparation, implementation and evaluation processes.
 
 
 \end{spacing}

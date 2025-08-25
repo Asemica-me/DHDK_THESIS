@@ -35,15 +35,23 @@ AI    & Artificial intelligence & The field of computer science dedicated to cre
 \cmidrule(lr){1-3}
 DH    & Digital humanities & An interdisciplinary field that applies computational methods and tools to humanities research, analysis, and dissemination. \\
 \cmidrule(lr){1-3}
-QA    & Question answering & A technology or task in which a system provides precise answers to questions posed in natural language. \\
+IR    & Information retrieval & The field of computer science that focuses on finding relevant information in large collections of data, typically unstructured text (like documents, web pages, or articles). \\
+\cmidrule(lr){1-3}
+NLP   & Natural language processing & The area of AI focused on enabling computers to understand, interpret, and generate human language. \\
+\cmidrule(lr){1-3}
+NLG   & Natural language generation & The process of automatically generating human-like text from structured data or models, often used in chatbots and content creation. \\
+\cmidrule(lr){1-3}
+NL & Natural language & The everyday language used by humans for communication, which NLP systems aim to understand and generate. \\
+\cmidrule(lr){1-3}
+QA    & Question answering & A task in NLP and IR that focuses on building systems capable of automatically answering questions posed in natural language. \\
 \cmidrule(lr){1-3}
 QAS   & Question-answering system & A system designed to answer questions automatically by processing natural language input, often using methods from IR and NLP. \\
 \cmidrule(lr){1-3}
 RAG   & Retrieval-augmented generation & An approach combining information retrieval with generative models, allowing AI to reference external data sources when generating answers. \\
 \cmidrule(lr){1-3}
-LLM   & Large language model & A neural network trained on massive text corpora to generate or understand human language, such as GPT or BERT. \\
+LLM   & Large language model & A type of neural network trained on massive text corpora to understand and generate human language. \\
 \cmidrule(lr){1-3}
-IR    & Information retrieval & The process of searching, retrieving, and ranking relevant documents or data from large collections based on user queries. \\
+API  & Application programming interface & A set of protocols and tools that allow different software applications to communicate and interact with each other. \\
 \cmidrule(lr){1-3}
 GNA   & Geoportale Nazionale Archeologia & Italy's institutional repository for archaeological data, hosting extensive documentation and resources related to the country's cultural heritage. \\
 \cmidrule(lr){1-3}
@@ -61,19 +69,13 @@ ICCD & Istituto Centrale per il Catalogo e la Documentazione & The Central Insti
 \cmidrule(lr){1-3}
 SiGECweb &  Sistema Informativo Generale del Catalogo & A web platform that handles every stage of cultural heritage cataloguing, from standard creation and code assignment to cataloguing diverse assets and publishing records online for public access. \\
 \cmidrule(lr){1-3}
-GIS & Geographic information system & A computer system, including software and hardware, designed to capture, store, manipulate, analyze, manage, and present spatial or geographic data, often used in archaeology for mapping and spatial analysis. \\
+GIS & Geographic information system & A computer system, including software and hardware, designed to capture, store, manipulate, analyse, manage, and present spatial or geographic data, often used in archaeology for mapping and spatial analysis. \\
 \cmidrule(lr){1-3}
-QGIS &  & A particular GIS software that is free and open-source. \\
+QGIS & Quantum GIS & A particular GIS software that is free and open-source. \\
 \cmidrule(lr){1-3}
 GLAM   & Galleries, Libraries, Archives and Museums & A collective term for institutions that preserve and provide access to cultural heritage in the public interest. \\
 \cmidrule(lr){1-3}
 KB    & Knowledge base & A structured collection of information or data, often used to support reasoning, search, or retrieval in AI systems. \\
-\cmidrule(lr){1-3}
-NLP   & Natural language processing & The area of AI focused on enabling computers to understand, interpret, and generate human language. \\
-\cmidrule(lr){1-3}
-NLG   & Natural language generation & The process of automatically generating human-like text from structured data or models, often used in chatbots and content creation. \\
-\cmidrule(lr){1-3}
-NL & Natural language & The everyday language used by humans for communication, which NLP systems aim to understand and generate. \\
 \cmidrule(lr){1-3}
 ML    & Machine learning & A subset of AI that involves training algorithms to recognise patterns and make decisions based on data. \\
 \cmidrule(lr){1-3}
@@ -91,11 +93,13 @@ RDF   & Resource Description Framework & A standard model for data interchange o
 \cmidrule(lr){1-3}
 SQL   & Structured Query Language & A standard programming language used for managing and manipulating relational databases, allowing users to query, insert, update, and delete data. \\
 \cmidrule(lr){1-3}
-SPARQL &  & A query language and protocol used to retrieve and manipulate data stored in Resource Description Framework (RDF) format, commonly used for querying knowledge graphs. \\
+SPARQL & SPARQL Protocol and RDF Query Language & A query language and protocol used to retrieve and manipulate data stored in RDF format, commonly used for querying knowledge graphs. \\
 \cmidrule(lr){1-3}  
-ontology &  & A formal representation of a set of concepts within a domain and the relationships between those concepts, used to enable knowledge extraction, sharing and reuse. \\
+Ontology &  & A formal representation of a set of concepts within a domain and the relationships between those concepts, used to enable knowledge extraction, sharing and reuse. \\
 \cmidrule(lr){1-3}
 JSON  & JavaScript Object Notation & A lightweight data interchange format that is easy for humans to read and write, and easy for machines to parse and generate, often used for data exchange in web applications. \\
+\cmidrule(lr){1-3}
+CSV & Comma-Separated Values & A text file format used to store tabular data (numbers and text) where each row represents a record, and each column (field) is separated by a comma. \\
 \cmidrule(lr){1-3}
 TREC  & Text REtrieval Conference & An ongoing series of workshops and evaluations focused on advancing research in text retrieval and related tasks. \\
 \cmidrule(lr){1-3}
@@ -105,7 +109,7 @@ RNN   & Recurrent Neural Network & A type of neural network architecture designe
 \cmidrule(lr){1-3}
 LSTM  & Long Short-Term Memory & A special kind of RNN capable of learning long-range dependencies, often used for tasks like language modeling or time series prediction. \\
 \cmidrule(lr){1-3}
-CRF   & Conditional Random Field & A probabilistic graphical model used for structured prediction, especially in NLP tasks such as sequence labeling. \\
+CRF   & Conditional Random Field & A probabilistic graphical model used for structured prediction, especially in NLP tasks such as sequence labelling. \\
 \cmidrule(lr){1-3}
 SVM   & Support Vector Machine & A supervised machine learning algorithm used for classification and regression, which finds the optimal boundary between classes in the feature space. \\
 \cmidrule(lr){1-3}
@@ -115,29 +119,37 @@ GloVe  & Global Vectors for Word Representation & An unsupervised learning algor
 \cmidrule(lr){1-3}
 BERT  & Bidirectional Encoder Representations from Transformers & A pre-trained language model that uses the Transformer architecture to understand the context of words in a sentence by considering both left and right contexts simultaneously. \\
 \cmidrule(lr){1-3}
-GPT   & Generative Pre-Trained Transformer & A family of LLMs based on the Transformer architecture.\\
+OpenAI & & An artificial intelligence research and deployment company based in San Francisco (USA). \\
+\cmidrule(lr){1-3}
+GPT   & Generative Pre-Trained Transformer & A family of LLMs developed by OpenAI.\\
 \cmidrule(lr){1-3}
 ChatGPT & Generative Pre-trained Transformer & An application of the GPT architecture developed by OpenAI, fine-tuned for conversational interaction and instruction following, and released to the public in November 2022. \\
 \cmidrule(lr){1-3}
 T5    & Text-to-Text Transfer Transformer & T5 is a series of LLMs developed by Google AI and introduced in 2019. \\
 \cmidrule(lr){1-3}
-E5    & Embedding-based model for information retrieval & A family of models designed to generate high-quality embeddings for text, improving retrieval performance in IR tasks. \\
+KeyBERT & & A keyword extraction technique using BERT embeddings to generate the keywords and keyphrases most similar to a document. \\
 \cmidrule(lr){1-3}
-BGE   & BAAI general embedding & A family of models designed to generate high-quality embeddings for text, improving retrieval performance in IR tasks. \\
+BAAI & Beijing Academy of Artificial Intelligence & A Chinese research institute that develops and releases cutting-edge AI models. BAAI is the organization behind BGE, and also known for other large-scale AI projects. \\
 \cmidrule(lr){1-3}
-intfloat & intfloat/e5 & A specific implementation of the E5 model, optimised for generating embeddings for information retrieval tasks. \\
+BGE   & BAAI General Embedding & A family of embedding models designed for dense retrieval and semantic search. \\
+\cmidrule(lr){1-3}
+Intfloat & Intelligent Floating Point & A research group and organization that develops open-source AI models for NLP. \\
+\cmidrule(lr){1-3}
+E5    & Embedding from Explicitly-Explained Supervision & A family of text embedding models developed by the research group Intfloat. \\
+\cmidrule(lr){1-3}
+Intfloat/e5 & & A family of models available on Hugging Face and based on the implementation of \textit{E5}. \\
 \cmidrule(lr){1-3}
 LLM-embedder &   & A model designed to generate embeddings for text using large language models, enhancing the quality of semantic representations for retrieval tasks. \\
 \cmidrule(lr){1-3}
-embeddings &    & Dense vector representations of text that capture semantic meaning, used in various NLP tasks including retrieval and classification. \\
+Embeddings &    & Dense vector representations of text that capture semantic meaning, used in various NLP tasks including retrieval and classification. \\
 \cmidrule(lr){1-3}
-chunking &    & The process of breaking down text into smaller, manageable pieces or ``chunks'' to facilitate processing and analysis in NLP tasks. \\
+Chunking &    & The process of breaking down text into smaller, manageable pieces or ``chunks'' to facilitate processing and analysis in NLP tasks. \\
 \cmidrule(lr){1-3}
-vector database &    & A specialised database designed to store and retrieve high-dimensional vectors efficiently, often used in RAG systems for managing embeddings. \\
+Vector database &    & A specialised database designed to store and retrieve high-dimensional vectors efficiently, often used in RAG systems for managing embeddings. \\
 \cmidrule(lr){1-3}
-retriever &    & A component of a system responsible for searching and retrieving relevant documents or information from a database or corpus based on user queries. \\
+Retriever &    & A component of a system responsible for searching and retrieving relevant documents or information from a database or corpus based on user queries. \\
 \cmidrule(lr){1-3}
-ranking function &    & A mathematical function used to score and order documents based on their relevance to a given query, often employed in IR systems. \\
+Ranking function &    & A mathematical function used to score and order documents based on their relevance to a given query, often employed in IR systems. \\
 \cmidrule(lr){1-3}
 XML & eXtensible Markup Language & A markup language used to encode documents in a format that is both human-readable and machine-readable, often used for data interchange. \\
 \cmidrule(lr){1-3}
@@ -170,10 +182,14 @@ Self-RAG & Self-Retrieval-Augmented Generation & A variant of RAG where the syst
 \cmidrule(lr){1-3}
 RAGAS & Retrieval-Augmented Generation with Adaptive Sampling & An advanced RAG approach that dynamically selects and retrieves the most relevant information based on the context of the query, improving the efficiency and accuracy of responses. \\
 \cmidrule(lr){1-3}
+AHE & Adaptive histogram equalization & A computer image processing technique designed to enhance contrast in pictures. Unlike standard histogram equalization, the adaptive approach divides the image into multiple regions, generates a separate histogram for each, and then redistributes the lightness values based on these localized histograms. \\
+\cmidrule(lr){1-3}
+CLAHE & Contrast limited AHE & A variant of adaptive histogram equalization in which the contrast amplification is limited, so as to reduce the problem of noise amplification. \\
+\cmidrule(lr){1-3}
 XAI & Explainable Artificial Intelligence & A field of AI focused on rendering the decision-making processes of AI systems transparent and understandable to humans, often used to build trust and accountability in AI applications. \\
 \cmidrule(lr){1-3}
-RAG-Chain & Retrieval-Augmented Generation Chain & A method that links multiple RAG components in a sequence. \\
+RAG-chain & Retrieval-Augmented Generation Chain & A method that links multiple RAG components in a sequence. \\
 \cmidrule(lr){1-3}
-ArCo & Italian Cultural Heritage knowledge graph & A knowledge graph representing Italian cultural heritage, providing structured information about historical sites, artifacts, and related entities. \\
+ArCo & Italian Cultural Heritage Knowledge Graph & A knowledge graph representing Italian cultural heritage, providing structured information about historical sites, artifacts, and related entities. \\
 \bottomrule
 \end{tabularx}

@@ -9,10 +9,27 @@ Note the dual evaluation approach (intrinsic retrieval metrics + qualitative)
 
 compare prototype vs. full-scale implementation but HOW????
 
-We conducted a series of experiments to evaluate the performance of different retrieval methods, including dense, BM25, and hybrid approaches. The results are summarized in \autoref{tab:benchmark}, which shows the retrieval effectiveness measured by Recall@5 (R@5), Mean Reciprocal Rank (MRR), Normalized Discounted Cumulative Gain at 5 (nDCG@5), Average Precision at 5 (AP@5), and latency per query.
+We conducted a series of experiments to evaluate the performance of different retrieval methods, including dense, BM25, and hybrid approaches. The results are summarized in \autoref{tab:benchmark}, which shows the retrieval effectiveness measured by Recall@5 (R@5), Mean Reciprocal Rank (MRR), Normalised Discounted Cumulative Gain at 5 (nDCG@5), Average Precision at 5 (AP@5), and latency per query.
 
 
-\section{Ablation Studies and Retrieval Performance}\label{sec:retrieval_ablation}
+\section{Prototyping Phase}
+
+A radar plot of the evaluation dimensions in \autoref{fig:proto_results} highlights this profile: strong alignment and topical accuracy, yet with opportunities for improvement in richness and expressivity.
+
+The prototype implementation offered an initial validation of the feasibility of a RAG-based QA system for the Geoportale Nazionale dell’Archeologia. Although limited in scope, it demonstrated that the architecture could effectively combine retrieval and generation within an interactive interface.
+
+The evaluation outcomes (\autoref{fig:proto_results}) indicate a high level of consistency (mean score close to 5) and strong topical relevance ($\approx$ 4.7). Fluency was also rated positively ($\approx$ 4.9), showing that the system could produce linguistically natural answers. By contrast, completeness achieved slightly lower scores ($\approx$ 4.6), suggesting that responses occasionally lacked sufficient depth or coverage of the available information. Overall, the radar profile highlights a system capable of producing reliable and coherent answers, while leaving room for improvement in expressivity and informational richness.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/radar.png} 
+  \caption{Evaluation results for prototype version of GNA QA system.}
+  \label{fig:proto_results}
+\end{figure}
+
+Performance testing showed that embedding generation required an average of 31.2 seconds, while query response times averaged 1.26 seconds. Although the latter figure is acceptable for interactive applications, efficiency remains suboptimal compared to production-ready systems, and response delays may accumulate under higher traffic conditions.
+
+\section{Retrieval Performance and Ablation Studies}\label{sec:retrieval_ablation}
 
 
 \begin{table}[H]
