@@ -30,6 +30,9 @@ Lightweight implementation (CPU-friendly, deployable on Streamlit).
 
 Limited adaptability to domain shifts, Maintenance and update strategy: the system is not designed to easily adapt to changes in the domain or knowledge base, which could affect its performance as the underlying information evolves.
 
+EVALUATION PROTOCOL.
+This methodology introduces its own limitations. Since questions were generated with the help of an LLM directly from document chunks, there is a risk of lexical leakage: wording and uncommon tokens in the question often mirror those of the gold chunk. This can unintentionally bias the retrieval stage, making the task easier for dense retrievers, which rely on semantic embeddings, while disadvantaging lexical retrievers, which benefit less from surface similarity. Moreover, the resulting queries may not faithfully reflect real user behaviour, which typically involves synonyms, abbreviations, typos, ellipses, or more implicit forms of reasoning. As such, while the synthetic datasets provided a controlled and reproducible environment for system evaluation, they should be interpreted as diagnostic tools rather than as complete proxies for deployment scenarios.
+
 Security and privacy considerations: the prototype does not address potential security vulnerabilities or data privacy concerns associated with handling user queries and sensitive information.
 
 \section{Relation to Previous Work}

@@ -1,0 +1,1 @@
+{"rule":"NEEDS_FIXED","sentence":"^\\QIdentifying these leaking objects required targeted profiling, after which caching decorators and object reinitialisation strategies were introduced to reduce overhead.\\E$"}

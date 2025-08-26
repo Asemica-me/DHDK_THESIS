@@ -32,8 +32,6 @@
     howpublished = {\url{https://github.com/kermitt2/grobid}},
     publisher = {GitHub},
     year = {2008--2025},
-    archivePrefix = {swh},
-    eprint = {1:dir:dab86b296e3c3216e2241968f0d63b68e8209d3c}
 }
 
 @misc{li_death_2024,
@@ -1964,6 +1962,88 @@ Retrieval {System} for {Biomedical} {Question} {Answering}},
 	author = {Glantz, Wenqi},
 	year = {2024},
 }
+
+
+@misc{dinan_wizard_2019,
+	title = {Wizard of {Wikipedia}: {Knowledge}-{Powered} {Conversational} agents},
+	shorttitle = {Wizard of {Wikipedia}},
+	url = {http://arxiv.org/abs/1811.01241},
+	doi = {10.48550/arXiv.1811.01241},
+	abstract = {In open-domain dialogue intelligent agents should exhibit the use of knowledge, however there are few convincing demonstrations of this to date. The most popular sequence to sequence models typically "generate and hope" generic utterances that can be memorized in the weights of the model when mapping from input utterance(s) to output, rather than employing recalled knowledge as context. Use of knowledge has so far proved difficult, in part because of the lack of a supervised learning benchmark task which exhibits knowledgeable open dialogue with clear grounding. To that end we collect and release a large dataset with conversations directly grounded with knowledge retrieved from Wikipedia. We then design architectures capable of retrieving knowledge, reading and conditioning on it, and finally generating natural responses. Our best performing dialogue models are able to conduct knowledgeable discussions on open-domain topics as evaluated by automatic metrics and human evaluations, while our new benchmark allows for measuring further improvements in this important research direction.},
+	urldate = {2025-08-26},
+	publisher = {arXiv},
+	author = {Dinan, Emily and Roller, Stephen and Shuster, Kurt and Fan, Angela and Auli, Michael and Weston, Jason},
+	month = feb,
+	year = {2019},
+	note = {arXiv:1811.01241},
+	keywords = {Computer Science - Computation and Language},
+}
+
+
+@misc{ho_constructing_2020,
+	title = {Constructing {A} {Multi}-hop {QA} {Dataset} for {Comprehensive} {Evaluation} of {Reasoning} {Steps}},
+	url = {http://arxiv.org/abs/2011.01060},
+	doi = {10.48550/arXiv.2011.01060},
+	abstract = {A multi-hop question answering (QA) dataset aims to test reasoning and inference skills by requiring a model to read multiple paragraphs to answer a given question. However, current datasets do not provide a complete explanation for the reasoning process from the question to the answer. Further, previous studies revealed that many examples in existing multi-hop datasets do not require multi-hop reasoning to answer a question. In this study, we present a new multi-hop QA dataset, called 2WikiMultiHopQA, which uses structured and unstructured data. In our dataset, we introduce the evidence information containing a reasoning path for multi-hop questions. The evidence information has two benefits: (i) providing a comprehensive explanation for predictions and (ii) evaluating the reasoning skills of a model. We carefully design a pipeline and a set of templates when generating a question-answer pair that guarantees the multi-hop steps and the quality of the questions. We also exploit the structured format in Wikidata and use logical rules to create questions that are natural but still require multi-hop reasoning. Through experiments, we demonstrate that our dataset is challenging for multi-hop models and it ensures that multi-hop reasoning is required.},
+	urldate = {2025-08-26},
+	publisher = {arXiv},
+	author = {Ho, Xanh and Nguyen, Anh-Khoa Duong and Sugawara, Saku and Aizawa, Akiko},
+	month = nov,
+	year = {2020},
+	note = {arXiv:2011.01060},
+	keywords = {Computer Science - Computation and Language},
+}
+
+
+
+@inproceedings{yang_hotpotqa_2018,
+	address = {Brussels, Belgium},
+	title = {{HotpotQA}: {A} {Dataset} for {Diverse}, {Explainable} {Multi}-hop {Question} {Answering}},
+	shorttitle = {{HotpotQA}},
+	url = {http://aclweb.org/anthology/D18-1259},
+	doi = {10.18653/v1/D18-1259},
+	language = {en},
+	urldate = {2025-08-26},
+	booktitle = {Proceedings of the 2018 {Conference} on {Empirical} {Methods} in {Natural} {Language} {Processing}},
+	publisher = {Association for Computational Linguistics},
+	author = {Yang, Zhilin and Qi, Peng and Zhang, Saizheng and Bengio, Yoshua and Cohen, William and Salakhutdinov, Ruslan and Manning, Christopher D.},
+	year = {2018},
+	pages = {2369--2380},
+}
+
+
+@article{kwiatkowski_natural_2019,
+	title = {Natural {Questions}: {A} {Benchmark} for {Question} {Answering} {Research}},
+	volume = {7},
+	issn = {2307-387X},
+	shorttitle = {Natural {Questions}},
+	url = {https://direct.mit.edu/tacl/article/43518},
+	doi = {10.1162/tacl_a_00276},
+	abstract = {We present the Natural Questions corpus, a question answering data set. Questions consist of real anonymized, aggregated queries issued to the Google search engine. An annotator is presented with a question along with a Wikipedia page from the top 5 search results, and annotates a long answer (typically a paragraph) and a short answer (one or more entities) if present on the page, or marks null if no long/short answer is present. The public release consists of 307,373 training examples with single annotations; 7,830 examples with 5-way annotations for development data; and a further 7,842 examples with 5-way annotated sequestered as test data. We present experiments validating quality of the data. We also describe analysis of 25-way annotations on 302 examples, giving insights into human variability on the annotation task. We introduce robust metrics for the purposes of evaluating question answering systems; demonstrate high human upper bounds on these metrics; and establish baseline results using competitive methods drawn from related literature.},
+	language = {en},
+	urldate = {2025-08-26},
+	journal = {Transactions of the Association for Computational Linguistics},
+	author = {Kwiatkowski, Tom and Palomaki, Jennimaria and Redfield, Olivia and Collins, Michael and Parikh, Ankur and Alberti, Chris and Epstein, Danielle and Polosukhin, Illia and Devlin, Jacob and Lee, Kenton and Toutanova, Kristina and Jones, Llion and Kelcey, Matthew and Chang, Ming-Wei and Dai, Andrew M. and Uszkoreit, Jakob and Le, Quoc and Petrov, Slav},
+	month = nov,
+	year = {2019},
+	pages = {453--466},
+}
+
+
+@misc{kotonya_explainable_2020,
+	title = {Explainable {Automated} {Fact}-{Checking} for {Public} {Health} {Claims}},
+	url = {http://arxiv.org/abs/2010.09926},
+	doi = {10.48550/arXiv.2010.09926},
+	abstract = {Fact-checking is the task of verifying the veracity of claims by assessing their assertions against credible evidence. The vast majority of fact-checking studies focus exclusively on political claims. Very little research explores fact-checking for other topics, specifically subject matters for which expertise is required. We present the first study of explainable fact-checking for claims which require specific expertise. For our case study we choose the setting of public health. To support this case study we construct a new dataset PUBHEALTH of 11.8K claims accompanied by journalist crafted, gold standard explanations (i.e., judgments) to support the fact-check labels for claims. We explore two tasks: veracity prediction and explanation generation. We also define and evaluate, with humans and computationally, three coherence properties of explanation quality. Our results indicate that, by training on in-domain data, gains can be made in explainable, automated fact-checking for claims which require specific expertise.},
+	urldate = {2025-08-26},
+	publisher = {arXiv},
+	author = {Kotonya, Neema and Toni, Francesca},
+	month = oct,
+	year = {2020},
+	note = {arXiv:2010.09926},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language},
+}
+
 
 @article{harsh_comprehending_2024,
 	title = {Comprehending and {Reducing} {LLM} {Hallucinations}},
