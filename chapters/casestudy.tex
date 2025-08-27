@@ -54,9 +54,9 @@ The development of the GNA saw significant acceleration during the COVID-19 pand
 
 The GNA is primarily intended for use by:
 \begin{itemize}
-    \item Public administrators and government officials
-    \item Professional archaeologists and cultural heritage consultants
-    \item Stakeholders involved in public works, such as national infrastructure planners
+    \item Public administrators and government officials;
+    \item Professional archaeologists and cultural heritage consultants;
+    \item Stakeholders involved in public works, such as national infrastructure planners.
 \end{itemize}
 
 \noindent For instance, major entities like TERNA (the national electricity grid operator), RFI (the Italian railway network), or the Milan Metro rely on the platform to assess archaeological constraints before launching construction projects. The platform helps them identify archaeological sites, deposits, and or protected areas that must be preserved. The GNA also supports compliance with European and Italian open data and transparency regulations, guaranteeing both civic access and the protection of intellectual property, as per national FOIA and EU directives\footnote{The FOIA (Freedom of Information Act) Guidelines are documents issued by the Italian National Anti-Corruption Authority (ANAC) to clarify and guide the implementation of the right to generalised civic access in Italy. The guidelines -- especially those from 2016 -- define the limits and exclusions to access, as well as specify the publication and transparency obligations for public administrations.\\Read more at \url{https://foia.gov.it/normativa}.\nocite{noauthor_normativa_2016}} \citep{falcone_dematerializzazione_2023}.
@@ -76,28 +76,28 @@ In response to the challenges users face in quickly locating relevant informatio
 \subsection{Functional Requirements}
 Functional requirements define what the system must do to deliver value to users and stakeholders:
 \begin{itemize}
-    \item \textbf{Natural language understanding (NLU):} The system must interpret user queries phrased in natural language, supporting diverse question types (factoid, list, explanatory, etc.) and handling both simple and complex multipart queries.
-    \item \textbf{Information retrieval:} The system must retrieve relevant passages or document segments from the GNA knowledge base, using vector similarity search over chunked content.
-    \item \textbf{Context-aware answer generation:} The system must synthesise coherent, context-aware answers using RAG, drawing from retrieved passages and maintaining reference to original sources.
-    \item \textbf{Source attribution and citation:} Answers must include traceable citations (e.g., URLs) to ensure transparency and support verification.
-    \item \textbf{Conversational memory:} The system must retain context from previous exchanges to handle follow-up questions and maintain dialogue continuity within a session.
-    \item \textbf{Multilingual support:} The chatbot must process and generate responses in Italian, with potential extensibility to other languages.
-    \item \textbf{User feedback collection:} The system must provide mechanisms for users to rate responses and submit qualitative feedback, enabling ongoing evaluation and improvement.
-    \item \textbf{Interactive user interface:} Users must be able to input queries and view answers through an accessible web interface, including features such as clickable citations, feedback buttons, and session management.
+    \item \textbf{Natural language understanding (NLU):} the system must interpret user queries phrased in natural language, supporting diverse question types (factoid, list, explanatory, etc.) and handling both simple and complex multipart queries.
+    \item \textbf{Information retrieval:} the system must retrieve relevant passages or document segments from the GNA knowledge base, using vector similarity search over chunked content.
+    \item \textbf{Context-aware answer generation:} the system must synthesise coherent, context-aware answers using RAG, drawing from retrieved passages and maintaining reference to original sources.
+    \item \textbf{Source attribution and citation:} answers must include traceable citations (e.g., URLs) to ensure transparency and support verification.
+    \item \textbf{Conversational memory:} the system must retain context from previous exchanges to handle follow-up questions and maintain dialogue continuity within a session.
+    \item \textbf{Multilingual support:} the chatbot must process and generate responses in Italian, with potential extensibility to other languages.
+    \item \textbf{User feedback collection:} the system must provide mechanisms for users to rate responses and submit qualitative feedback, enabling ongoing evaluation and improvement.
+    \item \textbf{Interactive user interface:} users must be able to input queries and view answers through an accessible web interface, including features such as clickable citations, feedback buttons, and session management.
 \end{itemize}
 
 \subsection{Non-Functional Requirements}
 Non-functional requirements define how the system should operate to ensure quality, usability, and maintainability:
 \begin{itemize}
-    \item \textbf{Accuracy and relevance:} Answers must be factually correct, directly address user queries, and reference up-to-date information.
-    \item \textbf{Performance and scalability:} The system must deliver responses with low latency (target average retrieval and response time inferior to 1 second per query) and scale to support multiple concurrent users.
-    \item \textbf{Robustness and reliability:} The system should gracefully handle invalid queries, errors, and resource constraints without crashing.
-    \item \textbf{Transparency and traceability:} Every generated answer must cite its sources clearly. The underlying process for retrieval should be auditable.
-    \item \textbf{Security and privacy:} The system must securely handle sensitive data. User interactions should be anonymised, and no personally identifiable information should be stored.
+    \item \textbf{Accuracy and relevance:} answers must be factually correct, directly address user queries, and reference up-to-date information.
+    \item \textbf{Performance and scalability:} the system must deliver responses with low latency (target average retrieval and response time inferior to 1 second per query) and scale to support multiple concurrent users.
+    \item \textbf{Robustness and reliability:} the system should gracefully handle invalid queries, errors, and resource constraints without crashing.
+    \item \textbf{Transparency and traceability:} every generated answer must cite its sources clearly. The underlying process for retrieval should be auditable.
+    \item \textbf{Security and privacy:} the system must securely handle sensitive data. User interactions should be anonymised, and no personally identifiable information should be stored.
     \item \textbf{Maintainability and extensibility:} The architecture must support modular updates (e.g., changing retrieval strategies), and facilitate maintenance, debugging, and future enhancements.
-    \item \textbf{Resource efficiency:} The solution must operate efficiently within the limits of available hardware, minimising memory and compute consumption, especially for cloud deployment scenarios without GPU access.
-    \item \textbf{User accessibility:} The web interface must be usable by non-technical users and meet accessibility standards (e.g., clear labelling, visual feedback, keyboard navigation).
-    \item \textbf{Continuous evaluation:} The system must support automated and human-in-the-loop evaluation methodologies, generating reports on retrieval accuracy, answer quality, and user satisfaction over time.
+    \item \textbf{Resource efficiency:} the solution must operate efficiently within the limits of available hardware, minimising memory and compute consumption, especially for cloud deployment scenarios without GPU access.
+    \item \textbf{User accessibility:} the web interface must be usable by non-technical users and meet accessibility standards (e.g., clear labelling, visual feedback, keyboard navigation).
+    \item \textbf{Continuous evaluation:} the system must support automated and human-in-the-loop evaluation methodologies, generating reports on retrieval accuracy, answer quality, and user satisfaction over time.
 \end{itemize}
 
 \citep{abu_shawar_chatbots_2007,arslan_survey_2024,gupta_comprehensive_2024}\\

@@ -252,16 +252,16 @@ The following retrieval configurations were implemented and evaluated:
     \begin{itemize}
             \item \textbf{Weighted Reciprocal Rank Fusion (RRF):} ranks from dense and sparse retrievers are aggregated using RRF. The fusion score for document $d$ is computed as:
 \[
-\frac{w_\mathrm{dense}}{k + \mathrm{rank}_\mathrm{dense}} + \frac{w_\mathrm{sparse}}{k + \mathrm{rank}_\mathrm{sparse}}
+\frac{w_\mathrm{dense}}{k + \mathrm{rank}_\mathrm{dense}} + \frac{w_\mathrm{sparse}}{k + \mathrm{rank}_\mathrm{sparse}} ;
 \]
 where the default weights parameters were $w_{\text{dense}} = w_{\text{sparse}} = 1.0$, candidates set size = 50, and \text{\texttt{k}} = 60.
             \item \textbf{Score-blend fusion:} here, normalised scores from the two retrievers are merged using a custom blending function that allows for fine-tuning the influence of each method:
 \[
 S_{\text{norm},d} = \frac{S_d - \min(S_d)}{\max(S_d) - \min(S_d)}, \quad  
-S_{\text{norm},s} = \frac{S_s - \min(S_s)}{\max(S_s) - \min(S_s)}
-\]
+S_{\text{norm},s} = \frac{S_s - \min(S_s)}{\max(S_s) - \min(S_s)} 
+;\]
 \[
-S_h = S_{\text{norm},d} + \alpha \cdot S_{\text{norm},s}
+S_h = S_{\text{norm},d} + \alpha \cdot S_{\text{norm},s} ;
 \]
 where $S_{\text{norm},d}$ and $S_{\text{norm},s}$ are the min-max normalised scores of the dense and sparse retrievers, respectively, and $\alpha$ controls the relative weight of the sparse component ($w_d = w_s = 1$, $k = 60$) \citep{wang_searching_2024}. Unlike RRF, this approach requires that scores from different retrievers are defined on comparable scales.
 \end{itemize}
@@ -280,11 +280,11 @@ The choice between RRF and Score-blend depends on the specific retrieval context
 \noindent \subsubsection*{\Large Query Rewrite}
 To sharpen retrieval quality, we experimented with \textit{query rewriting}, i.e. reformulating user queries to increase the likelihood of retrieving relevant documents. Within these experiments, query rewriting was conceived as a multi-strategy process that generates alternative query variants through complementary transformations, each targeting different aspects of query understanding and manipulation \citep{li_dmqr-rag_2024}. Specifically, the approach integrates:
 \begin{itemize}
-      \item \textbf{Core Content Extraction (CCE)} -- a sequence-to-sequence transformation using the \textit{it5-small} model, that rewrites the query to capture its essential informational content while removing peripheral terms.
-      \item \textbf{Keyword Expansion (QE)} -- extraction of key terms with KeyBERT, followed by enrichment through n-gram combinations and synonym substitutions to introduce semantically related expressions.
-      \item \textbf{General Query Rewriting (GQR)} -- linguistic normalisation based on spaCy lemmatisation and stop word removal, yielding canonical query forms.
-      \item \textbf{Pseudo-Relevance Feedback (PRF)} -- top-ranked documents from an initial retrieval pass are analysed to extract additional high-frequency terms not present in the original query, which are then appended to the original query to form an expanded version.
-      \item \textbf{Query Decomposition} -- conjunctive or disjunctive queries are split into simpler sub-queries, each addressing a distinct semantic aspect.
+      \item \textbf{Core Content Extraction (CCE):} a sequence-to-sequence transformation using the \textit{it5-small} model, that rewrites the query to capture its essential informational content while removing peripheral terms.
+      \item \textbf{Keyword Expansion (QE):} extraction of key terms with KeyBERT, followed by enrichment through n-gram combinations and synonym substitutions to introduce semantically related expressions.
+      \item \textbf{General Query Rewriting (GQR):} linguistic normalisation based on spaCy lemmatisation and stop word removal, yielding canonical query forms.
+      \item \textbf{Pseudo-Relevance Feedback (PRF):} top-ranked documents from an initial retrieval pass are analysed to extract additional high-frequency terms not present in the original query, which are then appended to the original query to form an expanded version.
+      \item \textbf{Query Decomposition:} conjunctive or disjunctive queries are split into simpler sub-queries, each addressing a distinct semantic aspect.
 \end{itemize}
 
 These strategies can be applied individually or in combination (\texttt{strategy="all"}), producing a set of reformulated queries submitted to the base retriever (Dense, BM25, or Hybrid).\\
@@ -460,7 +460,7 @@ Beyond serving as a functional entry point to the system, the UI assumes a cruci
       \item \textbf{Main interface:} provides a natural language input field for querying the assistant. It displays the chat history, including user messages, assistant responses and feedback buttons for each assistant reply (\autoref{fig:ratings}).
       \item \textbf{Session features}: 
       \begin{itemize}
-            \item Chat history is limited to the most recent 10 exchanges, which are stored and updated in the session state;
+            \item Chat history is limited to the most recent ten exchanges, which are stored and updated in the session state;
             \item Feedback from individual message indexes is stored as a set (\texttt{st.session\_state.feedback\_given}), allowing the system to prevent duplicate ratings and dynamically update UI.
       \end{itemize}
 \end{enumerate}
@@ -473,10 +473,10 @@ Beyond serving as a functional entry point to the system, the UI assumes a cruci
   \label{fig:ratings}
 \end{figure}
 
-\subsection{Session State Management}
+
 To guarantee smooth interactions and to minimise computational overhead, the system makes extensive use of \texttt{st.session\_state}, a built-in Streamlit object designed for persisting variables across user interactions. Unlike ordinary Python variables, which are re-initialised each time Streamlit re-runs a script, \texttt{st.session\_state} retains values for the duration of a session. This functionality is critical in a conversational application, as it allows chat memory to persist between turns. Both user queries and model responses are stored, so that continuity is preserved across multi-turn dialogues.\footnote{For more details on Streamlit session state management, see the official API documentation at \url{https://docs.streamlit.io/}.\nocite{noauthor_streamlit_2025}} 
 
-Beyond the bounds of memory management, \texttt{st.session\_state} is also used to cache API results, including responses generated by Mistral and their associated citation mappings. This prevents redundant API calls when users revisit or re-evaluate queries, at the advantage of efficiency and costs mitigation. In addition, the same mechanism is employed to track user feedback, linking annotations directly to the relevant conversational context.
+Beyond the bounds of memory management, \texttt{st.session\_state} is also used to cache API outcomings, including responses generated by Mistral and their associated citation mappings. This prevents redundant API calls when users revisit or re-evaluate queries, at the advantage of efficiency and costs mitigation. In addition, the same mechanism is employed to track user feedback, linking annotations directly to the relevant conversational context.
 
 To ensure a responsive user experience, the system integrates Python’s \texttt{asyncio} and \texttt{concurrent.futures} modules. Each call to the language model is executed within a new event loop, ensuring compatibility with Streamlit’s execution environment, while a \texttt{ThreadPoolExecutor} provides thread-safe parallel execution. This design enables non-blocking retrieval and generation: the interface remains responsive even under conditions of high latency or slow API responses, thus preserving a fluid user experience.
 
@@ -487,9 +487,9 @@ To support iterative improvement of the assistant and promote user engagement, t
 \subsection{Collection}
 As noted earlier, each assistant response is immediately followed by three clickable UI buttons based on a 3-point Likert scale:
 \begin{itemize}
-\item 1 point - Poor: The answer is incorrect, incomplete, or irrelevant.
-\item 2 points - Fair: The answer is partially correct but lacks clarity or depth.
-\item 3 points - Good: The answer is accurate, complete, and well-structured.
+\item 1 point - Poor: the answer is incorrect, incomplete, or irrelevant.
+\item 2 points - Fair: the answer is partially correct but lacks clarity or depth.
+\item 3 points - Good: the answer is accurate, complete, and well-structured.
 \end{itemize}
 
 This mechanism is implemented using Streamlit’s interactive widgets. Once a rating is submitted, the system prevents duplicate feedback using an in-memory tracking set (\texttt{st.session\_state.feedback\_given}). The interface then displays a confirmation message (``\textit{Valutazione registrata}'', \autoref{fig:valutazione}), improving transparency.
@@ -540,35 +540,28 @@ To mitigate this, we contacted the Streamlit team directly and requested additio
 This experience underlines a broader methodological point: deploying RAG systems is not merely a matter of algorithmic optimisation but also of infrastructure alignment, where careful monitoring, memory management, and resource planning or negotiation are essential to ensure reliability and usability under real-world usage conditions.
 
 \subsection{Memory Management}
-As discussed above, deploying a RAG workflow with multiple NLP resources integrated into a single pipeline poses considerable challenges for environments lacking access to GPUs or large memory allocations, such as free hosting platforms like Streamlit Community Cloud. To ensure the GNA QA system remains responsive and cost-efficient, several optimisation strategies were integrated:
+As discussed above, deploying a RAG workflow with multiple NLP resources integrated into a single pipeline poses considerable challenges for environments lacking access to GPUs or large memory allocations, such as free hosting platforms like Streamlit Community Cloud. To keep the system sustainable under these constraints, several optimisation strategies were adopted in terms of memory management:
 \begin{itemize}
-\item \textbf{Garbage collection routines:} Explicit calls to Python's garbage collector (\texttt{gc.collect()}) were introduced to free unused memory between embedding and response generation steps.
-\item \textbf{Batch processing:} Document chunks are processed in batches to minimise memory overhead, especially during retrieval.
-\item \textbf{Lazy loading:} All embeddings are computed once and stored to disk. On app startup, only metadata is loaded, and the FAISS index is memory-mapped to reduce RAM footprint.
-\item \textbf{Asynchronous processing:} Streamlit's async capabilities allow the UI to remain responsive while background tasks are executed, preventing memory spikes during long-running operations.
-\item \textbf{Cache clearing policies:} \texttt{st.session\_state} objects are pruned after each session or on manual reset by the user to prevent memory bloating during prolonged use.
+\item \textbf{Garbage collection routines:} explicit calls to Python's garbage collector (\texttt{gc.collect()}) were introduced to free unused memory between embedding and response generation steps;
+\item \textbf{Batch processing:} document chunks are processed in batches to minimise memory overhead, especially during retrieval;
+\item \textbf{Lazy loading:} all embeddings are computed once and stored persistently. At application startup, only the metadata is loaded into memory, and the FAISS index is accessed through memory-mapping to reduce RAM footprint;
+\item \textbf{Asynchronous processing:} Streamlit's async capabilities are leveraged to keep the UI responsive while background tasks run in parallel, preventing memory spikes during long-running operations;
+\item \textbf{Cache clearing policies:} \texttt{st.session\_state} objects are pruned after each session or upon manual reset by the user to prevent memory bloating during prolonged use.
 \end{itemize}
 
 \subsection{Computational Constraints Mitigation}
-Given the constraint of CPU-only deployments on platforms like Streamlit Cloud, the following strategies were implemented:
+To counterbalance the limitations of operating under strict computational constraints and preserve system responsiveness, the following strategies were introduced:
 \begin{itemize}
-\item \textbf{Model selection:} The use of \textit{intfloat/multilingual-e5-large} for embedding provides a trade-off between semantic accuracy and compute efficiency, even without GPU acceleration.
-\item \textbf{API offloading:} Offloading generative tasks to an external API prevents the local system from being overloaded and allows scaling independently of front-end performance.
-\item \textbf{Timeout and fallback handlers:} If the generation request exceeds 10 seconds or fails -- e.g., due to API rate limits --, the app returns a graceful fallback response, allowing users to retry or simplify their query without crashing the app.
-\item \textbf{Asynchronous I/O:} For embedding, retrieval, and response generation, asynchronous requests reduce UI freezing and ensure smoother user experience even under high latency conditions.
+\item \textbf{Model selection:} the use of \textit{intfloat/multilingual-e5-large} for embedding provides a trade-off between semantic accuracy and compute efficiency, even without GPU acceleration;
+\item \textbf{API offloading:} offloading generative tasks to the external Mistral API prevents the local system from being overloaded and allows scaling independently of front-end performance;
+\item \textbf{Timeout and fallback handlers:} if the generation request exceeds 10 seconds or fails (e.g., due to API rate limits), the interface returns a graceful fallback response, allowing users to retry without crashing the app;
+\item \textbf{Asynchronous I/O:} for embedding, retrieval, and response generation, asynchronous requests reduce UI freezing and ensure smoother user experience even under high latency conditions.
 \end{itemize}
 
 
 \section{Ethics and Data Governance}
-The GNA QA system is designed with a strong emphasis on ethical considerations and data governance, particularly in the context of cultural heritage and public information. Key principles include:
-\begin{itemize}
-\item \textbf{Transparency:} The system provides clear information about its data sources, methodologies, and limitations, ensuring users understand how answers are generated and the provenance of information.
-\item \textbf{Privacy:} The system avoids processing personally identifiable information (PII) and ensures that all data used is publicly available or explicitly licensed for use in research and educational contexts.
-\item \textbf{Licensing:} All components, including the knowledge base, models, and software libraries, are selected based on permissive licenses that allow for academic and non-commercial use, ensuring compliance with legal and ethical standards.
-\item \textbf{Auditability:} The system maintains logs of user interactions, feedback, and system performance, enabling ongoing evaluation and improvement while respecting user privacy and data protection regulations.
-\end{itemize}
-These principles guide the development and deployment of the GNA QA system, ensuring it serves as a responsible and ethical tool for cultural heritage public engagement.
-Provenance, PII avoidance, licensing, auditability.
+The GNA QA system has been developed with sustained attention to ethical considerations and data governance, particularly in the context of cultural heritage and public information. Transparency is pursued through open release of the source code and documentation of the pipeline -- covering models, prompts, parameters --, together with versioned configurations, and machine-readable evaluation artefacts; per-run JSON logs record dataset IDs, model identifiers, and retrieval settings, all of which are made accessible through the project’s GitHub repository. Privacy is safeguarded by design, as the system processes no personally identifiable information and relies exclusively on publicly available or openly licensed materials. Licensing constraints are respected, as all resources -- from the knowledge base to the language models and software libraries -- are drawn from projects distributed under permissive terms that guarantee lawful reuse in research and educational contexts. Auditability is ensured through persistent logging of system performance and user feedback on Streamlit Community Cloud.
 
+On the whole, these practices turn abstract commitments -- provenance, privacy, licensing, and auditability -- into concrete safeguards, allowing the GNA QA system to remain technically reliable and also a responsible instrument for public engagement.
 
 \end{spacing}

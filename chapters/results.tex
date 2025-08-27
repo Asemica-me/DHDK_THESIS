@@ -7,7 +7,7 @@ This chapter presents the results with regards to the evaluation of the retrieva
 Briefly restate the test dataset size (400 queries) and the methodology adopted (automatic question generation, retrieval evaluation).
 Note the dual evaluation approach (intrinsic retrieval metrics + qualitative)
 
-compare prototype vs. full-scale implementation but HOW????
+compare prototype vs. full-scale implementation but HOW???? because their methodologies are not the same thus results do not align
 
 We conducted a series of experiments to evaluate the performance of different retrieval methods, including dense, BM25, and hybrid approaches. The results are summarized in \autoref{tab:benchmark}, which shows the retrieval effectiveness measured by Recall@5 (R@5), Mean Reciprocal Rank (MRR), Normalised Discounted Cumulative Gain at 5 (nDCG@5), Average Precision at 5 (AP@5), and latency per query.
 
@@ -71,6 +71,8 @@ Hybrid                        &          &  &  &  &  &  &  &  &  &  &  &      \\
 
 Provide a short interpretation — e.g., which configuration excels in which scenario, trade-offs between speed and accuracy, and performance differences between single-hop and combined datasets.
 
+Highlight consistency (or not) in performance with growing dataset size.
+
 \section{Qualitative Analysis}
 Results showed that:
 
@@ -94,12 +96,21 @@ the lightweight UI,
 
 and the multilingual support.
 
+Edge Cases to Test:
+Queries with no relevant chunks
+Queries matching multiple chunks
+Out-of-domain queries
+Short vs. long queries
+discuss answers to Out-of-domain queries (system correctly adress these)
 
 Include observations about citation traceability, coherence of generated answers.
 
-\section{Summary of Findings}
-Neutral recap of what the system achieved (e.g., scalability, stability, acceptable latency).
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/rating_proportions.png} 
+  \caption{Information visualisation of users feedback.}
+  \label{fig:ratings}
+\end{figure}
 
-Highlight consistency (or not) in performance with growing dataset size.
 
 \end{spacing}
