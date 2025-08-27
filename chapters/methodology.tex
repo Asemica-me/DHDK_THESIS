@@ -1,7 +1,7 @@
 \chapter{Methodology}
 \label{chap:methodology}
 \begin{spacing}{1.5}
-This chapter details the methodological workflow for designing and implementing the GNA QA system. The system leverages a RAG pipeline tailored to the Geoportale Nazionale per l’Archeologia (GNA) knowledge base (KB). It comprises modular components for data acquisition, preprocessing, retrieval, generation, feedback collection, and evaluation. The methodology evolved through iterative development: beginning with a prototype, built using LangChain, and advancing to a full-scale system with custom components optimised for resource efficiency.
+This chapter details the methodological workflow for designing and implementing the GNA QA system. The system leverages a RAG pipeline tailored to the Geoportale Nazionale per l’Archeologia (GNA) knowledge base (KB). It comprises modular components for data acquisition, preprocessing, retrieval, generation, feedback collection, and evaluation. The methodology evolved through iterative development: beginning with a prototype and advancing to a full-scale system with custom components optimised for resource efficiency. In doing so, the chapter outlines the broader methodological framework and the concrete steps undertaken, offering an in-depth account of the design choices, technical architecture, data preparation, implementation, and evaluation processes.
 
 
 \section{Prototype}
@@ -139,7 +139,7 @@ The evaluation of the system's prototype followed a pronged path:
       \item \textbf{LLM-as-a-judge}: an external model -- namely, OpenAI’s GPT-3.5 -- was prompted in a few-shot setting to automatically score responses across the same criteria, producing an additional layer of intrinsic evaluation \citep{svikhnushina_approximating_2023}.
 \end{enumerate}
 
-This custom approach reflected the broader methodological challenges in evaluating RAG systems, where automatic metrics -- e.g., BLEU, ROUGE, METEOR, etc. -- have shown limited reliability in dialogue contexts \citep{deriu_survey_2020,liu_how_2016}.
+This custom approach reflected the broader methodological challenges in evaluating RAG systems, where traditional automatic metrics -- e.g., BLEU, ROUGE, METEOR, etc. -- have shown limited reliability in dialogue contexts (cf. \autoref{sec:eval_and_bench}).
 
 \subsection{Insights for System Redesign}
 Prototyping revealed several challenges that guided the design of the subsequent system:
@@ -156,7 +156,7 @@ Prototyping revealed several challenges that guided the design of the subsequent
       \item \textbf{Absence of real-world testing:} the prototype was not deployed in a live environment, preventing the observation of actual user interaction patterns and limiting insights into robustness under realistic conditions.
 \end{itemize}
 
-These limitations underscored the need for a more scalable and systematically evaluated architecture, motivating the full system design presented in \autoref{sec:full_system}. In parallel, the prototype confirmed the viability of the RAG approach, offering crucial insights into system bottlenecks that directly informed the subsequent design.
+These limitations underscored the need for a more scalable and systematically evaluated architecture, motivating the full system design presented in \autoref{sec:full_system}. In parallel, the prototype confirmed the viability of the RAG approach, offering crucial insights into system bottlenecks that directly informed the subsequent design choices.
 
 
 \section{Full-Scale Implementation}\label{sec:full_system}
@@ -172,22 +172,23 @@ The full system was re-engineered from scratch to support dynamic, scalable docu
       \item and a feedback management system.
 \end{itemize}
 
+Together, these modules amount to a complete end-to-end system. Web documents are ingested, cleaned, and segmented; semantic metadata and embeddings are created; retrieval is performed over a dedicated vector store; and answers are generated, presented through an interactive interface, and enriched by user feedback mechanisms. The outcome is not a loose set of tools, but a coherent workflow that moves seamlessly from source material to user-facing response, capable of supporting real use in the GNA context.
+
 \sloppy
 \section{Data Acquisition and Preprocessing}
 \subsection{Sitemap Generation}
-The sitemap is constructed via a focused breadth-first crawler targeting the MediaWiki documentation (\url{https://gna.cultura.gov.it/wiki}) which constitutes the user manual of the GNA \citep{mic_mic_2019}. 
+The sitemap is constructed via a focused breadth-first crawler targeting the MediaWiki documentation -- accessible at \url{https://gna.cultura.gov.it/wiki} -- which hosts the official user manual of the GNA \citep{mic_mic_2019}. 
 
-The crawler:
+The crawler is configured to:
 \begin{itemize}
-      \item starts at the root node (\texttt{\href{https://web.archive.org/web/20250803092155/https://gna.cultura.gov.it/wiki/index.php/Pagina_principale}{Pagina\_principale}}\nocite{noauthor_wiki_2025});
-      \item follows internal links matching \texttt{/wiki/index.php/}, excluding namespaces such as \texttt{Special:}, \texttt{User:}, or \texttt{Talk:};
-      \item removes query parameters to avoid duplicates;
-      \item applies a polite crawling policy (1-second delay and custom user-agent header);
-      \item imposes crawl depth\footnote{Crawl depth is intended as the maximum number of link ``level'' away from the starting url that the crawler will follow.} (max 10) and page limits\footnote{Page limit parameter refers to the maximum number of pages the crawler will visit and include in the sitemap, regardless of depth.} (max 200 pages);
-      \item and outputs a structured sitemap serialised into an XML file (\texttt{GNA\_\_sitemap.xml}) with last-modified timestamps, priority, and change frequency. 
+      \item begin at the root node (\texttt{\href{https://web.archive.org/web/20250803092155/https://gna.cultura.gov.it/wiki/index.php/Pagina_principale}{Pagina\_principale}}\nocite{noauthor_wiki_2025});
+      \item follow only internal links matching \texttt{/wiki/index.php/}, excluding irrelevant namespaces such as \texttt{Special:}, \texttt{User:}, or \texttt{Talk:};
+      \item normalise URLs by removing query parameters to prevent duplicates;
+      \item apply a polite crawling policy, including a one-second delay between requests and a custom user-agent header;
+      \item limit traversal with a maximum crawl depth\footnote{Crawl depth is intended as the maximum number of link ``level'' away from the starting url that the crawler will follow.} of 10 and page limit\footnote{Page limit parameter refers to the maximum number of pages the crawler will visit and include in the sitemap, regardless of depth.} set to 200 pages.
 \end{itemize}
 
-This sitemap serves as the foundation for subsequent document harvesting.
+The output is a structured sitemap serialised as an XML file (\texttt{GNA\_\_sitemap.xml}), annotated with metadata such as last-modified timestamps, priority, and update frequency. This sitemap then provides the foundation for all subsequent document harvesting and processing steps.
 
 \subsection{Document Crawling}
 The next stage systematically collects the contents of all URLs listed in the sitemap to ensure comprehensive coverage of the manual. Pages are fetched asynchronously with retry logic, exponential backoff, and controlled concurrency to withstand transient network issues or throttling. Requests are interleaved with pauses to avoid overwhelming the server and failed URLs are logged for reprocessing.
@@ -300,7 +301,7 @@ At runtime, the reranker receives the top-$N$ candidates (with $N$ = 50) from th
 \section{Generation}\label{sec:rag_generation}
 The generation phase employs Mistral \textit{NeMo},\footnote{\url{https://web.archive.org/web/20250803120348/https://mistral.ai/news/mistral-nemo}.\nocite{noauthor_mistral_2025}} an open-source LLM accessible via a dedicated API and hosted independently. Its selection was guided by a convergence of methodological and practical requirements. First, open-source availability and a permissive licence ensured transparency, reproducibility, and the possibility of adaptation without the restrictions of proprietary services. Second, the model’s strong performance on multilingual benchmarks, including robust handling of Italian, made it particularly suitable for a system intended to operate in a cultural heritage setting where linguistic specificity is paramount. Third, Mistral \textit{NeMo} demonstrated competitive efficiency, with low latency and high throughput even when deployed on modest hardware, a quality that enabled real-time responsiveness without requiring more powerful computing infrastructures. In addition, the availability of an official API greatly facilitated seamless integration into the retrieval-augmented generation pipeline, while its ability to support extended context windows -- up to 128k tokens -- allowed the system to process multiple retrieved passages in a single prompt without truncation or loss of coherence.
 
-While different open-source alternatives were considered too -- such as \textit{LLaMA 3}, \textit{Falcon}, and \textit{OpenAI} models --, none aligned as closely with the system’s combined requirements. \textit{LLaMA 3}, for instance, offers state-of-the-art performance and strong community support, but its licensing terms restrict certain deployment scenarios and its context window is more limited in practice. \textit{Falcon} models, though efficient, have shown more variability in multilingual performance, particularly outside English. Proprietary APIs, while powerful, introduce cost barriers and potential vendor lock-in, compromising the long-term reproducibility of the research workflow. By contrast, Mistral \textit{NeMo} offered a balanced compromise: multilingual coverage, scalable deployment options, and infrastructure for fine-tuning embeddings, made it a natural fit for both the prototyping stage and the full-scale system.\footnote{For an overview between open-source and proprietary models, read \textcite{noauthor_open_2025}.}
+While different open-source alternatives were considered too -- such as \textit{LLaMA 3}, \textit{Falcon}, \textit{Google Gemma} and \textit{OpenAI} models --, none aligned as closely with the system’s combined requirements. \textit{LLaMA 3}, for instance, offers state-of-the-art performance and strong community support, but its licensing terms restrict certain deployment scenarios and its context window is more limited in practice. \textit{Falcon} models, though efficient, have shown more variability in multilingual performance, particularly outside English. Proprietary APIs, while powerful, introduce cost barriers and potential vendor lock-in, compromising the long-term reproducibility of the research workflow. By contrast, Mistral \textit{NeMo} offered a balanced compromise: multilingual coverage, scalable deployment options, and infrastructure for fine-tuning embeddings, made it a natural fit for both the prototyping stage and the full-scale system.\footnote{For an overview between open-source and proprietary models, read \textcite{noauthor_open_2025}.}
 
 
 The generation module itself is designed to deliver fluent, context-aware answers with inline citations, ensuring that responses remain both interpretable and verifiable. Prompts are constructed through a structured template combining system-level instructions (see \autoref{sec:prompt_engineering}), the user query, top-k retrieved grouped chunks, and the conversational history maintained in memory to sustain continuity across follow-ups. API calls are issued with a combination of decoding parameters: a temperature of 0.3\footnote{The parameter temperature set to 0.3 sharpens the model’s probability distribution, favouring high-likelihood tokens and suppressing unlikely alternatives, thereby producing more deterministic and factual outputs.} to prioritise factual accuracy, a top-$p$ of 0.9\footnote{The parameter top-$p$, also called \textit{nucleus sampling}, restricts generation to the smallest set of candidate tokens whose combined probability mass reaches a chosen threshold (here 90\%), ensuring that the model considers diverse but still plausible continuations while discarding unlikely options.} to maintain lexical diversity without drifting off-topic, and a maximum of 512 tokens to keep answers concise. Finally, responses undergo lightweight post-processing to enforce inline citation formatting, guarantee Italian output, and preserve readability through numbered references and paragraph boundaries.
@@ -368,7 +369,7 @@ These constraints mirror challenges identified in recent RAG evaluation literatu
 
 
 \subsection{Datasets}\label{sec:datasets}
-Widely used QA benchmarks such as SQuAD, Natural Questions \citep{kwiatkowski_natural_2019}, or multi-hop datasets like HotpotQA \citep{yang_hotpotqa_2018} and 2WikiMultiHopQA \citep{ho_constructing_2020} are indispensable for advancing general-domain research but are misaligned with the objectives of this study. These datasets are predominantly built around encyclopaedic or factoid queries in English, often centred on entity recognition and short-span extraction. By contrast, the GNA QA system targets procedural, explanatory, and domain-specific questions expressed in Italian, where answers are not simple factual snippets but often involve step-by-step guidance, cross-references to interface components, or the interpretation of heterogeneous content.
+Widely used QA benchmarks such as SQuAD and Natural Questions or multi-hop datasets like HotpotQA \citep{yang_hotpotqa_2018} and 2WikiMultiHopQA \citep{ho_constructing_2020} are indispensable for advancing general-domain research but are misaligned with the objectives of this study. These datasets are predominantly built around encyclopaedic or factoid queries in English, often centred on entity recognition and short-span extraction. By contrast, the GNA QA system targets procedural, explanatory, and domain-specific questions expressed in Italian, where answers are not simple factual snippets but often involve step-by-step guidance, cross-references to interface components, or the interpretation of heterogeneous content.
 
 Equally important, while KBs such as Wikipedia do consists of text that coexists with tables and lists, their role is largely illustrative or descriptive. In the GNA manual, instead, such structures are integral to the semantics of the documentation. Tables encode data entry examples or parameter constraints, lists enumerate workflows, and images -- often screenshots -- embody key instructional content. These formats are not ancillary but essential to the information needs of end-users, requiring reasoning that goes beyond the scope of existing benchmarks.
 
