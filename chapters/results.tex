@@ -2,34 +2,49 @@
 \label{chap:results}
 \begin{spacing}{1.5}
 
-This chapter presents the results with regards to the evaluation of the retrieval methods applied to the test datasets. We compare various configurations, including query rewriting and reranking, across single-hop and combined datasets.
+This chapter presents the results with regard to the evaluation of the RAG QA system across its two stages of development: the prototype and the full-scale implementation. 
 
-Briefly restate the test dataset size (400 queries) and the methodology adopted (automatic question generation, retrieval evaluation).
-Note the dual evaluation approach (intrinsic retrieval metrics + qualitative)
-
-compare prototype vs. full-scale implementation but HOW???? because their methodologies are not the same thus results do not align
-
-We conducted a series of experiments to evaluate the performance of different retrieval methods, including dense, BM25, and hybrid approaches. The results are summarized in \autoref{tab:benchmark}, which shows the retrieval effectiveness measured by Recall@5 (R@5), Mean Reciprocal Rank (MRR), Normalised Discounted Cumulative Gain at 5 (nDCG@5), Average Precision at 5 (AP@5), and latency per query.
+Each followed a distinct evaluation protocol. For the prototype, responses were assessed through a dual strategy combining human annotation on a 5-point Likert scale -- measuring consistency, fluency, completeness, and relevance -- with automatic scoring from an external LLM (GPT-3.5), prompted as an evaluator. By contrast, the re-engineered system was tested on a synthetic collection of 508 single-hop and 908 combined queries automatically generated from the GNA operative manual. The assessment included intrinsic IR metrics -- Recall@, MRR, nDCG@, AP@, Latency --  to quantify retrieval performance, alongside qualitative human feedback, to capture user-facing quality. Feedback was collected systematically through in-interface ratings tasks: each response was labelled on a 3-point Likert scale -- 1 star equals ``poor'', 2 stars equals ``fair'', 3 stars equals ``good'' --, offering direct insight into the perceived relevance, completeness, and fluency of the generated answers.
 
 
 \section{Prototyping Phase}
+The prototype offered an initial proof of concept, validating that a RAG architecture could be applied to the GNA corpus. Although limited in scale, it provided important insights into feasibility.
 
-A radar plot of the evaluation dimensions in \autoref{fig:proto_results} highlights this profile: strong alignment and topical accuracy, yet with opportunities for improvement in richness and expressivity.
+The evaluation outcomes (\autoref{fig:proto_results}) show a clear profile: consistency was rated at the highest level ($\approx$ 5), indicating that generated answers rarely contradicted themselves. Relevance ($\approx$ 4.7) and fluency ($\approx$ 4.9) also scored strongly, confirming the system’s ability to generate both accurate and linguistically natural responses. Completeness, however, achieved slightly lower values ($\approx$ 4.6), pointing to occasional gaps in coverage where answers did not fully integrate all available evidence.
 
-The prototype implementation offered an initial validation of the feasibility of a RAG-based QA system for the Geoportale Nazionale dell’Archeologia. Although limited in scope, it demonstrated that the architecture could effectively combine retrieval and generation within an interactive interface.
+Performance testing further revealed practical constraints. Embedding generation averaged 31.2 seconds per batch, while query responses were returned in $\approx$ 1.26 seconds on average. While the latter figure was adequate for interactive use, efficiency lagged behind production-ready deployments, especially under load. 
 
-The evaluation outcomes (\autoref{fig:proto_results}) indicate a high level of consistency (mean score close to 5) and strong topical relevance ($\approx$ 4.7). Fluency was also rated positively ($\approx$ 4.9), showing that the system could produce linguistically natural answers. By contrast, completeness achieved slightly lower scores ($\approx$ 4.6), suggesting that responses occasionally lacked sufficient depth or coverage of the available information. Overall, the radar profile highlights a system capable of producing reliable and coherent answers, while leaving room for improvement in expressivity and informational richness.
+In sum, the prototype confirmed the viability of a RAG-based QA approach, but also highlighted the need for more scalable retrieval infrastructure.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/radar.png} 
-  \caption{Evaluation results for prototype version of GNA QA system.}
+  \caption{Evaluation results for prototype version of the GNA QA system.}
   \label{fig:proto_results}
 \end{figure}
 
-Performance testing showed that embedding generation required an average of 31.2 seconds, while query response times averaged 1.26 seconds. Although the latter figure is acceptable for interactive applications, efficiency remains suboptimal compared to production-ready systems, and response delays may accumulate under higher traffic conditions.
 
 \section{Retrieval Performance and Ablation Studies}\label{sec:retrieval_ablation}
+Retrieval performance pertinent to the full-scale system implementation was benchmarked in the experimental setup across different strategies: Dense, BM25, and Hybrid variants, with optional query rewriting and cross-encoder reranking. All runs were evaluated with @5 cut-offs -- R@5, MRR, nDCG@5, AP@5 --, complemented by latency measurements (seconds per query). This setup enables a consistent comparison of coverage, ranking quality, and efficiency across methods. The benchmarked retrieval scores and the different configurations tested are summarised in \autoref{tab:benchmark}.\\
+
+\noindent The findings highlight distinct trade-offs across retrieval methods, presented hereafter.\\
+
+\noindent \textbf{Single-hop dataset.}\\
+The best overall performance was achieved by the \textbf{Hybrid + Score-blend} method without query rewriting and reranking (R@5 = 70.27, MRR = 48.59, nDCG@5 = 54.02, AP@5 = 48.59), with latency around 0.55 s. This configuration consistently outperformed \textbf{Dense} retriever -- the system’s initial baseline -- and \textbf{BM25} alone, showing the benefits of combining lexical and semantic signals. A close second was \textbf{Hybrid + Weighted RRF} (R@5 = 69.68, nDCG@5 = 52.49) at slightly lower latency (0.33 s).
+\textbf{BM25} without extras proved a strong baseline (R@5 = 65.15) and remained by far the fastest method ($\approx$ 0.001 s), though it lagged behind hybrids in ranking quality. \textbf{Dense} retrieval showed competitive early-rank placement (MRR = 47.04) but lower recall and nDCG, confirming its limits when used in isolation.\\
+
+\noindent \textbf{Combined(single-hop + multi-hop).}\\
+Here, absolute scores dropped due to the increased complexity of multi-hop queries and the @5 cutoff, but the relative ordering of methods remained stable. \textbf{Hybrid + Score-blend} again provided the best balance, with R@5 = 55.35 and AP@5 = 36.69 at 0.45 s. \textbf{BM25} retained an edge in precision at early ranks (MRR = 51.23, nDCG@5 = 57.13), again with negligible latency ($\approx$ 0.001 s). \textbf{Hybrid + Weighted RRF} was also competitive (R@5 = 53.98, nDCG@5 = 56.92). \textbf{Dense} retrieval remained faster than hybrids (0.19-0.82 s) but less effective overall.\\
+
+\noindent \textbf{Effect of rewriting and reranking.}\\
+Across all methods, adding query rewriting or reranking consistently reduced effectiveness and inflated latency. Reranking with the MS-MARCO English cross-encoder reordered Italian, domain-specific candidates sub-optimally, while rewriting perturbed terminology that BM25 depends on. In practice, this meant added latency (up to 10 s in BM25 with rerank) and systematically lower recall and precision.\\
+
+\noindent \textbf{Latency-quality trade-offs.}
+\begin{itemize}
+  \item Fastest: BM25 without extras (\~0.001 s);
+  \item Best balance: Hybrid + Score-blend without extras (\~0.45-0.55 s), combining top recall and ranking quality with sub-second latency;
+  \item Worst cost–benefit: query rewriting and reranking, which added seconds of latency without gains in retrieval quality.
+\end{itemize}
 
 
 \begin{table}[H]
@@ -69,47 +84,30 @@ Hybrid                        &          &  &  &  &  &  &  &  &  &  &  &      \\
 \label{tab:benchmark}
 \end{table}
 
-Provide a short interpretation — e.g., which configuration excels in which scenario, trade-offs between speed and accuracy, and performance differences between single-hop and combined datasets.
-
-Highlight consistency (or not) in performance with growing dataset size.
 
 \section{Qualitative Analysis}
-Results showed that:
+The re-engineered system was evaluated not only through intrinsic metrics but also via direct user feedback, providing a complementary perspective on performance. As shown in \autoref{fig:ratings_}, user ratings distributed as follows: 65\% of answers received 3 stars (``Good''), 25\% received 2 stars (``Fair''), and 10\% received 1 star (``Poor'').
 
-65\% of answers were rated as “Relevant”,
-
-25\% as “Partially relevant”,
-
-10\% as “Not relevant”.
-
-Feedback indicated that relevance dropped when:
-
-the query used ambiguous phrasing,
-
-or too few document chunks were retrieved due to vector sparsity.
-
-Users appreciated:
-
-the traceability of answers via citations,
-
-the lightweight UI,
-
-and the multilingual support.
-
-Edge Cases to Test:
-Queries with no relevant chunks
-Queries matching multiple chunks
-Out-of-domain queries
-Short vs. long queries
-discuss answers to Out-of-domain queries (system correctly adress these)
-
-Include observations about citation traceability, coherence of generated answers.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/rating_proportions.png} 
   \caption{Information visualisation of users feedback.}
-  \label{fig:ratings}
+  \label{fig:ratings_}
+\end{figure}
+
+Instances of lower relevance were generally linked to ambiguous queries or to cases where vector sparsity limited the number of retrieved chunks. Despite these shortcomings, users highlighted several strengths: the system’s multilingual capabilities, the user-friendly interface, and the attempt to provide traceability through citations -- though, as discussed in \autoref{chap:discussion}, the citation mechanism requires further refinement.
+
+Edge-case testing yielded additional insights. For out-of-domain queries, the system largely succeeded in avoiding hallucinations by producing cautious fallback responses. For example, (\autoref{fig:edge-case}), illustrates a query about contemporary art exhibitions in Rome: although the reply is incomplete and does not provide relevant content to the query, it faithfully reflects the system prompt’s instruction to refrain from answering questions outside the GNA scope, instead redirecting the user to the knowledge base.
+
+Overall, the feedback evaluation demonstrates the feasibility and effectiveness of a RAG pipeline tailored to the GNA corpus. The prototype established proof of concept, while the full-scale implementation improved retrieval robustness and scalability. Although some challenges persist -- particularly with completeness, citation reliability, and response latency under reranking -- the system consistently produced relevant, fluent, and context-aware answers, confirming its potential as a practical assistant for navigating the GNA documentation.
+
+\vspace{0.5em}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/edge_case_response.png} 
+  \caption{Edge case test of the GNA AI Assistant, showing an out-of-domain query about contemporary art exhibitions in Rome and the system’s fallback response with redirection to the GNA knowledge base.}
+  \label{fig:edge-case}
 \end{figure}
 
 
