@@ -160,7 +160,7 @@ These limitations underscored the need for a more scalable and systematically ev
 
 
 \section{Full-Scale Implementation}\label{sec:full_system}
-The full system was re-engineered from the ground to support dynamic, scalable document ingestion, contextual retrieval, and answer generation using open-source language models. All LangChain dependencies were removed in favour of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The final architecture (fig. xx) brings together the following components:
+The full system was re-engineered from the ground to support dynamic, scalable document ingestion, contextual retrieval, and answer generation using open-source language models. All LangChain dependencies were removed in favour of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The final architecture (see \autoref{fig:full-system-diagram}) brings together the following components:
 \begin{itemize}
       \item a custom KB construction module, which integrates sitemap generation and web crawling,
       \item semantic chunking and metadata enrichment,
@@ -175,6 +175,49 @@ The full system was re-engineered from the ground to support dynamic, scalable d
 Together, these modules amount to a complete end-to-end system. Web documents are ingested, cleaned, and segmented; semantic metadata and embeddings are created; retrieval is performed over a dedicated vector store; and answers are generated, presented through an interactive interface, and enriched by user feedback mechanisms. The outcome is not a loose set of tools, but a coherent workflow that moves seamlessly from source material to user-facing response.
 
 A fundamental part of this design is the \texttt{RAG Orchestrator} module, which acts as a connector and manages the flow of information across modules, centralising responsibilities such as gathering evidence from the vector database, grouping it into coherent contexts, and delivering it -- together with the user’s query and dialogue history -- to the LLM.
+
+
+
+\begin{figure}[H]
+\centering
+\usetikzlibrary{positioning}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tikzpicture}[node distance=2.0cm and 1.5cm]
+\tikzset{
+  module/.style={draw, rounded corners, align=center, minimum width=3.8cm, minimum height=1.6cm, thick, fill=gray!5},
+  arrow/.style={-Latex, thick},
+  feedback/.style={-Latex, thick, dashed}
+}
+
+% Top row
+\node[module] (webkb) {Web-based\\Corpus};
+\node[module, right=of webkb] (chunkskb) {Knowledge Base\\(Chunks Set)};
+\node[module, right=of chunkskb] (vectordb) {Vector\\Database};
+\node[module, right=of vectordb] (retriever) {Dense Retriever};
+
+% Bottom row
+\node[module, below=1.5cm of retriever] (llm) {LLM\\(Answers Generation)};
+\node[module, left=of llm] (ui) {User\\Interface};
+
+% Feedback
+\node[module, left=of ui] (feedback) {Feedback\\Rating};
+
+% Flow arrows
+\draw[arrow] (webkb) -- (chunkskb);
+\draw[arrow] (chunkskb) -- (vectordb);
+\draw[arrow] (vectordb) -- (retriever);
+\draw[arrow] (retriever) -- (llm);
+\draw[arrow] (llm) -- (ui);
+
+% Feedback loop
+\draw[feedback] (ui) -- (feedback);
+
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Macro modules of the system. Solid arrows show the main data flow; dashed arrow indicates user feedback.}\label{fig:full-system-diagram}
+\end{figure}
+
+
 
 \sloppy
 \section{Data Acquisition and Preprocessing}
