@@ -92,13 +92,15 @@ The re-engineered system was evaluated not only through intrinsic metrics but al
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/rating_proportions.png} 
-  \caption{Information visualisation of users feedback.}
+  \caption{Distribution of user feedback ratings, showing the proportion of responses evaluated as poor (1 star), fair (2 stars), and good (3 stars).}
   \label{fig:ratings_}
 \end{figure}
 
 Instances of lower relevance were generally linked to ambiguous queries or to cases where vector sparsity limited the number of retrieved chunks. Despite these shortcomings, users highlighted several strengths: the system’s multilingual capabilities, the user-friendly interface, and the attempt to provide traceability through citations -- though, as discussed in \autoref{chap:discussion}, the citation mechanism requires further refinement.
 
 Edge-case testing yielded additional insights. For out-of-domain queries, the system largely succeeded in avoiding hallucinations by producing cautious fallback responses. For example, (\autoref{fig:edge-case}), illustrates a query about contemporary art exhibitions in Rome: although the reply is incomplete and does not provide relevant content to the query, it faithfully reflects the system prompt’s instruction to refrain from answering questions outside the GNA scope, instead redirecting the user to the knowledge base.
+
+Equally instructive were the tests on HTML snippets retrieval, a particular feature of the GNA user manual where HTML tags are embedded as procedural instructions for formatting reports. In these cases, the assistant correctly surfaced and rendered the relevant code blocks (see \autoref{fig:edge-case_code}), preserving both syntax and explanatory context. This demonstrated the system’s capacity to handle heterogeneous content types aside from plain text, thus addressing one of the distinctive characteristics of the GNA documentation.
 
 Overall, the feedback evaluation demonstrates the feasibility and effectiveness of a RAG pipeline tailored to the GNA corpus. The prototype established proof of concept, while the full-scale implementation improved retrieval robustness and scalability. Although some challenges persist -- particularly with completeness, citation reliability, and response latency under reranking -- the system consistently produced relevant, fluent, and context-aware answers, confirming its potential as a practical assistant for navigating the GNA documentation.
 
@@ -108,6 +110,13 @@ Overall, the feedback evaluation demonstrates the feasibility and effectiveness 
   \includegraphics[width=\textwidth]{images/edge_case_response.png} 
   \caption{Edge case test of the GNA AI Assistant, showing an out-of-domain query about contemporary art exhibitions in Rome and the system’s fallback response with redirection to the GNA knowledge base.}
   \label{fig:edge-case}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/risposta_assistente_con_codice.png} 
+  \caption{Example of the GNA QA system retrieving and presenting HTML code snippets from the knowledge base.}
+  \label{fig:edge-case_code}
 \end{figure}
 
 

@@ -45,6 +45,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{soul}  
 \usepackage[font=bf,labelfont=bf,justification=raggedright,singlelinecheck=false]{caption}
+\usepackage{emptypage}
 
 \captionsetup{font={bf,small}, labelfont=bf, justification=raggedright, singlelinecheck=false}
 
@@ -197,7 +198,6 @@
 
 % Abstract
 \input{chapters/abstract}
-\clearpage
 \input{chapters/acknowledgments.tex}
 \clearpage
 \listoffigures
@@ -207,9 +207,14 @@
 \lstlistoflistings
 \clearpage
 
-\newpage
-\thispagestyle{empty} 
-\mbox{}                
+%%\newpage
+%\thispagestyle{empty} 
+%\mbox{}      
+\cleardoublepage
+\thispagestyle{empty} % if you insist on a blank page here
+\mbox{}
+{\let\cleardoublepage\clearpage \mainmatter}
+\pagestyle{fancy}       
 
 % Main Content (Arabic page numbering)
 \mainmatter

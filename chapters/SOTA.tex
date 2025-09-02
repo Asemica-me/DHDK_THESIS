@@ -22,7 +22,7 @@ This modular design (\autoref{fig:rag}) enables the continuous incorporation of 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/rag_workflow.jpg} 
-  \caption{Typical retrieval-augmented generation (RAG) pipeline.\\
+  \caption{Retrieval-augmented generation pipeline combining user queries with external knowledge to produce context-aware responses.\\
   \footnotesize{Source: \url{https://aws.amazon.com/de/what-is/retrieval-augmented-generation/}.\nocite{noauthor_was_nodate}}}
   \label{fig:rag}
 \end{figure}
@@ -114,7 +114,7 @@ Summarization     & Recomp                      & Both extractive and abstractiv
 \end{figure}
 
 \subsection{Evaluation and Benchmarking}\label{sec:eval_and_bench}
-Evaluating RAG systems poses unique challenges, as traditional metrics like BLEU, ROUGE or METEOR may not fully capture the quality of generated responses, particularly in terms of factual accuracy and contextual relevance \citep{deriu_survey_2020}. In conversational QA research, this limitation has long been acknowledged: multi-turn settings require models not only to answer a single query but also to maintain consistency, resolve co-references, and adapt to evolving conversational context \citep{zaib_conversational_2022}. Consequently, evaluation must go beyond surface level overlap and incorporate measures that reflect contextual appropriateness and understanding at discourse level. Moreover, assessing RAG systems requires attention to both retrieval and generation quality, since failures in either stage directly impact the final response \citep{abeysinghe_challenges_2024}.
+Evaluating RAG systems poses unique challenges, as traditional metrics like BLEU, ROUGE or METEOR may not fully capture the quality of generated responses, particularly in terms of factual accuracy and contextual relevance \citep{deriu_survey_2020}. In conversational QA research, this limitation has long been acknowledged, as multi-turn settings require models to answer a single query and to maintain consistency, resolve co-references, and adapt to evolving conversational context \citep{zaib_conversational_2022}. Consequently, evaluation must go beyond surface level overlap and incorporate measures that reflect contextual appropriateness and understanding at discourse level. Moreover, assessing RAG systems requires attention to both retrieval and generation quality, since failures in either stage directly impact the final response \citep{abeysinghe_challenges_2024}.
 
 Surveys of the field increasingly stress the need for frameworks capable of measuring multiple dimensions of RAG. Despite the rapid advancements in retrieval, generation, and augmentation, evaluation methods remain underdeveloped, with persistent challenges in capturing retrieval quality, hallucination rates, and faithfulness of generated content in a systematic way \citep{gao_retrieval-augmented_2024}. Large-scale benchmarks such as TREC \citep{voorhees_trec_2005}, MS MARCO \citep{bajaj_ms_2018} and BEIR \citep{thakur_beir_2021} continue to be standard for retrieval, but generation quality requires different approaches. Newer frameworks like the \textit{Retrieval-Augmented Generation Assessment System (RAGAS)} have therefore been introduced to capture aspects such as contextual alignment, answer faithfulness, and pipeline-level performance \citep{es_ragas_2023}.
 
