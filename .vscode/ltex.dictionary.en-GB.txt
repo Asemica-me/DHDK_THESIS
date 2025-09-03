@@ -11,3 +11,8 @@ agentic
 KBs
 outcomings
 FAISS
+rerank
+apocope
+clitics
+deprioritising
+experimentability

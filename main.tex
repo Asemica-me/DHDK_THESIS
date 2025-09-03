@@ -201,17 +201,13 @@
 \input{chapters/acknowledgments.tex}
 \clearpage
 \listoffigures
-\clearpage
 \listoftables
-\clearpage
 \lstlistoflistings
-\clearpage
 
-%%\newpage
-%\thispagestyle{empty} 
-%\mbox{}      
+
+
 \cleardoublepage
-\thispagestyle{empty} % if you insist on a blank page here
+\thispagestyle{empty}
 \mbox{}
 {\let\cleardoublepage\clearpage \mainmatter}
 \pagestyle{fancy}       
@@ -235,10 +231,39 @@
 \makeatother
 
 \input{chapters/introduction}
-\input{chapters/QAS}
+
+% --- make the next chapter NOT start a new page ---
+\begingroup
+  \makeatletter
+  \let\origclearpage\clearpage
+  \let\origdoublepage\cleardoublepage
+  \let\clearpage\relax
+  \let\cleardoublepage\relax
+  \makeatother
+
+  \input{chapters/QAS}  % this chapter will follow immediately
+
+  \makeatletter
+  \let\clearpage\origclearpage
+  \let\cleardoublepage\origdoublepage
+  \makeatother
+\endgroup
+% --- normal behaviour resumes for subsequent chapters ---
 \input{chapters/SOTA}
 \input{chapters/casestudy}
+\begingroup
+  \makeatletter
+  \let\origclearpage\clearpage
+  \let\origdoublepage\cleardoublepage
+  \let\clearpage\relax
+  \let\cleardoublepage\relax
+  \makeatother
 \input{chapters/methodology}
+  \makeatletter
+  \let\clearpage\origclearpage
+  \let\cleardoublepage\origdoublepage
+  \makeatother
+\endgroup
 \input{chapters/results}
 \input{chapters/discussion}
 \input{chapters/conclusion}
