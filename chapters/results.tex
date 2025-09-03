@@ -82,11 +82,12 @@ Hybrid                        &          &  &  &  &  &  &  &  &  &  &  &      \\
 \label{tab:benchmark}
 \end{table}
 
+\clearpage
 
 \section{Qualitative Analysis}
-The re-engineered system was evaluated not only through intrinsic metrics but also via direct user feedback, providing a complementary perspective on performance. As shown in \autoref{fig:ratings_}, user ratings distributed as follows: 65\% of answers received 3 stars (``Good''), 25\% received 2 stars (``Fair''), and 10\% received 1 star (``Poor'').
+The re-engineered system was evaluated not only through intrinsic metrics but also via direct user feedback, providing a complementary perspective on performance. Based on a set of 50 user ratings (see \autoref{fig:ratings_}), 64\% of answers received 3 stars (``good''), 26\% received 2 stars (``fair''), and 10\% received 1 star (``poor'').
 
-
+\vspace{0.9em}
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/rating_proportions.png} 
@@ -100,7 +101,7 @@ Edge-case testing yielded additional insights. For out-of-domain queries, the sy
 
 Equally instructive were the tests on HTML snippets retrieval -- a particular feature of the GNA user manual where HTML tags are embedded as procedural instructions for the formatting of QGIS layouts. In these cases, the assistant correctly surfaced and rendered the relevant ``code'' blocks (see \autoref{fig:edge-case_code}), preserving both syntax and explanatory context. This demonstrated the system’s capacity to handle heterogeneous content types aside from plain text, thus addressing one of the distinctive characteristics of the GNA documentation.\\
 
-\noindent Overall, the feedback evaluation confirmed the capability and added value of a RAG pipeline tailored to the GNA corpus. The prototype established proof of concept, while the full-scale implementation improved retrieval robustness and scalability. Although some challenges persist -- particularly with completeness, citation reliability, and response latency under query rewriting and reranking -- the system consistently produced relevant, fluent, and context-aware answers, confirming its potential as a practical assistant for navigating the GNA documentation.
+\noindent Overall, the feedback evaluation confirmed the capability and added value of a RAG pipeline tailored to the GNA corpus. The prototype established proof of concept, while the full-scale implementation improved retrieval robustness and scalability. Although some challenges persist -- particularly with completeness, citation reliability, and response latency under query rewriting and reranking -- the system consistently produced relevant, fluent, and context-sensitive answers, confirming its potential as a practical assistant for navigating the GNA documentation.
 
 \vspace{0.5em}
 \begin{figure}[H]

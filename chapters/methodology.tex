@@ -196,11 +196,12 @@ A fundamental part of this design is the \texttt{RAG Orchestrator} module, which
 \node[module, right=of vectordb] (retriever) {Dense Retriever};
 
 % Bottom row
-\node[module, below=1.5cm of retriever] (llm) {LLM\\(Answers Generation)};
+\node[module, below=1.5cm of retriever] (llm) {Answer Generation\\with context (LLM)};
 \node[module, left=of llm] (ui) {User\\Interface};
 
 % Feedback
 \node[module, left=of ui] (feedback) {Feedback\\Rating};
+\node[module, left=of feedback] (user) {User};
 
 % Flow arrows
 \draw[arrow] (webkb) -- (chunkskb);
@@ -208,6 +209,7 @@ A fundamental part of this design is the \texttt{RAG Orchestrator} module, which
 \draw[arrow] (vectordb) -- (retriever);
 \draw[arrow] (retriever) -- (llm);
 \draw[arrow] (llm) -- (ui);
+\draw[arrow] (user) to [out=270, in=180] (ui.south);
 
 % Feedback loop
 \draw[feedback] (ui) -- (feedback);
