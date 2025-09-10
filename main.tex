@@ -33,6 +33,12 @@
     linkcolor=black,        % color of internal links (e.g., TOC)
     citecolor=blue
 ]{hyperref}
+\hypersetup{
+    pdftitle={From Documents to Dialogue: A Question-Answering System for Geoportale Nazionale Archeologia with Retrieval-Augmented Generation},
+    pdfauthor={Lucrezia Pograri},
+    pdfsubject={MA dissertation in Machine Learning for the Arts and Humanities},
+    pdfkeywords={digital humanities, information retrieval, question-answering systems, retrieval-augmented generation, humanistic ai, cultural heritage}
+}
 \usepackage{listings}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning}
@@ -204,8 +210,6 @@
 \listoftables
 \lstlistoflistings
 
-
-
 \cleardoublepage
 \thispagestyle{empty}
 \mbox{}
@@ -271,15 +275,15 @@
 \clearpage
 % Appendices
 \begin{appendices}
-    \chapter{Implementation details}
+    \chapter{Implementation Details}
     \label{appendix:A}
 
 In this study, all the experiments have been executed in Python 3.11.9 on a system equipped with an Intel Core i7-1185G7 CPU at 3.00 GHz, 16 GB of RAM, and integrated Intel Iris Xe Graphics with 128 MB of VRAM.\\ 
 
 
-\noindent The ablation studies were conducted on the \textit{single-hop} dataset, comprising 508 queries, and on the \textit{combined} dataset, comprising 908 queries in total (single-hop plus multi-hop questions). The retrieval index, implemented using FAISS, contained 801 document chunks with a length of 687 words (average: 91.83 words). Evaluation was carried out in batch mode with a batch size of 32, retrieving up to \texttt{candidate\_k} = 50 documents per query before applying top-$k$ selection ($k$ = 5). For hybrid retrieval configurations, the RRF parameter was set to $k$ = 60, with dense and sparse weights both equal to 1.0, while $\alpha$ = 0.3.\\
+\noindent The ablation studies were conducted on the \textit{single-hop} dataset, comprising 508 queries, and on the \textit{combined} dataset, comprising 908 queries in total (single-hop plus multi-hop questions). The retrieval index, implemented using Faiss, contained 801 document chunks with a length of 687 words (average: 91.83 words). Evaluation was carried out in batch mode with a batch size of 32, retrieving up to \texttt{candidate\_k} = 50 documents per query before applying top-$k$ selection ($k$ = 5). For hybrid retrieval configurations, the RRF parameter was set to $k$ = 60, with dense and sparse weights both equal to 1.0, while $\alpha$ = 0.3.\\
 
-\noindent Additionally, the proposed approach was implemented using the following libraries: PyTorch, Hugging Face Transformers, SentenceTransformers, PEFT, spaCy, KeyBERT, NLTK, FAISS, Rank-BM25, and scikit-learn. These were complemented by supporting and utility packages such as NumPy, Pandas, Matplotlib, Streamlit, Pillow (PIL), BeautifulSoup (bs4), httpx, and the MistralAI API, as well as standard Python libraries including asyncio, concurrent.futures, collections, functools, and urllib.
+\noindent Additionally, the proposed approach was implemented using the following libraries: PyTorch, Hugging Face Transformers, SentenceTransformers, spaCy, KeyBERT, NLTK, faiss-cpu, Rank-BM25, and scikit-learn. These were complemented by supporting and utility packages such as NumPy, Pandas, Matplotlib, Streamlit, Pillow (PIL), BeautifulSoup (bs4), httpx, and the MistralAI API, as well as standard Python libraries including asyncio, concurrent.futures, collections, functools, and urllib.
 
 \input{chapters/appendixB.tex}
 

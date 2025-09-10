@@ -11,7 +11,7 @@ The initial prototype served as a proof-of-concept, developed to validate the fe
 The prototype architecture (\autoref{fig:protosys}) consisted of:
 \begin{itemize}
       \item \textbf{knowledge base}: a CSV dataset created from the web-based operational manual of the Geoportale Nazionale dell’Archeologia (GNA). Content was preprocessed into document chunks enriched with metadata (titles, URLs, descriptions);
-      \item \textbf{vector store}: semantic embeddings of chunks were computed using MistralAI API and then stored in a FAISS database;
+      \item \textbf{vector store}: semantic embeddings of chunks were computed using MistralAI API and then stored in a Faiss database;
       \item \textbf{generation language model}: the Mistral \textit{NeMo} LLM was accessed via the same Mistral API for answer generation;
       \item \textbf{retrieval mechanism}: queries were embedded and matched against FAISS; all retrieved chunks were concatenated into a single context and passed to the Mistral model;
       \item \textbf{user interface}: a front-end implemented via Streamlit (\autoref{fig:proto_UI}) allowed users to input queries in natural language and visualise answers in a clean, accessible format.
@@ -27,17 +27,17 @@ The prototype architecture (\autoref{fig:protosys}) consisted of:
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{images/proto_UI.png} 
+  \includegraphics[width=0.8\textwidth]{images/proto_UI.png} 
   \caption{User interface of the GNA QA system prototype deployed on Streamlit Community Cloud.}
   \label{fig:proto_UI}
 \end{figure}
 
-LangChain served as the orchestration layer, providing ready-made abstractions that connected data ingestion, retrieval, and generation into a single workflow (\autoref{fig:prototype-pipeline}). Concretely, it handled prompt templating for the Mistral \textit{NeMo} model, mediated the \texttt{Conversational Retrieval} flow, and maintained short-term dialogue state through \texttt{ConversationBufferMemory}. The retriever was based on a FAISS vector store, which indexed chunked representations of documents and returned the top-$k$ semantically similar chunks given a user query. Retrieved chunks were then combined using LangChain’s \textit{stuff} method\footnote{In LangChain, the stuff method is a particular abstraction for context packing. It concatenates the top-$k$ retrieved documents and inserts the combined block into a single prompt template passed to the LLM. While computationally lightweight, it is limited by the model’s context window. LangChain also provides alternative strategies such as \textit{map-reduce}, \textit{refine}, and \textit{map-rerank} \citep{topsakal_creating_2023}.} (\autoref{lst:stuff-method}), in which all documents are concatenated into a single prompt template and passed to the LLM.
+LangChain served as the orchestration layer, providing ready-made abstractions that connected data ingestion, retrieval, and generation into a single workflow (\autoref{fig:prototype-pipeline}). Concretely, it handled prompt templating for the Mistral \textit{NeMo} model, mediated the \texttt{Conversational Retrieval} flow, and maintained short-term dialogue state through \texttt{ConversationBufferMemory}. The retriever was based on a Faiss vector store, which indexed chunked representations of documents and returned the top-$k$ semantically similar chunks given a user query. Retrieved chunks were then combined using LangChain’s \textit{stuff} method\footnote{In LangChain, the stuff method is a particular abstraction for context packing. It concatenates the top-$k$ retrieved documents and inserts the combined block into a single prompt template passed to the LLM. While computationally lightweight, it is limited by the model’s context window. LangChain also provides alternative strategies such as \textit{map-reduce}, \textit{refine}, and \textit{map-rerank} \citep{topsakal_creating_2023}.} (\autoref{lst:stuff-method}), in which all documents are concatenated into a single prompt template and passed to the LLM.
 
 \vspace{0.8em}
 \begin{figure}[H]
 \centering
-\begin{adjustbox}{max width=\linewidth}
+\begin{adjustbox}{max width=0.8\linewidth, center}
 \begin{tikzpicture}[
   node distance=2.2cm,
   every node/.style={rectangle, draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center},
@@ -45,7 +45,7 @@ LangChain served as the orchestration layer, providing ready-made abstractions t
 ]
 
 \node (query) {User query};
-\node (retriever) [right=of query] {Retriever \\ (FAISS)};
+\node (retriever) [right=of query] {Retriever \\ (Faiss)};
 \node (context) [right=of retriever] {Context packing \\ (\textit{stuff} method)};
 \node (generation) [right=of context] {LLM generation};
 
@@ -55,11 +55,11 @@ LangChain served as the orchestration layer, providing ready-made abstractions t
 
 \end{tikzpicture}
 \end{adjustbox}
-\caption{Prototype retrieval pipeline: from user query to generation via retrieval and context packing.}
+\caption{Prototype retrieval pipeline: from user query to generation via Faiss retrieval with LangChain \textit{stuff} method and context packing.}
 \label{fig:prototype-pipeline}
 \end{figure}
 
-The appeal, methodologically, privileged rapid deployment over optimisation, with the primary aim of validating the pipeline: a single Pythonic framework glued together embedding creation, vector search, prompt assembly, and LLM calls, enabling a minimal viable product that validated feasibility before investing efforts in bespoke infrastructure.
+The appeal, methodologically, privileged rapid deployment over optimisation, with the primary aim of validating the pipeline. A single Pythonic framework glued together embedding creation, vector search, prompt assembly, and LLM calls, enabling a minimal viable product that validated feasibility before investing efforts in bespoke infrastructure.
 
 
 \begin{lstlisting}[language=Python, 
@@ -68,11 +68,12 @@ The appeal, methodologically, privileged rapid deployment over optimisation, wit
                   showspaces=false,
                   showstringspaces=false,
                   showtabs=false,
-                  caption={Usage example of the stuff method from LangChain.}, 
+                  caption={Usage example in Python of the stuff method from LangChain.}, 
                   captionpos=b, 
                   label={lst:stuff-method},
-                  xleftmargin=0.05\textwidth,
-                  xrightmargin=0\textwidth]
+                  xleftmargin=0.1\textwidth,
+                  xrightmargin=0.1\textwidth,
+                  basicstyle=\fontsize{9}{10.5}\selectfont\ttfamily]
 from mistralai import Mistral
 from langchain_mistralai import ChatMistralAI
 from langchain.memory import ConversationBufferMemory
@@ -89,19 +90,20 @@ def get_conversation_chain(vector_store, api_key: str, model_name: str, system_m
 
     The chain uses LangChain's ConversationalRetrievalChain with the 
     default "stuff" document combination strategy, concatenating the 
-    retrieved chunks into a prompt template. A ConversationBufferMemory 
-    maintains chat history across turns, enabling stateful interaction.
+    retrieved chunks into a prompt template. 
+    A ConversationBufferMemory maintains chat history across turns 
+    for stateful interaction.
 
-      Args:
-        vector_store: The vector database wrapper (FAISS) used for retrieval.
-        api_key (str): API key for the Mistral LLM.
-        model_name (str): Identifier of the Mistral model to be used.
-        system_message (str): The system-level instruction in the prompt.
-        human_message (str): The user-facing prompt template.
+    Args:
+      vector_store: The vector database (Faiss) used for retrieval.
+      api_key (str): API key for the Mistral LLM.
+      model_name (str): Identifier of the Mistral model to be used.
+      system_message (str): The system-level instructions (prompt).
+      human_message (str): The user-facing prompt template (query).
 
-      Returns:
-        conversation_chain: A ConversationalRetrievalChain instance ready 
-        for query-answering with memory support.
+    Returns:
+      conversation_chain: A ConversationalRetrievalChain instance 
+      ready for query-answering with memory support.
       """
 
     llm = create_mistral_llm(api_key, model_name)
@@ -126,11 +128,9 @@ def get_conversation_chain(vector_store, api_key: str, model_name: str, system_m
     return conversation_chain
 \end{lstlisting}
 
-
-
 At the same time, the prototyping phase exposed several framework frictions that informed the later redesign. One issue concerned redundant model calls within the LangChain stack -- most notably the automatic query rephrasing in \texttt{ConversationalRetrievalChain} -- which doubled LLM invocations and increased the risk of hitting API rate limits. This was mitigated through a simple rate-limiting guard with a one-second delay, but the solution remained suboptimal. A second problem arose with the retry logic in \texttt{MistralAIEmbeddings}, which failed to handle \texttt{HTTP 429} \textit{Too Many Requests}\footnote{The HTTP 429 \textit{Too Many Requests} status code signals that the client has exceeded the allowable number of requests within a specified timeframe. This response enforces what is commonly known as \textit{rate limiting}, instructing the client to reduce its request frequency.} responses correctly due to a bug in LangChain’s client error handling. This reduced robustness under bursty traffic until an upstream patch was introduced later on,\footnote{Pull request addressing the incorrect exception handling for rate limiting in \texttt{MistralAIEmbeddings} emerged in LangChain \href{https://web.archive.org/web/20250823161804/https://github.com/langchain-ai/langchain/pull/29242}{PR\#29242} and it was released in the subsequent version (January 2025).}\nocite{noauthor_mistralai_2025} but the episode highlighted the limited control over low-level failure modes. Finally, reliance on predefined chains restricted experimentability by limiting chunk-level metadata control, and constraining the ability to vary context-packing strategies or introduce custom pre- and post-processing filters without abandoning the abstraction layer altogether.
 
-These findings, which emerged during implementation and debugging, motivated a shift toward a more modular pipeline. In this redesign, chunking, vectorisation, and retrieval, were configured and evaluated explicitly, avoiding reliance on predefined chains and granting finer control over performance-critical components.
+These findings, which emerged during implementation and debugging, motivated a shift toward a more modular pipeline. In this redesign, chunking, vectorisation, and retrieval, were configured as distinct, observable stages, evaluated in isolation rather than hidden within predefined chains. This approach granted finer control over performance-critical components and made their effects more transparent.
 
 \subsection{Evaluation}
 The evaluation of the system's prototype followed a pronged path:
@@ -145,7 +145,7 @@ This custom approach reflected the broader methodological challenges in evaluati
 Prototyping revealed several challenges that guided the design of the subsequent system:
 \begin{itemize}
       \item \textbf{Scalability:} reliance on CSV storage and naive concatenation of retrieved chunks limited efficiency and made the system unsuitable for larger-scale deployments.
-      \item \textbf{Resource efficiency:} redundant LLM calls (e.g., for query rephrasing in LangChain) caused unnecessary latency and risked exceeding API rate limits.
+      \item \textbf{Resource efficiency:} redundant LLM calls (e.g., for query processing in LangChain) caused unnecessary latency and risked exceeding API rate limits.
       \item \textbf{Metadata control:} the absence of fine-grained chunk-level metadata management constrained retrieval flexibility.
       \item \textbf{Evaluation scope:} intrinsic evaluation without a gold standard or baseline system restricted comparability with other solutions; user and domain-expert feedback was absent at this stage.
       \item \textbf{Dependency on third-party frameworks:} reliance on LangChain introduced constraints in terms of customization and debugging transparency, limiting the control over specific components.
@@ -160,28 +160,27 @@ These limitations underscored the need for a more scalable and systematically ev
 
 
 \section{Full-Scale Implementation}\label{sec:full_system}
-The full system was re-engineered from the ground to support dynamic, scalable document ingestion, contextual retrieval, and answer generation using open-source language models. All LangChain dependencies were removed in favour of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The final architecture (see \autoref{fig:full-system-diagram}) brings together the following components:
+The full system was re-engineered from the ground to support dynamic, scalable document ingestion, contextual retrieval, and answer generation using open-source language models. All LangChain dependencies were removed in favour of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The final architecture is organised around the following processing stages (see \autoref{fig:full-system-diagram}):
 \begin{itemize}
       \item a custom KB construction module, which integrates sitemap generation and web crawling,
       \item semantic chunking and metadata enrichment,
       \item MistralAI vector embeddings,
-      \item a FAISS vector store for retrieval,
+      \item a Faiss vector store for retrieval,
       \item a generation module with open-source Mistral \textit{NeMo} model,
       \item generative responses with inline citation handling,
       \item a reactive front-end Streamlit interface,
       \item and a feedback management system.
 \end{itemize}
 
-Together, these modules amount to a complete end-to-end system. Web documents are ingested, cleaned, and segmented; semantic metadata and embeddings are created; retrieval is performed over a dedicated vector store; and answers are generated, presented through an interactive interface, and enriched by user feedback mechanisms. The outcome is not a loose set of tools, but a coherent workflow that moves seamlessly from source material to user-facing response.
+Together, these modules amount to a complete end-to-end pipeline. Web documents are ingested, cleaned, and segmented; semantic metadata and embeddings are created; retrieval is performed over a dedicated vector store; and answers are generated, presented through an interactive interface, and enriched by user feedback mechanisms. The outcome is not a loose set of tools, but a coherent workflow that moves seamlessly from source material to user-facing response.
 
-A fundamental part of this design is the \texttt{RAG Orchestrator} module, which acts as a connector and manages the flow of information across modules, centralising responsibilities such as gathering evidence from the vector database, grouping it into coherent contexts, and delivering it -- together with the user’s query and dialogue history -- to the LLM.
+A fundamental element of this design is the \texttt{RAG Orchestrator}, which acts as the central coordinator of the pipeline. It manages the end-to-end flow of information across modules by issuing retrieval requests to the vector database, aggregating and grouping the retrieved chunks into relevant context, and constructing the final prompt. This prompt combines the contextual evidence, the user’s query, and the dialogue history, and is then passed to the LLM for answer generation. In doing so, the orchestrator centralises control, ensures consistency in context construction, and abstracts the complexity of the underlying retrieval and generation stages from the user-facing interface.
 
-
-
+\vspace{0.9em}
 \begin{figure}[H]
 \centering
-\usetikzlibrary{positioning}
-\begin{adjustbox}{max width=\linewidth}
+\usetikzlibrary{positioning,arrows.meta}
+\begin{adjustbox}{max width=0.8\linewidth}
 \begin{tikzpicture}[node distance=2.0cm and 1.5cm]
 \tikzset{
   module/.style={draw, rounded corners, align=center, minimum width=3.8cm, minimum height=1.6cm, thick, fill=gray!5},
@@ -197,28 +196,43 @@ A fundamental part of this design is the \texttt{RAG Orchestrator} module, which
 
 % Bottom row
 \node[module, below=1.5cm of retriever] (llm) {Answer Generation\\with context (LLM)};
-\node[module, left=of llm] (ui) {User\\Interface};
+\node[module, left=of llm] (orch) {RAG\\Orchestrator};
+\node[module, left=of orch] (ui) {User\\Interface};
 
 % Feedback
 \node[module, left=of ui] (feedback) {Feedback\\Rating};
-\node[module, left=of feedback] (user) {User};
+\node[module, left=of feedback] (user) {User Query};
 
-% Flow arrows
+% Main flow
 \draw[arrow] (webkb) -- (chunkskb);
 \draw[arrow] (chunkskb) -- (vectordb);
-\draw[arrow] (vectordb) -- (retriever);
-\draw[arrow] (retriever) -- (llm);
-\draw[arrow] (llm) -- (ui);
-\draw[arrow] (user) to [out=270, in=180] (ui.south);
+\draw[arrow] (retriever) -- (vectordb);
+
+% Orchestrated flow
+\draw[arrow] (ui) -- (orch);
+\draw[arrow] (orch) -- (retriever);   % retrieve step
+\draw[arrow] (retriever) -- (orch);   % results back to orchestrator
+\draw[arrow] (orch) -- (llm);         % build prompt + call LLM
+\draw[arrow] (llm) -- (orch);         % answer + citations back
+\draw[arrow] (orch) -- (ui);          % deliver to UI
+
+% User → UI (orthogonal path)
+\def\drop{8mm}
+\draw[arrow]
+  (user.south) -- ++(0,-\drop) coordinate (urow)
+               -- (ui.south |- urow)
+               -- (ui.south);
 
 % Feedback loop
 \draw[feedback] (ui) -- (feedback);
 
 \end{tikzpicture}
 \end{adjustbox}
-\caption{Macro modules of the system. Solid arrows show the main data flow; dashed arrow indicates user feedback.}\label{fig:full-system-diagram}
+\caption{Dataflow and macro modules of the re-engineered GNA QA system. The \emph{RAG Orchestrator} mediates between the UI, the vector database, the retriever, and the LLM: it issues retrieval, builds the context prompt and returns the final answer. Solid arrows show the main data flow; the dashed arrow indicates user feedback.}
+\label{fig:full-system-diagram}
 \end{figure}
 
+It is worth noting that \autoref{fig:full-system-diagram} may be read both as a dataflow diagram and as a representation of the system architecture. In this case, the two perspectives converge: the logical architecture of the system is itself defined by the pipeline of data transformations, with each module corresponding directly to a deployed component. The orchestrator sits at the core of this dual view, embodying both the control logic of the architecture and the connective tissue of the dataflow.
 
 
 \sloppy
@@ -240,7 +254,7 @@ The output is a structured sitemap serialised as an XML file (\texttt{GNA\_\_sit
 \subsection{Document Crawling}
 The next stage systematically collects the contents of all URLs listed in the sitemap to ensure comprehensive coverage of the manual. Pages are fetched asynchronously with retry logic, exponential back off, and controlled concurrency to withstand transient network issues or throttling. Requests are interleaved with pauses to avoid overwhelming the server and failed URLs are logged for reprocessing.
 
-Once retrieved, the raw HTML is parsed using BeautifulSoup, focusing on the main content (\texttt{deiv\#mw-content-text}) and stripped of extraneous elements such as navigation bars, footers, and other layout components that do not contribute semantic content. The remaining material is processed preserving the logical reading order. Structural features are carefully retained: section headers (\texttt{h1-h6}) are used to reconstruct a hierarchical outline of the page; paragraphs, tables, lists, and images are preserved as discrete items, each linked back to its contextual breadcrumb trail. This ensures that the captured content is situated within its original navigational hierarchy, which later supports more precise retrieval.
+Once retrieved, the raw HTML is parsed using BeautifulSoup \citep{hajba_website_2018}, focusing on the main content (\texttt{deiv\#mw-content-text}) and stripped of extraneous elements such as navigation bars, footers, and other layout components that do not contribute semantic content. The remaining material is processed preserving the logical reading order. Structural features are carefully retained: section headers (\texttt{h1-h6}) are used to reconstruct a hierarchical outline of the page; paragraphs, tables, lists, and images are preserved as discrete items, each linked back to its contextual breadcrumb trail. This ensures that the captured content is situated within its original navigational hierarchy, which later supports more precise retrieval.
 
 The outcome of this step is a collection of structured representations of the user manual’s pages, where meaningful content is disentangled from noise and the logical organisation of the source is preserved.
 
@@ -248,33 +262,33 @@ The outcome of this step is a collection of structured representations of the us
 \subsection{Chunking}
 After parsing, documents are segmented into smaller and more manageable units. To this end, the system employs a sliding-window strategy with a maximum span of 512 characters and an overlap of 128, a configuration recommended to favour dense retrieval while mitigating excessive fragmentation of context \citep{wang_searching_2024}.
 
-Chunks are not treated as inert slices of text, but as semantically enriched units that carry a set of contextual signals. Each one is assigned a unique identifier -- a SHA-256 hash of its source and position -- and is accompanied by the source URL, page title, and the chain of section headers that serve as navigational breadcrumbs. Content is further annotated with keywords extracted through the KeyBERT method\footnote{\textit{KeyBERT} is a keyword extraction technique which uses BERT embeddings to generate the keywords and keyphrases most closely aligned with a document.} and named entities identified with the model \textit{it\_core\_news\_md} from spaCy. The metadata also records the content type -- whether a passage of text, a table, a list, or an image -- ensuring that the heterogeneous nature of the original source remains visible at retrieval time.
+Chunks are not treated as inert slices of text, but as semantically enriched units that carry a set of contextual signals. Each one is assigned a unique identifier -- a SHA-256 hash of its source and position -- and is accompanied by the source URL, page title, and the chain of section headers that serve as navigational breadcrumbs. Content is further annotated with keywords extracted through the KeyBERT method\footnote{\textit{KeyBERT} is a keyword extraction technique which uses BERT embeddings to generate the keywords and keyphrases most closely aligned with a document \citep{grootendorst_maartengrkeybert_2025}.} and named entities identified with the model \textit{it\_core\_news\_md} from spaCy.\footnote{Reference: \textcite{noauthor_release_2024}} The metadata also records the content type -- whether a passage of text, a table, a list, or an image -- ensuring that the heterogeneous nature of the original source remains visible at retrieval time.
 
 \textbf{Tables. }Tables are preserved as autonomous chunks and formatted in Markdown, maintaining both their structure and interpretability. 
 
 \textbf{Lists. }Lists are likewise extracted as discrete units, safeguarding their enumerative character. 
 
-\textbf{Images. }Images are handled with particular care, since they frequently consist of illustrative diagrams, tables embedded as graphics (e.g., \autoref{fig:example_image}), or screenshots of the GNA QGIS plugin (e.g., \autoref{fig:screen_image}) that can be of value for the retrieval and answer generation stages. To unlock this layer of information, the system applies an OCR pipeline built on Tesseract, enhanced with a series of preprocessing steps. Each image is first converted to greyscale and rescaled through bicubic interpolation to sharpen textual contours, then contrast-limited adaptive histogram equalisation (CLAHE) is applied to reduce noise and improve legibility across varied backgrounds. The processed image is passed to Tesseract with a configuration optimised for Italian language recognition and extended character support, allowing the extraction of structured textual surrogates. These OCR outputs are integrated into the retrieval space as additional content, making usable otherwise inaccessible visual information.
+\textbf{Images. }Images are handled with particular care, since they frequently consist of illustrative diagrams, tables embedded as graphics (e.g., \autoref{fig:example_image}), or screenshots of the GNA QGIS plugin (e.g., \autoref{fig:screen_image}) that can be of value for the retrieval and answer generation stages. To unlock this layer of information, the system applies an OCR pipeline built on Tesseract \citep{noauthor_tesseract_2025}, enhanced with a series of preprocessing steps. Each image is first converted to greyscale and rescaled through bicubic interpolation to sharpen textual contours, then contrast-limited adaptive histogram equalisation (CLAHE) is applied to reduce noise and improve legibility across varied backgrounds. The processed image is passed to Tesseract with a configuration optimised for Italian language recognition and extended character support, allowing the extraction of structured textual surrogates. These OCR outputs are integrated into the retrieval space as additional content, making usable otherwise inaccessible visual information.
 
-\textbf{Code. }A further challenge is posed by the presence of code snippets in the operative manual, expressed in the form of HTML tags. These typically provide instructions for formatting reports or embedding elements within QGIS layouts. For instance, in the section on compiling the MOPR, users are instructed to insert HTML tags (see \autoref{fig:html_example}) to generate two-column layouts when descriptive text exceeds 5000 characters, or to employ \texttt{<br>} to insert line breaks. In the chunking phase, these snippets are preserved as discrete ``code'' chunks, tagged accordingly in the metadata. This ensures that when a user queries the assistant for formatting or technical guidance, the relevant HTML examples are retrievable in their proper context.\\
+\textbf{Code. }A further challenge is posed by the presence of code snippets in the operative manual, expressed in the form of HTML tags. These typically provide instructions for formatting reports or embedding elements within QGIS layouts. For instance, in the section on compiling the MOPR, users are instructed to insert HTML tags (e.g., \autoref{fig:html_example}) to generate two-column layouts when descriptive text exceeds 5000 characters, or to employ \texttt{<br>} to insert line breaks. In the chunking phase, these snippets are preserved as discrete ``code'' chunks, tagged accordingly in the metadata. This ensures that when a user queries the assistant for formatting or technical guidance, the relevant HTML examples are retrievable in their proper context.\\
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{images/merged.jpg} 
+  \includegraphics[width=0.8\textwidth]{images/merged.jpg} 
   \caption{Example of a table embedded as an image, accompanied by the corresponding HTML snippet used for its integration in the GNA user manual website.}
   \label{fig:example_image}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{images/esempio_screen.png} 
+  \includegraphics[width=0.8\textwidth]{images/esempio_screen.png} 
   \caption{Screenshot of the GNA QGIS plugin interface, as presented in the user manual, illustrating configuration options to support data entry and visualisation.}
   \label{fig:screen_image}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \fbox{\includegraphics[width=\textwidth]{images/istruzioni_html.png}}
+  \fbox{\includegraphics[width=0.8\textwidth]{images/istruzioni_html.png}}
   \caption{Example of HTML snippet instructions from the GNA user manual, illustrating how to format long descriptive fields.}
   \label{fig:html_example}
 \end{figure}
@@ -296,27 +310,28 @@ Finally, all enriched chunks are serialised into a JSON file,\footnote{Output: 8
 
 \sloppy
 \subsection{Vector Embeddings}
-Document chunks are converted into dense vector representations using the \textit{intfloat/multilingual-e5-large} model from Sentence Transformers. This model was selected for its multilingual encoding capabilities and strong performance in semantic retrieval tasks, making it suitable for the predominantly Italian KB while allowing also cross-lingual queries. 
+Document chunks are converted into dense vector representations using the \textit{intfloat/multilingual-e5-large} model from Sentence Transformers \citep{wang_multilingual_2024}. This model was selected for its multilingual encoding capabilities and strong performance in semantic retrieval tasks, making it suitable for the predominantly Italian KB while allowing also cross-lingual queries. 
 
-Text chunks are processed in batches and transformed into L2-normalised embeddings to ensure vector magnitudes are uniform. Embeddings are cached locally to avoid redundant computation across runs. The normalised vectors are stored in a FAISS \texttt{IndexFlatIP} index, which performs brute-force nearest neighbour search using the inner product (dot product) as metric, computed as:
-
+Text chunks are processed in batches and transformed into L2-normalised embeddings to ensure vector magnitudes are uniform. Embeddings are cached locally to avoid redundant computation across runs. The normalised vectors are stored in a Faiss \texttt{IndexFlatIP} index, which performs brute-force nearest neighbour search using the inner product -- i.e., dot product -- as metric, computed as:
 \[
 \cos(\theta) \;=\; \frac{q \cdot x}{\|q\|_2 \, \|x\|_2}.\\
 \]
 
-Alongside the vector index, a separate metadata store is maintained, linking each embedding to its corresponding chunk through a unique identifier. This separation enables efficient similarity search in FAISS while preserving quick access to rich metadata such as source URL, document structure, and content type for downstream processing.\footnote{Output: FAISS index stored in \texttt{.faiss\_db}, linked with its metadata.}
+Alongside the vector index, a separate metadata store is maintained, linking each embedding to its corresponding chunk through a unique identifier. This separation enables efficient similarity search while preserving quick access to metadata such as source URL, document structure, and content type for downstream processing.\footnote{Output: Faiss index stored in \texttt{.faiss\_db/}, linked with its metadata.}
+
+Faiss was retained for the full-scale implementation because its lightweight yet high-performance design matched the project’s computational constraints and the requirement for retrieval methods that are both controllable and replicable. Unlike Milvus or Qdrant, which offer integrated metadata management and distributed scalability but at the cost of additional infrastructure, this choice enabled the system to remain simple and efficient within the deployment setting, which consists of a single-node architecture. In particular, the application runs on Streamlit Community Cloud, a self-contained environment where introducing external database services would have added unnecessary complexity, with the risk of reduced performance and higher latency. With Faiss, the index type, similarity metric, and vector normalization could be explicitly defined, keeping the retrieval process understandable and explainable. Furthermore, storing the vector index in a \texttt{.faiss} file and maintaining metadata separately in a \texttt{.pkl} file guaranteed stable and consistent results across sessions, different runs and redeployments. The availability of Python wrappers further contributed to making the integration both straightforward and efficient.
 
 These embeddings and their associated metadata form the foundation for the retrieval stage, where user queries -- also encoded with the same \textit{multilingual-e5-large} model, to guarantee that both queries and documents share the same normalised vector space -- are matched against the stored vectors to identify the most semantically relevant chunks for answer generation.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/preprocess_diagram.png} 
-  \caption{First stages of the GNA QA pipeline: from knowledge base construction and chunking with metadata to embedding into a FAISS index for subsequent retrieval.}
+  \caption{First stages of the GNA QA pipeline: from knowledge base construction and chunking with metadata to embedding into the Faiss index for subsequent retrieval.}
   \label{fig:pre}
 \end{figure}
 
 \section{Candidates Retrieval}
-When a user submits a query, it is embedded using the same encoder to ensure vector space consistency. The FAISS index, configured for inner-product similarity, is queried to return the top-$k$ candidate chunks.\footnote{The default value of $k$=5 was determined empirically to balance response quality and token constraints.} Retrieval is executed entirely within the vector space to maximise speed and maintain consistent scoring across CPU-based deployments. The retrieved results are enriched with their stored metadata, which includes source URL, document title from the original web section, hierarchical section headings, and content type (text, table, image). Candidates are then grouped by provenance, ensuring that related chunks from the same source URL are passed together into the generation stage, thus improving contextual coherence, supporting inline citation, and reducing redundancy.
+When a user submits a query, it is embedded using the same encoder to ensure vector space consistency. The Faiss index, configured for inner product similarity, is queried to return the top-$k$ candidate chunks.\footnote{The default value of $k$=5 was determined empirically to balance response quality and token constraints.} Retrieval is executed entirely within the vector space to maximise speed and maintain consistent scoring across CPU-based deployments. The retrieved results are enriched with their stored metadata, which includes source URL, document title from the original web section, hierarchical section headings, and content type (text, table, image). Candidates are then grouped by provenance, ensuring that related chunks from the same source URL are passed together into the generation stage, thus improving contextual coherence, supporting inline citation, and reducing redundancy.
 
 To further improve factual density, a lightweight filtering heuristic is applied to penalise very short or contextless chunks, deprioritising fragments that lack substantive information. The grouped and filtered candidates are returned as structured context objects, ready to be consumed by the answer generation module. 
 
@@ -328,7 +343,7 @@ To systematically evaluate the contribution of different retrieval strategies, w
 \noindent The following retrieval configurations were implemented and evaluated:
 \begin{itemize}
     \item \textbf{Dense retrieval.}\\
-    This method employs dense vector embeddings for document representation and similarity search. It relies on FAISS as the underlying vector database, wrapped via the \texttt{VectorDatabaseWrapper} module. Queries are encoded into embeddings and compared with pre-computed document embeddings, returning the top-$k$ results ranked by inner-product similarity. Query embeddings are cached using a normalised MD5 hash to avoid redundant computations, and batch querying is supported.
+    This method employs dense vector embeddings for document representation and similarity search. It relies on Faiss as the underlying vector database, wrapped via the \texttt{VectorDatabaseWrapper} module. Queries are encoded into embeddings and compared with pre-computed document embeddings, returning the top-$k$ results ranked by inner-product similarity. Query embeddings are cached using a normalised MD5 hash to avoid redundant computations, and batch querying is supported.
     \item \textbf{BM25 retrieval.}\\ 
     A traditional sparse retriever based on the BM25 algorithm. The index was constructed over concatenated metadata fields -- \texttt{title}, \texttt{keywords}, \texttt{headers\_context}, and \texttt{document} -- from the same chunks metadata store. Preprocessing was applied specifically for Italian, including stop word removal, stemming, and handling of clitics and apocope forms. The tokenised corpus was then indexed for lexical matching. As with dense retrieval, a batch mode was implemented. The default cutoff parameter (k = 5) was selected empirically to balance response quality against tokenisation and latency constraints.
     \item \textbf{Hybrid retrieval.}\\ 
@@ -385,7 +400,7 @@ At runtime, the reranker receives the top-$N$ candidates (with $N$ = 50) from th
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{images/evaluation_diagram.png} 
+  \includegraphics[width=0.9\textwidth]{images/evaluation_diagram.png} 
   \caption{Ablation setup for retrieval strategies. Each configuration (Dense, BM25, Hybrid via RRF or Score-blend), with or without Query Rewriting and/or Reranking, is executed \emph{independently}. Outputs are evaluated at the @5 cutoff (R@5, MRR, nDCG@5, AP@5, Latency) and compared to Dense retriever baseline.}
   \label{fig:ablation-setup}
 \end{figure}
@@ -393,7 +408,7 @@ At runtime, the reranker receives the top-$N$ candidates (with $N$ = 50) from th
 
 
 \section{Generation}\label{sec:rag_generation}
-Central to the generation phase is the RAG Orchestrator, the component responsible for coordinating the entire workflow between retrieval and answer synthesis. When a user query is received, the orchestrator first queries the vector database to obtain the most relevant chunks. These chunks are then grouped by provenance -- i.e., their original URLs --, ensuring that related fragments are presented together and assigned consistent citation identifiers. Next, the orchestrator constructs the retrieval-augmented prompt by combining the grouped context with the user’s question and any previous dialogue history. This structured prompt, together with the decoding parameters, is forwarded to the Mistral model through an asynchronous streaming interface. As the model generates its response, the orchestrator performs post-processing by validating and formatting in-answer citations and appending the corresponding reference list.
+Central to the generation phase is the \texttt{RAG Orchestrator}, the component responsible for coordinating the entire workflow between retrieval and answer synthesis. When a user query is received, the orchestrator first queries the vector database to obtain the most relevant chunks. These chunks are then grouped by provenance -- i.e., their original URLs --, ensuring that related fragments are presented together and assigned consistent citation identifiers. Next, the orchestrator constructs the retrieval-augmented prompt by combining the grouped context with the user’s question and any previous dialogue history. This structured prompt, together with the decoding parameters, is forwarded to the Mistral model through an asynchronous streaming interface. As the model generates its response, the orchestrator performs post-processing by validating and formatting in-answer citations and appending the corresponding reference list.
 
 The Mistral model employed is \textit{NeMo} 12B,\footnote{NeMo 12B, released in July 2024 by Mistral, surpasses comparable open-source models with 83.5\% accuracy on HellaSwag, 73.8\% on TriviaQA, and 68\% on MMLU, while offering a 128k context window -- vs. 8k for LLaMA 3 and Gemma 2. On instruction-following, it achieves 7.84 on MT Bench and 42.57 on WildBench, demonstrating stronger reasoning and alignment in multi-turn QA. Source: \cite{noauthor_mistral_2025}.} an open-source LLM accessible via a dedicated API and hosted independently. Its selection was guided by a convergence of methodological and practical requirements. First, open-source availability and a permissive licence ensured transparency, reproducibility, and the possibility of adaptation without the restrictions of proprietary services. Second, the model’s strong performance on multilingual benchmarks, including robust handling of Italian,\footnote{On multilingual tasks, Mistral model consistently outperforms LLaMA 3 (8B). For Italian specifically, accuracy reaches about 72\% on HellaSwag, ~49\% on ARC Challenge, and ~62\% on MMLU. The model is able to tokenizes Italian efficiently (compression ratio 1.28) and also sustains strong accuracy across reasoning, commonsense, and knowledge-intensive benchmarks. Ibid.} made it particularly suitable for a system intended to operate in a cultural heritage setting where linguistic specificity is paramount. Third, Mistral \textit{NeMo} demonstrated competitive efficiency, with low latency and high throughput even when deployed on modest hardware, a quality that enabled real-time responsiveness without requiring more powerful computing infrastructures. In addition, the availability of an official API greatly facilitated seamless integration into the retrieval-augmented generation pipeline, while its ability to support extended context windows -- up to 128k tokens -- allowed the system to process multiple retrieved passages in a single prompt without truncation or loss of coherence.
 
@@ -415,7 +430,8 @@ A custom system message (\autoref{lst:system_prompt}) is injected at the top of 
                    captionpos=b,
                    label={lst:system_prompt},
   xleftmargin=0.05\textwidth,
-  xrightmargin=0.05\textwidth]
+  xrightmargin=0.05\textwidth,
+  basicstyle=\fontsize{9}{10.5}\selectfont\ttfamily]
 system_content = """
     Sei un assistente virtuale incaricato di rispondere a domande sul manuale operativo del Geoportale Nazionale per l'Archeologia (GNA), gestito dall'Istituto Centrale per il Catalogo e la Documentazione (ICCD).
 
@@ -453,7 +469,7 @@ Each chunk passed to the LLM is numbered and grouped by its metadata (title, URL
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/generation_workflow.png} 
-  \caption{Sequence diagram of the generation stage from the GNA QA pipeline: a user query is sent to the RAG orchestrator, the FAISS vector database and combined with context and chat history by the orchestrator before being sent to the Mistral NeMo 12B model, which generates a response that is post-processed and returned to the user.}
+  \caption{Sequence diagram of the generation stage from the GNA QA pipeline: a user query is sent to the RAG orchestrator, the Faiss vector database and combined with context and chat history by the orchestrator before being sent to the Mistral NeMo 12B model, which generates a response that is post-processed and returned to the user.}
   \label{fig:generation_workflow}
 \end{figure}
 
@@ -497,7 +513,8 @@ Evaluating on standard datasets would therefore risk producing misleadingly infl
                    captionpos=b,
                    label={lst:single-hop-example},
   xleftmargin=0.2\textwidth,
-  xrightmargin=0.2\textwidth]
+  xrightmargin=0.2\textwidth,
+  basicstyle=\fontsize{9}{10.5}\selectfont\ttfamily]
 {
   "question": "<Italian question>",
   "relevant_docs": ["<chunk_id>"],
@@ -511,8 +528,9 @@ Evaluating on standard datasets would therefore risk producing misleadingly infl
                    caption={JSON output format for combined dataset items, including single-hop and multi-hop questions.},
                    captionpos=b,
                    label={lst:combined-set-example},
-  xleftmargin=0.05\textwidth,
-  xrightmargin=0.05\textwidth]
+  xleftmargin=0.2\textwidth,
+  xrightmargin=0.2\textwidth,
+  basicstyle=\fontsize{9}{10.5}\selectfont\ttfamily]
 {
   "question": "<Italian question>",
   "relevant_docs": ["<chunk_id_1>", "<chunk_id_2>", "..."],
@@ -553,9 +571,9 @@ Human feedback was through a lightweight 3-point Likert scale -- Poor, Fair, Goo
 
 
 \section{User Interface}
-The user interface (UI) was developed using Streamlit, chosen for its ability to support rapid prototyping and its native integration with Python NLP pipelines. Streamlit also offers built-in handling of asynchronous processes, making it well suited for a RAG system where retrieval and generation stages can vary in latency. Within the system, the UI serves as the primary interaction layer between users and the GNA QA service. Through a simple and accessible design (\autoref{fig:UI}), users are able to submit queries in natural language, receive answers, and inspect the underlying evidence via inline citations linked to the retrieved documents.
+The user interface (UI) was implemented using Streamlit \citep{noauthor_streamlit_2025}, chosen for its capacity to support rapid prototyping and its native integration with Python NLP pipelines. The framework also provides built-in support for asynchronous processes, which is particularly advantageous in a RAG setting where retrieval and generation stages may exhibit variable latency. Functioning as the primary interaction layer, the UI enables users to submit queries in natural language and obtain generated answers in real time through a clear and accessible design (see \autoref{fig:UI}). Supporting evidence is presented through in-answer citations linked to the corresponding source documents, enabling users to verify the information, assess the reliability of the response, and explore the broader context from which the answer was derived.
 
-Beyond serving as a functional entry point to the system, the UI assumes a crucial methodological role. It provides a framework for integrating explicit user feedback, thereby enabling the collection of qualitative evaluations that complement quantitative retrieval metrics. Through the interface, users can annotate responses in terms of perceived relevance, fluency, completeness, and usability by selecting an option on a three-point Likert scale. These annotations generate valuable data that can be used to iteratively refine the system. As previously discussed, this human-centred dimension is particularly important in dialogue and QA contexts, where conventional automated metrics often fail to capture the subtleties of interaction quality. The interface therefore does more than display outputs: it functions as an evaluation instrument in its own right, supporting the triangulation of system performance across computational measures and human judgements.
+Beyond serving as a functional entry point to the system, the UI assumes a crucial methodological role. It establishes a channel for gathering explicit user feedback, thereby complementing quantitative retrieval metrics with qualitative evaluations. Through the interface, users can annotate system responses according to perceived relevance, fluency, completeness, and usability by selecting an option on a three-point Likert scale. These ratings generate valuable data that inform iterative refinement of the system. As previously noted, this human-centred dimension is particularly important in dialogue and QA contexts, where conventional automated metrics often fail to capture the subtleties of interaction quality. The interface therefore does more than displaying outputs; it serves as an evaluation instrument in its own right, supporting the triangulation of system performance across computational indicators and human judgements.
 
 \vspace{0.8em}
 \begin{figure}[H]
@@ -565,24 +583,16 @@ Beyond serving as a functional entry point to the system, the UI assumes a cruci
   \label{fig:UI}
 \end{figure}
 
-\noindent The application interface is organised into three main areas:
+\noindent The application UI is organised into three main areas:
 \begin{enumerate}
-      \item \textbf{Sidebar:} contains MiC reference, institutional links to the GNA documentation, and contextual help describing the assistant’s capabilities. It also provides functional controls including a \textit{Clear chat history} button (``\textit{Cancella cronologia chat}'') to reset the Streamlit session (\texttt{st.session\_state.chat\_history}) and a ``\textit{Download Feedback}'' button for exporting user queries and system's responses.
-      \item \textbf{Main interface:} provides a natural language input field for querying the assistant. It displays the chat history, including user messages, assistant responses and feedback buttons for each assistant reply (\autoref{fig:ratings}).
+      \item \textbf{Sidebar:} contains MiC reference, institutional links to the GNA documentation, and contextual help describing the assistant’s capabilities. It also provides functional controls including a ``\textit{Clear chat history}'' button (``\textit{Cancella cronologia chat}'') to reset the Streamlit session (\texttt{st.session\_state.chat\_history}) and a ``\textit{Download feedback}'' button for exporting user queries and system's responses.
+      \item \textbf{Main section:} provides a natural language input field for querying the assistant. It displays the chat history, including user messages, assistant responses and feedback buttons for each system answer.
       \item \textbf{Session features}: 
       \begin{itemize}
             \item Chat history is limited to the most recent ten exchanges, which are stored and updated in the session state;
             \item Feedback from individual message indexes is stored as a set (\texttt{st.session\_state.feedback\_given}), allowing the system to prevent duplicate ratings and dynamically update UI.
       \end{itemize}
 \end{enumerate}
-
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{images/ui_ratings.png} 
-  \caption{Rating mechanism embedded in the user interface.}
-  \label{fig:ratings}
-\end{figure}
 
 To guarantee smooth interactions and to minimise computational overhead, the system makes extensive use of \texttt{st.session\_state}, a built-in Streamlit object designed for persisting variables across user interactions. Unlike ordinary Python variables, which are re-initialised each time Streamlit re-runs a script, \texttt{st.session\_state} retains values for the duration of a session. This functionality is critical in a conversational application, as it allows chat memory to persist between turns. Both user queries and model responses are stored, so that continuity is preserved across multi-turn dialogues.\footnote{For more details on Streamlit session state management, see the official API documentation at \url{https://docs.streamlit.io/}.\nocite{noauthor_streamlit_2025}} 
 
@@ -595,7 +605,7 @@ To ensure a responsive user experience, the system integrates Python's \texttt{a
 To support iterative improvement of the assistant and promote user engagement, the system integrates an interactive feedback module that allows users to rate each answer directly within the Streamlit interface. This design is intended to support continuous quality assessment and transparent evaluation of LLM-generated content.
 
 \subsection{Collection}
-As noted earlier, each assistant response is immediately followed by three clickable UI buttons based on a 3-point Likert scale:
+As noted earlier, each assistant response is immediately followed by three clickable UI buttons based on a three-point Likert scale -- i.e., ``\textit{Valuta questa risposta:}'' (see \autoref{fig:ratings}):
 \begin{itemize}
 \item 1 point - Poor: the answer is incorrect, incomplete, or irrelevant.
 \item 2 points - Fair: the answer is partially correct but lacks clarity or depth.
@@ -604,8 +614,15 @@ As noted earlier, each assistant response is immediately followed by three click
 
 This mechanism is implemented using Streamlit’s interactive widgets. Once a rating is submitted, the system prevents duplicate feedback using an in-memory tracking set (\texttt{st.session\_state.feedback\_given}). The interface then displays a confirmation message upon submission (``\textit{Valutazione registrata}'').
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/ui_ratings.png} 
+  \caption{Feedback mechanism embedded in the user interface via interactive rating buttons.}
+  \label{fig:ratings}
+\end{figure}
+
 \subsection{Storage and Export}
-Feedback is stored locally in a SQLite database (\texttt{feedback.db}) with each record capturing the timestamp, user query, generated answer, rating, and message index (\autoref{lst:sql_schema}). This schema ensures reproducibility and traceability by maintaining a transparent mapping between input, output, and evaluation. Records are inserted with minimal overhead through parameterised SQL statements and transaction-safe commits.
+Feedback is stored locally in a SQLite \citep{team_sqlitesqlite_2025} database (\texttt{feedback.db}) with each record capturing the timestamp, user query, generated answer, rating, and message index (\autoref{lst:sql_schema}). This schema ensures reproducibility and traceability by maintaining a transparent mapping between input, output, and evaluation. Records are inserted with minimal overhead through parameterised SQL statements and transaction-safe commits.
 
 \vspace{0.5em}
 \begin{lstlisting}[language=SQL,
@@ -633,9 +650,9 @@ Collected feedback thus serves as a valuable resource for researchers, developer
 
 
 \section{Resources and Deployment}
-The GNA QA system is deployed on Streamlit Community Cloud, a platform that allows developers to openly host interactive Python applications directly from a linked GitHub repository. The service abstracts most of the infrastructure overhead: each push to the repository automatically triggers a build and deployment, packaging dependencies specified in configuration files and exposing the application as a live web service. This solution enabled rapid iteration and made the system easily accessible to stakeholders without local installation.
+The GNA QA system is deployed on Streamlit Community Cloud, a platform that allows developers to publicly host interactive Python applications directly from a linked GitHub repository. The service abstracts most of the infrastructure management: each push to the repository automatically triggers a build and deployment, packaging dependencies specified in configuration files and exposing the application as a live web service via a public URL. This arrangement facilitated rapid iteration and made the system easily accessible to end users, without the need to provision on-premises infrastructure or a dedicated model-serving layer. The full system is available at \url{https://gna-assistant-ai.streamlit.app/}.
 
-However, long-running RAG pipelines are not trivial to host within such constrained environments. Indeed, early deployments surfaced memory leaks: object references from retrieval and generation modules, especially cached embeddings and session state artefacts, were not consistently released, leading to a progressive increase in memory usage during extended interactions. Identifying these leaking objects required targeted profiling, after which caching decorators and object reinitialisation strategies were introduced to reduce overhead. Although these optimisations improved stability, the underlying workload still proved too heavy for the default configuration availabilities of Streamlit Cloud.
+However, long-running RAG pipelines are not trivial to host within such constrained environments. Indeed, early deployments surfaced memory leaks. Object references from retrieval and generation modules, especially cached embeddings and session state artefacts, were not consistently released, leading to a progressive increase in memory usage during extended interactions. Identifying these leaking objects required targeted profiling, after which caching decorators and object reinitialisation strategies were introduced to reduce overhead. Although these optimisations improved stability, the underlying workload still proved too heavy for the default configuration availabilities of Streamlit Cloud.
 
 To mitigate this, we contacted the Streamlit team and requested additional resources. As a result, the hosting environment was scaled up to 8 gibibytes (GiB), a critical increase that allowed the application to sustain concurrent sessions and longer conversational histories without interruption. 
 
@@ -646,7 +663,7 @@ As discussed above, deploying a RAG workflow with multiple NLP resources integra
 \begin{itemize}
 \item \textbf{Garbage collection routines:} explicit calls to Python's garbage collector (\texttt{gc.collect()}) were introduced to free unused memory between embedding and response generation steps;
 \item \textbf{Batch processing:} document chunks are processed in batches to minimise memory overhead, especially during retrieval;
-\item \textbf{Lazy loading:} all embeddings are computed once and stored persistently. At application startup, only the metadata is loaded into memory, and the FAISS index is accessed through memory-mapping to reduce RAM footprint;
+\item \textbf{Lazy loading:} all embeddings are computed once and stored persistently. At application startup, only the metadata is loaded into memory, and the Faiss index is accessed through memory-mapping to reduce RAM footprint;
 \item \textbf{Asynchronous processing:} Streamlit's async capabilities are leveraged to keep the UI responsive while background tasks run in parallel, preventing memory spikes during long-running operations;
 \item \textbf{Cache clearing policies:} \texttt{st.session\_state} objects are pruned after each session or upon manual reset by the user to prevent memory bloating during prolonged use.
 \end{itemize}
