@@ -139,7 +139,7 @@ The evaluation of the system's prototype followed a pronged path:
       \item \textbf{LLM-as-a-judge}: an external model -- namely, OpenAI’s GPT-3.5 -- was prompted in a few-shot setting to automatically score responses across the same criteria, producing an additional layer of intrinsic evaluation \citep{svikhnushina_approximating_2023}.
 \end{enumerate}
 
-This custom approach reflected the broader methodological challenges in evaluating RAG systems, where traditional automatic metrics -- e.g., BLEU, ROUGE, METEOR, etc. -- have shown limited reliability in dialogue contexts (cf. \autoref{sec:eval_and_bench}).
+This custom approach reflected the broader methodological challenges in evaluating RAG systems, where traditional automatic metrics -- e.g., BLEU, ROUGE, METEOR, etc. -- have shown limited reliability in dialogue contexts (cf. \autoref{sec:eval_and_bench}). The results of this prototype evaluation, presented in \autoref{sec:prototype_results}, provide a clearer view of its performance and limitations. Anticipating those findings, the following section highlights the specific challenges encountered during prototyping, which in turn motivated the redesign of the system.
 
 \subsection{Insights for System Redesign}
 Prototyping revealed several challenges that guided the design of the subsequent system:
@@ -160,80 +160,33 @@ These limitations underscored the need for a more scalable and systematically ev
 
 
 \section{Full-Scale Implementation}\label{sec:full_system}
-The full system was re-engineered from the ground to support dynamic, scalable document ingestion, contextual retrieval, and answer generation using open-source language models. All LangChain dependencies were removed in favour of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The final architecture is organised around the following processing stages (see \autoref{fig:full-system-diagram}):
+The full system was re-engineered from the ground to support dynamic, scalable document ingestion, contextual retrieval, and answer generation using open-source language models. All LangChain dependencies were removed in favour of custom Python implementations to improve modularity, debugging transparency, and flexibility in processing. The overall architecture is articulated into two macro modules, which can be identified as \textbf{Knowledge Processing} and \textbf{User Application} (see \autoref{fig:dataflow}), each comprising the following subcomponents:
 \begin{itemize}
-      \item a custom KB construction module, which integrates sitemap generation and web crawling,
-      \item semantic chunking and metadata enrichment,
-      \item MistralAI vector embeddings,
-      \item a Faiss vector store for retrieval,
-      \item a generation module with open-source Mistral \textit{NeMo} model,
-      \item generative responses with inline citation handling,
-      \item a reactive front-end Streamlit interface,
-      \item and a feedback management system.
+      \item \textbf{Knowledge Processing:}
+      \begin{itemize}
+        \item \textbf{Crawling, Parsing, Chunking:} automated harvesting of the GNA user manual, HTML parsing, and content segmentation;
+        \item \textbf{Vector Databse Manager:} embedding generation and storage in a Faiss index along with metadata;
+      \end{itemize}
+      \item \textbf{User Application:}
+      \begin{itemize}
+        \item \textbf{Rag Orchestrator:} retrieval of relevant chunks, context construction, query management and prompt assembly;
+        \item \textbf{LLM:} interaction with the Mistral LLM for answer generation;
+        \item \textbf{User Interface:} front-end for user interaction, displaying answers and collecting feedback;
+        \item \textbf{Feedback Collector:} logging user interactions and feedback for future analysis and system improvement.
+      \end{itemize}
 \end{itemize}
 
 Together, these modules amount to a complete end-to-end pipeline. Web documents are ingested, cleaned, and segmented; semantic metadata and embeddings are created; retrieval is performed over a dedicated vector store; and answers are generated, presented through an interactive interface, and enriched by user feedback mechanisms. The outcome is not a loose set of tools, but a coherent workflow that moves seamlessly from source material to user-facing response.
 
 A fundamental element of this design is the \texttt{RAG Orchestrator}, which acts as the central coordinator of the pipeline. It manages the end-to-end flow of information across modules by issuing retrieval requests to the vector database, aggregating and grouping the retrieved chunks into relevant context, and constructing the final prompt. This prompt combines the contextual evidence, the user’s query, and the dialogue history, and is then passed to the LLM for answer generation. In doing so, the orchestrator centralises control, ensures consistency in context construction, and abstracts the complexity of the underlying retrieval and generation stages from the user-facing interface.
 
-\vspace{0.9em}
+
 \begin{figure}[H]
-\centering
-\usetikzlibrary{positioning,arrows.meta}
-\begin{adjustbox}{max width=0.8\linewidth}
-\begin{tikzpicture}[node distance=2.0cm and 1.5cm]
-\tikzset{
-  module/.style={draw, rounded corners, align=center, minimum width=3.8cm, minimum height=1.6cm, thick, fill=gray!5},
-  arrow/.style={-Latex, thick},
-  feedback/.style={-Latex, thick, dashed}
-}
-
-% Top row
-\node[module] (webkb) {Web-based\\Corpus};
-\node[module, right=of webkb] (chunkskb) {Knowledge Base\\(Chunks Set)};
-\node[module, right=of chunkskb] (vectordb) {Vector\\Database};
-\node[module, right=of vectordb] (retriever) {Dense Retriever};
-
-% Bottom row
-\node[module, below=1.5cm of retriever] (llm) {Answer Generation\\with context (LLM)};
-\node[module, left=of llm] (orch) {RAG\\Orchestrator};
-\node[module, left=of orch] (ui) {User\\Interface};
-
-% Feedback
-\node[module, left=of ui] (feedback) {Feedback\\Rating};
-\node[module, left=of feedback] (user) {User Query};
-
-% Main flow
-\draw[arrow] (webkb) -- (chunkskb);
-\draw[arrow] (chunkskb) -- (vectordb);
-\draw[arrow] (retriever) -- (vectordb);
-
-% Orchestrated flow
-\draw[arrow] (ui) -- (orch);
-\draw[arrow] (orch) -- (retriever);   % retrieve step
-\draw[arrow] (retriever) -- (orch);   % results back to orchestrator
-\draw[arrow] (orch) -- (llm);         % build prompt + call LLM
-\draw[arrow] (llm) -- (orch);         % answer + citations back
-\draw[arrow] (orch) -- (ui);          % deliver to UI
-
-% User → UI (orthogonal path)
-\def\drop{8mm}
-\draw[arrow]
-  (user.south) -- ++(0,-\drop) coordinate (urow)
-               -- (ui.south |- urow)
-               -- (ui.south);
-
-% Feedback loop
-\draw[feedback] (ui) -- (feedback);
-
-\end{tikzpicture}
-\end{adjustbox}
-\caption{Dataflow and macro modules of the re-engineered GNA QA system. The \emph{RAG Orchestrator} mediates between the UI, the vector database, the retriever, and the LLM: it issues retrieval, builds the context prompt and returns the final answer. Solid arrows show the main data flow; the dashed arrow indicates user feedback.}
-\label{fig:full-system-diagram}
+  \centering
+  \includegraphics[width=\textwidth]{images/dataflow_arch.png} 
+  \caption{Macro modules of the re-engineered GNA QA system. The \emph{RAG Orchestrator} mediates between the UI, the vector database, the retriever, and the LLM: it issues retrieval, builds the context prompt and returns the final answer.}
+  \label{fig:dataflow}
 \end{figure}
-
-It is worth noting that \autoref{fig:full-system-diagram} may be read both as a dataflow diagram and as a representation of the system architecture. In this case, the two perspectives converge: the logical architecture of the system is itself defined by the pipeline of data transformations, with each module corresponding directly to a deployed component. The orchestrator sits at the core of this dual view, embodying both the control logic of the architecture and the connective tissue of the dataflow.
-
 
 \sloppy
 \section{Data Acquisition and Preprocessing}
@@ -326,7 +279,7 @@ These embeddings and their associated metadata form the foundation for the retri
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/preprocess_diagram.png} 
-  \caption{First stages of the GNA QA pipeline: from knowledge base construction and chunking with metadata to embedding into the Faiss index for subsequent retrieval.}
+  \caption{Components of the GNA QA system within the \textit{Knowledge Preprocessing} macro module, illustrating the process from knowledge base construction and chunking with metadata to embedding into the Faiss index for subsequent retrieval.}
   \label{fig:pre}
 \end{figure}
 
@@ -462,14 +415,14 @@ Each chunk passed to the LLM is numbered and grouped by its metadata (title, URL
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/generation_diagram.png} 
-  \caption{Generation and retrieval stages of the GNA QA pipeline: components interaction.}
+  \caption{Retrieval and generation stages of the GNA QA system within the \textit{User Application} module, showing the interaction among its components.}
   \label{fig:generation_diagram}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/generation_workflow.png} 
-  \caption{Sequence diagram of the generation stage from the GNA QA pipeline: a user query is sent to the RAG orchestrator, the Faiss vector database and combined with context and chat history by the orchestrator before being sent to the Mistral NeMo 12B model, which generates a response that is post-processed and returned to the user.}
+  \caption{Sequence diagram of the generation stage from the GNA QA system: a user query is sent to the RAG orchestrator, the Faiss vector database and combined with context and chat history by the orchestrator before being sent to the Mistral NeMo 12B model, which generates a response that is post-processed and returned to the user.}
   \label{fig:generation_workflow}
 \end{figure}
 
@@ -579,7 +532,7 @@ Beyond serving as a functional entry point to the system, the UI assumes a cruci
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/UI_full.png} 
-  \caption{Streamlit user interface of the GNA AI Assistant.}
+  \caption{Streamlit user interface of the GNA AI assistant.}
   \label{fig:UI}
 \end{figure}
 

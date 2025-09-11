@@ -7,7 +7,7 @@ This chapter presents the results with regard to the evaluation of the RAG QA sy
 Each followed a distinct evaluation protocol. For the prototype, responses were assessed through a dual strategy combining human annotation on a 5-point Likert scale -- measuring consistency, fluency, completeness, and relevance -- with automatic scoring from an external LLM (GPT-3.5), prompted as an evaluator. By contrast, the re-engineered system was tested on a synthetic collection of 508 single-hop and 908 combined queries automatically generated from the GNA operative manual. The assessment included intrinsic IR metrics -- Recall@, MRR, nDCG@, AP@, Latency --  to quantify retrieval performance, alongside qualitative human feedback, to capture user-facing quality. Feedback was collected systematically through in-interface ratings tasks: each response was labelled on a 3-point Likert scale -- 1-star equals ``poor'', 2-stars equals ``fair'', 3-stars equals ``good'' --, offering direct insight into the perceived relevance, completeness, and fluency of the generated answers.
 
 
-\section{Prototyping Phase}
+\section{Prototyping Phase}\label{sec:prototype_results}
 The prototype offered an initial proof of concept, validating that a RAG architecture could be applied to the GNA corpus. Although limited in scale, it provided important insights into feasibility.
 
 The evaluation outcomes (\autoref{fig:proto_results}) show a clear profile: consistency was rated at the highest level ($\approx$ 5), indicating that generated answers rarely contradicted themselves. Relevance ($\approx$ 4.7) and fluency ($\approx$ 4.9) also scored strongly, confirming the system’s ability to generate both accurate and linguistically natural responses. Completeness, however, achieved slightly lower values ($\approx$ 4.6), pointing to occasional gaps in coverage where answers did not fully integrate all available evidence.
@@ -107,7 +107,7 @@ Equally instructive were the tests on HTML snippets retrieval -- a particular fe
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{images/edge_case_response.png} 
-  \caption{Edge case test of the GNA AI Assistant, showing an out-of-domain query about contemporary art exhibitions in Rome and the system’s fallback response with redirection to the GNA knowledge base.}
+  \caption{Edge case test of the GNA AI assistant, showing an out-of-domain query about contemporary art exhibitions in Rome and the system’s fallback response with redirection to the GNA knowledge base.}
   \label{fig:edge-case}
 \end{figure}
 
